@@ -1,0 +1,146 @@
+package fileprocessing_test
+
+import (
+	"errors"
+	fileprocessing "importcleaner/internal/file_processing"
+	"importcleaner/internal/iowrappers"
+	"importcleaner/internal/parsing"
+	"testing"
+)
+
+func TestProcessFile_ValidPythonFile(t *testing.T) {
+	testFileName := "test_file.py"
+
+	testInputFileContents := `from internal import VALUE
+
+x = VALUE
+
+from dataclasses import dataclass, field
+import datetime
+
+class SomeClass:
+    def __init__(self) -> None:
+		from big import (
+			this,
+			andthis,
+			andalsothis
+		)
+        pass
+
+from submod import SUBVALUE
+`
+
+	expectedOutputFileContents := `from big import this, andthis, andalsothis
+from dataclasses import dataclass, field
+import datetime
+
+from internal import VALUE
+from submod import SUBVALUE
+
+x = VALUE
+
+class SomeClass:
+    def __init__(self) -> None:
+        pass
+`
+
+	testFileContents := make(map[string]string)
+	testFileContents[testFileName] = testInputFileContents
+
+	fileManager := iowrappers.MockFileManager{
+		Items: []iowrappers.DirectoryItemInfo{
+			{
+				ItemName: "submod.py",
+				IsDir:    false,
+			},
+			{
+				ItemName: "internal",
+				IsDir:    true,
+			},
+		},
+		FileContents: testFileContents,
+	}
+
+	parser := parsing.PythonImportStatementParser{
+		WorkingDir:  "",
+		FileManager: fileManager,
+	}
+
+	testFileProcessor := fileprocessing.FileProcessor{
+		FileManager: fileManager,
+	}
+
+	error := testFileProcessor.ProcessFile(testFileName, parser)
+
+	if error != nil {
+		t.Errorf("File processing returned error: %s", error.Error())
+	}
+
+	updatedFileContents, _ := fileManager.ReadContentsFromFile(testFileName)
+	if updatedFileContents != expectedOutputFileContents {
+		t.Errorf("File contents was '%s', \nbut '%s' \nwas expected.", updatedFileContents, expectedOutputFileContents)
+	}
+}
+
+func TestProcessFile_InvalidPythonFile(t *testing.T) {
+	testFileName := "test_file.py"
+
+	testInputFileContents := `from internal import VALUE
+
+x = VALUE
+
+from dataclasses import dataclass, field
+import datetime as
+
+class SomeClass:
+    def __init__(self) -> None:
+		from big import (
+			this,
+			andthis,
+			andalsothis
+		)
+        pass
+
+from submod import SUBVALUE
+`
+
+	expectedError := parsing.ImportStatementParseError{
+		Statement: "import datetime as",
+	}
+
+	testFileContents := make(map[string]string)
+	testFileContents[testFileName] = testInputFileContents
+
+	fileManager := iowrappers.MockFileManager{
+		Items: []iowrappers.DirectoryItemInfo{
+			{
+				ItemName: "submod.py",
+				IsDir:    false,
+			},
+			{
+				ItemName: "internal",
+				IsDir:    true,
+			},
+		},
+		FileContents: testFileContents,
+	}
+
+	parser := parsing.PythonImportStatementParser{
+		WorkingDir:  "",
+		FileManager: fileManager,
+	}
+
+	testFileProcessor := fileprocessing.FileProcessor{
+		FileManager: fileManager,
+	}
+
+	error := testFileProcessor.ProcessFile(testFileName, parser)
+	if !errors.Is(error, &expectedError) {
+		t.Errorf("File processing expected error '%+v', but returned error '%+v'", expectedError, error)
+	}
+
+	updatedFileContents, _ := fileManager.ReadContentsFromFile(testFileName)
+	if updatedFileContents != testInputFileContents {
+		t.Errorf("The file contents should not have been modified.")
+	}
+}
