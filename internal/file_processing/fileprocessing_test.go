@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestProcessFile_ValidPythonFile(t *testing.T) {
+func TestProcessFile_ValidPythonFileWithImports(t *testing.T) {
 	testFileName := "test_file.py"
 
 	testInputFileContents := `from internal import VALUE
@@ -79,6 +79,54 @@ class SomeClass:
 	updatedFileContents, _ := fileManager.ReadContentsFromFile(testFileName)
 	if updatedFileContents != expectedOutputFileContents {
 		t.Errorf("File contents was '%s', \nbut '%s' \nwas expected.", updatedFileContents, expectedOutputFileContents)
+	}
+}
+
+func TestProcessFile_ValidPythonFileWithNoImports(t *testing.T) {
+	testFileName := "test_file.py"
+
+	testInputFileContents := `x = VALUE
+
+class SomeClass:
+    def __init__(self) -> None:
+        pass
+`
+
+	testFileContents := make(map[string]string)
+	testFileContents[testFileName] = testInputFileContents
+
+	fileManager := iowrappers.MockFileManager{
+		Items: []iowrappers.DirectoryItemInfo{
+			{
+				ItemName: "submod.py",
+				IsDir:    false,
+			},
+			{
+				ItemName: "internal",
+				IsDir:    true,
+			},
+		},
+		FileContents: testFileContents,
+	}
+
+	parser := parsing.PythonImportStatementParser{
+		WorkingDir:  "",
+		FileManager: fileManager,
+	}
+
+	testFileProcessor := fileprocessing.FileProcessor{
+		FileManager: fileManager,
+	}
+
+	error := testFileProcessor.ProcessFile(testFileName, parser)
+
+	if error != nil {
+		t.Errorf("File processing returned error: %s", error.Error())
+	}
+
+	updatedFileContents, _ := fileManager.ReadContentsFromFile(testFileName)
+	if updatedFileContents != testInputFileContents {
+		t.Errorf("File with no import should remain unchanged, but output was '%s'", updatedFileContents)
 	}
 }
 
