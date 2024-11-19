@@ -43,7 +43,11 @@ func main() {
 				continue
 			}
 
-			relativeItemPath := strings.TrimPrefix(fullTargetRootDirPath, fullItemPath)
+			if !strings.HasSuffix(fullItemPath, ".py") {
+				continue
+			}
+
+			relativeItemPath := strings.TrimPrefix(fullItemPath, fullTargetRootDirPath)
 			fileProcessingError := fileProcessor.ProcessFile(fullItemPath, parser)
 			if fileProcessingError != nil {
 				fmt.Printf("Error reading file '%s': %s\n", relativeItemPath, fileProcessingError.Error())
