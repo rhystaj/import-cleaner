@@ -53,6 +53,10 @@ func (fp FileProcessor) ProcessFile(filePath string, parser parsing.ImportStatem
 
 	var outputContentsBuffer bytes.Buffer
 	for _, group := range statementGroups {
+		if len(group) == 0 {
+			continue
+		}
+
 		for _, statement := range group {
 			statementAsText := parser.StatementAsString(statement)
 			outputContentsBuffer.WriteString(statementAsText + "\n")
@@ -61,6 +65,7 @@ func (fp FileProcessor) ProcessFile(filePath string, parser parsing.ImportStatem
 	}
 
 	outputContentsBuffer.WriteString(strings.Join(otherStatements, "\n"))
+
 	fp.FileManager.WriteContentsToFile(filePath, outputContentsBuffer.String())
 
 	return nil
