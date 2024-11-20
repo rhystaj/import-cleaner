@@ -158,7 +158,7 @@ func (p PythonImportStatementParser) generateErrorResultForStatement(statement s
 		Statement: statement,
 	}
 
-	return ImportStatement{"", "", []Dependecy{}, false}, error
+	return ImportStatement{[]string{}, "", []Dependecy{}, false}, error
 }
 
 func (p PythonImportStatementParser) ParseImportStatement(statementText string) (ImportStatement, error) {
@@ -181,10 +181,10 @@ func (p PythonImportStatementParser) ParseImportStatement(statementText string) 
 		}
 
 		return ImportStatement{
-			ModuleName:  moduleName,
-			ModuleAlias: moduleAlias,
-			Dependecies: []Dependecy{},
-			External:    p.isExternalModule(moduleName),
+			ModulePathParts: []string{moduleName},
+			ModuleAlias:     moduleAlias,
+			Dependecies:     []Dependecy{},
+			External:        p.isExternalModule(moduleName),
 		}, nil
 	}
 
@@ -207,7 +207,7 @@ func (p PythonImportStatementParser) ParseImportStatement(statementText string) 
 
 	external := p.isExternalModule(moduleName)
 
-	return ImportStatement{moduleName, "", dependencies, external}, nil
+	return ImportStatement{[]string{moduleName}, "", dependencies, external}, nil
 }
 
 func (p PythonImportStatementParser) dependecyAsString(dependecy Dependecy) string {
@@ -221,14 +221,16 @@ func (p PythonImportStatementParser) dependecyAsString(dependecy Dependecy) stri
 }
 
 func (p PythonImportStatementParser) StatementAsString(statement ImportStatement) string {
+	modulePath := strings.Join(statement.ModulePathParts, ".")
+
 	if len(statement.Dependecies) > 0 {
 		dependencyNames := make([]string, 0)
 		for _, dep := range statement.Dependecies {
 			dependencyNames = append(dependencyNames, p.dependecyAsString(dep))
 		}
 
-		return fmt.Sprintf("from %s import %s", statement.ModuleName, strings.Join(dependencyNames, ", "))
+		return fmt.Sprintf("from %s import %s", modulePath, strings.Join(dependencyNames, ", "))
 	} else {
-		return fmt.Sprintf("import %s", statement.ModuleName)
+		return fmt.Sprintf("import %s", modulePath)
 	}
 }

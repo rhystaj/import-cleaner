@@ -107,21 +107,21 @@ func TestParseImportStatement_ValidRootImports_NoAliases(t *testing.T) {
 	}
 
 	AssertStatementParsedCorrectly(t, "import acoolpackage", testDirectoryReader, parsing.ImportStatement{
-		ModuleName:  "acoolpackage",
-		Dependecies: []parsing.Dependecy{},
-		External:    true,
+		ModulePathParts: []string{"acoolpackage"},
+		Dependecies:     []parsing.Dependecy{},
+		External:        true,
 	})
 
 	AssertStatementParsedCorrectly(t, "import modulefile", testDirectoryReader, parsing.ImportStatement{
-		ModuleName:  "modulefile",
-		Dependecies: []parsing.Dependecy{},
-		External:    false,
+		ModulePathParts: []string{"modulefile"},
+		Dependecies:     []parsing.Dependecy{},
+		External:        false,
 	})
 
 	AssertStatementParsedCorrectly(t, "import moduledir", testDirectoryReader, parsing.ImportStatement{
-		ModuleName:  "moduledir",
-		Dependecies: []parsing.Dependecy{},
-		External:    false,
+		ModulePathParts: []string{"moduledir"},
+		Dependecies:     []parsing.Dependecy{},
+		External:        false,
 	})
 }
 
@@ -140,24 +140,24 @@ func TestParseImportStatement_ValidRootImports_Aliases(t *testing.T) {
 	}
 
 	AssertStatementParsedCorrectly(t, "import acoolpackage as acp", testDirectoryReader, parsing.ImportStatement{
-		ModuleName:  "acoolpackage",
-		ModuleAlias: "acp",
-		Dependecies: []parsing.Dependecy{},
-		External:    true,
+		ModulePathParts: []string{"acoolpackage"},
+		ModuleAlias:     "acp",
+		Dependecies:     []parsing.Dependecy{},
+		External:        true,
 	})
 
 	AssertStatementParsedCorrectly(t, "import modulefile as mf", testDirectoryReader, parsing.ImportStatement{
-		ModuleName:  "modulefile",
-		ModuleAlias: "mf",
-		Dependecies: []parsing.Dependecy{},
-		External:    false,
+		ModulePathParts: []string{"modulefile"},
+		ModuleAlias:     "mf",
+		Dependecies:     []parsing.Dependecy{},
+		External:        false,
 	})
 
 	AssertStatementParsedCorrectly(t, "import moduledir as md", testDirectoryReader, parsing.ImportStatement{
-		ModuleName:  "moduledir",
-		ModuleAlias: "md",
-		Dependecies: []parsing.Dependecy{},
-		External:    false,
+		ModulePathParts: []string{"moduledir"},
+		ModuleAlias:     "md",
+		Dependecies:     []parsing.Dependecy{},
+		External:        false,
 	})
 }
 
@@ -176,8 +176,8 @@ func TestParseImportStatement_ValidSelectiveImports_SingleLine(t *testing.T) {
 	}
 
 	AssertStatementParsedCorrectly(t, "from acoolpackage import somedependency", testDirectoryReader, parsing.ImportStatement{
-		ModuleName:  "acoolpackage",
-		ModuleAlias: "",
+		ModulePathParts: []string{"acoolpackage"},
+		ModuleAlias:     "",
 		Dependecies: []parsing.Dependecy{
 			{Name: "somedependency", Alias: ""},
 		},
@@ -185,8 +185,8 @@ func TestParseImportStatement_ValidSelectiveImports_SingleLine(t *testing.T) {
 	})
 
 	AssertStatementParsedCorrectly(t, "from modulefile import somedependency", testDirectoryReader, parsing.ImportStatement{
-		ModuleName:  "modulefile",
-		ModuleAlias: "",
+		ModulePathParts: []string{"modulefile"},
+		ModuleAlias:     "",
 		Dependecies: []parsing.Dependecy{
 			{Name: "somedependency", Alias: ""},
 		},
@@ -194,8 +194,8 @@ func TestParseImportStatement_ValidSelectiveImports_SingleLine(t *testing.T) {
 	})
 
 	AssertStatementParsedCorrectly(t, "from moduledir import somedependency", testDirectoryReader, parsing.ImportStatement{
-		ModuleName:  "moduledir",
-		ModuleAlias: "",
+		ModulePathParts: []string{"moduledir"},
+		ModuleAlias:     "",
 		Dependecies: []parsing.Dependecy{
 			{Name: "somedependency", Alias: ""},
 		},
@@ -203,8 +203,8 @@ func TestParseImportStatement_ValidSelectiveImports_SingleLine(t *testing.T) {
 	})
 
 	AssertStatementParsedCorrectly(t, "from acoolpackage import somedependency as sd", testDirectoryReader, parsing.ImportStatement{
-		ModuleName:  "acoolpackage",
-		ModuleAlias: "",
+		ModulePathParts: []string{"acoolpackage"},
+		ModuleAlias:     "",
 		Dependecies: []parsing.Dependecy{
 			{Name: "somedependency", Alias: "sd"},
 		},
@@ -212,8 +212,8 @@ func TestParseImportStatement_ValidSelectiveImports_SingleLine(t *testing.T) {
 	})
 
 	AssertStatementParsedCorrectly(t, "from modulefile import somedependency as sd", testDirectoryReader, parsing.ImportStatement{
-		ModuleName:  "modulefile",
-		ModuleAlias: "",
+		ModulePathParts: []string{"modulefile"},
+		ModuleAlias:     "",
 		Dependecies: []parsing.Dependecy{
 			{Name: "somedependency", Alias: "sd"},
 		},
@@ -221,8 +221,8 @@ func TestParseImportStatement_ValidSelectiveImports_SingleLine(t *testing.T) {
 	})
 
 	AssertStatementParsedCorrectly(t, "from moduledir import somedependency as sd", testDirectoryReader, parsing.ImportStatement{
-		ModuleName:  "moduledir",
-		ModuleAlias: "",
+		ModulePathParts: []string{"moduledir"},
+		ModuleAlias:     "",
 		Dependecies: []parsing.Dependecy{
 			{Name: "somedependency", Alias: "sd"},
 		},
@@ -230,8 +230,8 @@ func TestParseImportStatement_ValidSelectiveImports_SingleLine(t *testing.T) {
 	})
 
 	AssertStatementParsedCorrectly(t, "from acoolpackage import somedependency, anotherthing as at, somethingelse", testDirectoryReader, parsing.ImportStatement{
-		ModuleName:  "acoolpackage",
-		ModuleAlias: "",
+		ModulePathParts: []string{"acoolpackage"},
+		ModuleAlias:     "",
 		Dependecies: []parsing.Dependecy{
 			{Name: "somedependency", Alias: ""},
 			{Name: "anotherthing", Alias: "at"},
@@ -256,8 +256,8 @@ func TestParseImportStatement_ValidSelectiveImports_MultipleLines(t *testing.T) 
 	}
 
 	AssertStatementParsedCorrectly(t, "from acoolpackage import (\n\tthis as t,\n\tandthis,\n\tandalsothis\n)", testDirectoryReader, parsing.ImportStatement{
-		ModuleName:  "acoolpackage",
-		ModuleAlias: "",
+		ModulePathParts: []string{"acoolpackage"},
+		ModuleAlias:     "",
 		Dependecies: []parsing.Dependecy{
 			{Name: "this", Alias: "t"},
 			{Name: "andthis", Alias: ""},
@@ -267,8 +267,8 @@ func TestParseImportStatement_ValidSelectiveImports_MultipleLines(t *testing.T) 
 	})
 
 	AssertStatementParsedCorrectly(t, "from modulefile import (\n\tthis,\n\tandthis as at,\n\tandalsothis\n)", testDirectoryReader, parsing.ImportStatement{
-		ModuleName:  "modulefile",
-		ModuleAlias: "",
+		ModulePathParts: []string{"modulefile"},
+		ModuleAlias:     "",
 		Dependecies: []parsing.Dependecy{
 			{Name: "this", Alias: ""},
 			{Name: "andthis", Alias: "at"},
@@ -278,8 +278,8 @@ func TestParseImportStatement_ValidSelectiveImports_MultipleLines(t *testing.T) 
 	})
 
 	AssertStatementParsedCorrectly(t, "from moduledir import (\n\tthis,\n\tandthis,\n\tandalsothis as aat\n)", testDirectoryReader, parsing.ImportStatement{
-		ModuleName:  "moduledir",
-		ModuleAlias: "",
+		ModulePathParts: []string{"moduledir"},
+		ModuleAlias:     "",
 		Dependecies: []parsing.Dependecy{
 			{Name: "this", Alias: ""},
 			{Name: "andthis", Alias: ""},
@@ -291,10 +291,10 @@ func TestParseImportStatement_ValidSelectiveImports_MultipleLines(t *testing.T) 
 
 func AssertParseErrorHandledCorrectly(t *testing.T, statement string, expectedError error, parser parsing.ImportStatementParser) {
 	expectedImportStatement := parsing.ImportStatement{
-		ModuleName:  "",
-		ModuleAlias: "",
-		Dependecies: []parsing.Dependecy{},
-		External:    false,
+		ModulePathParts: []string{},
+		ModuleAlias:     "",
+		Dependecies:     []parsing.Dependecy{},
+		External:        false,
 	}
 
 	result, error := parser.ParseImportStatement(statement)
@@ -375,15 +375,15 @@ func TestStatementAsString(t *testing.T) {
 	}
 
 	AssertStatementCorrectlyConvertedToString(t, parsing.ImportStatement{
-		ModuleName:  "somemod",
-		ModuleAlias: "",
-		Dependecies: []parsing.Dependecy{},
-		External:    true,
+		ModulePathParts: []string{"somemod"},
+		ModuleAlias:     "",
+		Dependecies:     []parsing.Dependecy{},
+		External:        true,
 	}, "import somemod", testParser)
 
 	AssertStatementCorrectlyConvertedToString(t, parsing.ImportStatement{
-		ModuleName:  "bigmod",
-		ModuleAlias: "",
+		ModulePathParts: []string{"bigmod"},
+		ModuleAlias:     "",
 		Dependecies: []parsing.Dependecy{
 			{Name: "something", Alias: ""},
 			{Name: "thingwithalias", Alias: "twa"},

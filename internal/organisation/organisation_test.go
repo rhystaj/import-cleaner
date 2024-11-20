@@ -11,12 +11,12 @@ func TestOrganiseImports(t *testing.T) {
 
 	testImports := []parsing.ImportStatement{
 		{
-			ModuleName:  "somecoolmodule",
-			Dependecies: []parsing.Dependecy{},
-			External:    false,
+			ModulePathParts: []string{"somecoolmodule"},
+			Dependecies:     []parsing.Dependecy{},
+			External:        false,
 		},
 		{
-			ModuleName: "dataclasses",
+			ModulePathParts: []string{"dataclasses"},
 			Dependecies: []parsing.Dependecy{
 				{Name: "dataclass", Alias: ""},
 				{Name: "field", Alias: ""},
@@ -24,14 +24,14 @@ func TestOrganiseImports(t *testing.T) {
 			External: true,
 		},
 		{
-			ModuleName: "zzz",
+			ModulePathParts: []string{"zzz"},
 			Dependecies: []parsing.Dependecy{
 				{Name: "zzzz", Alias: ""},
 			},
 			External: false,
 		},
 		{
-			ModuleName: "anokdependencyiguess",
+			ModulePathParts: []string{"anokdependencyiguess"},
 			Dependecies: []parsing.Dependecy{
 				{Name: "thing", Alias: ""},
 				{Name: "doodad", Alias: ""},
@@ -39,31 +39,31 @@ func TestOrganiseImports(t *testing.T) {
 			External: false,
 		},
 		{
-			ModuleName:  "abc",
-			Dependecies: []parsing.Dependecy{},
-			External:    true,
+			ModulePathParts: []string{"abc"},
+			Dependecies:     []parsing.Dependecy{},
+			External:        true,
 		},
 		{
-			ModuleName:  "argparse",
-			Dependecies: []parsing.Dependecy{},
-			External:    true,
+			ModulePathParts: []string{"argparse"},
+			Dependecies:     []parsing.Dependecy{},
+			External:        true,
 		},
 	}
 
 	expectedResult := [][]parsing.ImportStatement{
 		{
 			{
-				ModuleName:  "abc",
-				Dependecies: []parsing.Dependecy{},
-				External:    true,
+				ModulePathParts: []string{"abc"},
+				Dependecies:     []parsing.Dependecy{},
+				External:        true,
 			},
 			{
-				ModuleName:  "argparse",
-				Dependecies: []parsing.Dependecy{},
-				External:    true,
+				ModulePathParts: []string{"argparse"},
+				Dependecies:     []parsing.Dependecy{},
+				External:        true,
 			},
 			{
-				ModuleName: "dataclasses",
+				ModulePathParts: []string{"dataclasses"},
 				Dependecies: []parsing.Dependecy{
 					{Name: "dataclass", Alias: ""},
 					{Name: "field", Alias: ""},
@@ -73,7 +73,7 @@ func TestOrganiseImports(t *testing.T) {
 		},
 		{
 			{
-				ModuleName: "anokdependencyiguess",
+				ModulePathParts: []string{"anokdependencyiguess"},
 				Dependecies: []parsing.Dependecy{
 					{Name: "thing", Alias: ""},
 					{Name: "doodad", Alias: ""},
@@ -81,12 +81,12 @@ func TestOrganiseImports(t *testing.T) {
 				External: false,
 			},
 			{
-				ModuleName:  "somecoolmodule",
-				Dependecies: []parsing.Dependecy{},
-				External:    false,
+				ModulePathParts: []string{"somecoolmodule"},
+				Dependecies:     []parsing.Dependecy{},
+				External:        false,
 			},
 			{
-				ModuleName: "zzz",
+				ModulePathParts: []string{"zzz"},
 				Dependecies: []parsing.Dependecy{
 					{Name: "zzzz", Alias: ""},
 				},

@@ -11,10 +11,10 @@ type Dependecy struct {
 }
 
 type ImportStatement struct {
-	ModuleName  string
-	ModuleAlias string
-	Dependecies []Dependecy
-	External    bool
+	ModulePathParts []string
+	ModuleAlias     string
+	Dependecies     []Dependecy
+	External        bool
 }
 
 type ImportStatementParseError struct {

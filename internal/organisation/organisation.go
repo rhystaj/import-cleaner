@@ -31,7 +31,7 @@ func OrganiseImportStatements(statements []parsing.ImportStatement) [][]parsing.
 				}
 			},
 			func(a parsing.ImportStatement, b parsing.ImportStatement) int {
-				return strings.Compare(a.ModuleName, b.ModuleName)
+				return strings.Compare(a.ModulePathParts[0], b.ModulePathParts[0])
 			})
 	}
 
