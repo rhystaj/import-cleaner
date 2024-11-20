@@ -391,4 +391,15 @@ func TestStatementAsString(t *testing.T) {
 		},
 		External: true,
 	}, "from bigmod import something, thingwithalias as twa, anotherthing", testParser)
+
+	AssertStatementCorrectlyConvertedToString(t, parsing.ImportStatement{
+		ModulePathParts: []string{"mod", "with", "multiple", "parts"},
+		ModuleAlias:     "",
+		Dependecies: []parsing.Dependecy{
+			{Name: "something", Alias: "s"},
+			{Name: "thingwithalias", Alias: ""},
+			{Name: "anotherthing", Alias: "at"},
+		},
+		External: true,
+	}, "from mod.with.multiple.parts import something as s, thingwithalias, anotherthing as at", testParser)
 }
