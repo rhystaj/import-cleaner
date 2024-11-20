@@ -118,8 +118,8 @@ func TestParseImportStatement_ValidRootImports_NoAliases(t *testing.T) {
 		External:        false,
 	})
 
-	AssertStatementParsedCorrectly(t, "import moduledir", testDirectoryReader, parsing.ImportStatement{
-		ModulePathParts: []string{"moduledir"},
+	AssertStatementParsedCorrectly(t, "import moduledir.subdep", testDirectoryReader, parsing.ImportStatement{
+		ModulePathParts: []string{"moduledir", "subdep"},
 		Dependecies:     []parsing.Dependecy{},
 		External:        false,
 	})
@@ -153,8 +153,8 @@ func TestParseImportStatement_ValidRootImports_Aliases(t *testing.T) {
 		External:        false,
 	})
 
-	AssertStatementParsedCorrectly(t, "import moduledir as md", testDirectoryReader, parsing.ImportStatement{
-		ModulePathParts: []string{"moduledir"},
+	AssertStatementParsedCorrectly(t, "import moduledir.subdep as md", testDirectoryReader, parsing.ImportStatement{
+		ModulePathParts: []string{"moduledir", "subdep"},
 		ModuleAlias:     "md",
 		Dependecies:     []parsing.Dependecy{},
 		External:        false,
@@ -193,8 +193,8 @@ func TestParseImportStatement_ValidSelectiveImports_SingleLine(t *testing.T) {
 		External: false,
 	})
 
-	AssertStatementParsedCorrectly(t, "from moduledir import somedependency", testDirectoryReader, parsing.ImportStatement{
-		ModulePathParts: []string{"moduledir"},
+	AssertStatementParsedCorrectly(t, "from moduledir.subdep import somedependency", testDirectoryReader, parsing.ImportStatement{
+		ModulePathParts: []string{"moduledir", "subdep"},
 		ModuleAlias:     "",
 		Dependecies: []parsing.Dependecy{
 			{Name: "somedependency", Alias: ""},
@@ -220,8 +220,8 @@ func TestParseImportStatement_ValidSelectiveImports_SingleLine(t *testing.T) {
 		External: false,
 	})
 
-	AssertStatementParsedCorrectly(t, "from moduledir import somedependency as sd", testDirectoryReader, parsing.ImportStatement{
-		ModulePathParts: []string{"moduledir"},
+	AssertStatementParsedCorrectly(t, "from moduledir.subdep import somedependency as sd", testDirectoryReader, parsing.ImportStatement{
+		ModulePathParts: []string{"moduledir", "subdep"},
 		ModuleAlias:     "",
 		Dependecies: []parsing.Dependecy{
 			{Name: "somedependency", Alias: "sd"},
