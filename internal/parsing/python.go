@@ -71,19 +71,19 @@ func (p PythonImportStatementParser) IsImportStatement(statementText string) boo
 	return strings.TrimSpace(statementParts[0]) == "from" && strings.TrimSpace(statementParts[2]) == "import"
 }
 
-func (p PythonImportStatementParser) isExternalModule(moduleName string) bool {
+func (p PythonImportStatementParser) isExternalModule(modulePathParts []string) bool {
 
-	if strings.HasPrefix(moduleName, ".") {
+	if modulePathParts[0] == "" {
 		//Relative import, so can't be external
 		return false
 	}
 
 	for e := range p.FileManager.ReadDirectory(p.WorkingDir) {
-		if !e.IsDir && e.ItemName == moduleName+".py" {
+		if !e.IsDir && e.ItemName == modulePathParts[0]+".py" {
 			return false
 		}
 
-		if e.IsDir && e.ItemName == moduleName {
+		if e.IsDir && e.ItemName == modulePathParts[0] {
 			return false
 		}
 	}
@@ -91,18 +91,23 @@ func (p PythonImportStatementParser) isExternalModule(moduleName string) bool {
 	return true
 }
 
-func (p PythonImportStatementParser) parseModuleInfo(moduleInfoText string) (moduleName string, moduleAlias string, successful bool) {
+func (p PythonImportStatementParser) parseModuleInfo(moduleInfoText string) (modulePathParts []string, moduleAlias string, successful bool) {
 	parts := strings.Split(moduleInfoText, " ")
 
+	if len(parts) == 0 {
+		return []string{}, "", false
+	}
+
+	modulePathParts = strings.Split(parts[0], ".")
 	if len(parts) <= 1 {
-		return parts[0], "", true
+		return modulePathParts, "", true
 	}
 
 	if len(parts) != 3 || parts[1] != "as" {
-		return "", "", false
+		return []string{}, "", false
 	}
 
-	return parts[0], parts[2], true
+	return modulePathParts, parts[2], true
 }
 
 func (p PythonImportStatementParser) parseDependency(dependecyText string) (dependency Dependecy, successful bool) {
@@ -175,21 +180,24 @@ func (p PythonImportStatementParser) ParseImportStatement(statementText string) 
 			return p.generateErrorResultForStatement(statementText)
 		}
 
-		moduleName, moduleAlias, moduleParseSuccessful := p.parseModuleInfo(statementRemaining)
+		modulePathParts, moduleAlias, moduleParseSuccessful := p.parseModuleInfo(statementRemaining)
 		if !moduleParseSuccessful {
 			return p.generateErrorResultForStatement(statementText)
 		}
 
 		return ImportStatement{
-			ModulePathParts: []string{moduleName},
+			ModulePathParts: modulePathParts,
 			ModuleAlias:     moduleAlias,
 			Dependecies:     []Dependecy{},
-			External:        p.isExternalModule(moduleName),
+			External:        p.isExternalModule(modulePathParts),
 		}, nil
 	}
 
 	currentStatementPart, statementRemaining, _ = strings.Cut(statementRemaining, " ")
-	moduleName := currentStatementPart
+	modulePathParts, _, moduleParseSuccessful := p.parseModuleInfo(currentStatementPart)
+	if !moduleParseSuccessful {
+		return p.generateErrorResultForStatement(statementText)
+	}
 
 	currentStatementPart, statementRemaining, _ = strings.Cut(statementRemaining, " ")
 	if currentStatementPart != "import" {
@@ -205,9 +213,9 @@ func (p PythonImportStatementParser) ParseImportStatement(statementText string) 
 		return p.generateErrorResultForStatement(statementText)
 	}
 
-	external := p.isExternalModule(moduleName)
+	external := p.isExternalModule(modulePathParts)
 
-	return ImportStatement{[]string{moduleName}, "", dependencies, external}, nil
+	return ImportStatement{modulePathParts, "", dependencies, external}, nil
 }
 
 func (p PythonImportStatementParser) dependecyAsString(dependecy Dependecy) string {
