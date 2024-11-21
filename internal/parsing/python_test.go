@@ -277,6 +277,39 @@ func TestParseImportStatement_ValidSelectiveImports_MultipleLines(t *testing.T) 
 		External: false,
 	})
 
+	AssertStatementParsedCorrectly(t, "from moduledir import (\n   this,\n   andthis,\n   andalsothis as aat\n)", testDirectoryReader, parsing.ImportStatement{
+		ModulePathParts: []string{"moduledir"},
+		ModuleAlias:     "",
+		Dependecies: []parsing.Dependecy{
+			{Name: "this", Alias: ""},
+			{Name: "andthis", Alias: ""},
+			{Name: "andalsothis", Alias: "aat"},
+		},
+		External: false,
+	})
+
+	AssertStatementParsedCorrectly(t, "from acoolpackage import (\n   this as t,\n   andthis,\n   andalsothis\n)", testDirectoryReader, parsing.ImportStatement{
+		ModulePathParts: []string{"acoolpackage"},
+		ModuleAlias:     "",
+		Dependecies: []parsing.Dependecy{
+			{Name: "this", Alias: "t"},
+			{Name: "andthis", Alias: ""},
+			{Name: "andalsothis", Alias: ""},
+		},
+		External: true,
+	})
+
+	AssertStatementParsedCorrectly(t, "from modulefile import (\n   this,\n   andthis as at,\n   andalsothis\n)", testDirectoryReader, parsing.ImportStatement{
+		ModulePathParts: []string{"modulefile"},
+		ModuleAlias:     "",
+		Dependecies: []parsing.Dependecy{
+			{Name: "this", Alias: ""},
+			{Name: "andthis", Alias: "at"},
+			{Name: "andalsothis", Alias: ""},
+		},
+		External: false,
+	})
+
 	AssertStatementParsedCorrectly(t, "from moduledir import (\n\tthis,\n\tandthis,\n\tandalsothis as aat\n)", testDirectoryReader, parsing.ImportStatement{
 		ModulePathParts: []string{"moduledir"},
 		ModuleAlias:     "",
