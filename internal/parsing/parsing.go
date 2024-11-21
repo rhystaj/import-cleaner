@@ -19,16 +19,22 @@ type ImportStatement struct {
 
 type ImportStatementParseError struct {
 	Statement string
+	Detail    string
 }
 
 func (e *ImportStatementParseError) Error() string {
-	return fmt.Sprintf("%s is not a valid import statement", e.Statement)
+	message := fmt.Sprintf("%s is not a valid import statement", e.Statement)
+	if e.Detail != "" {
+		message += " - " + e.Detail
+	}
+
+	return message
 }
 
 func (e *ImportStatementParseError) Is(otherError error) bool {
 	switch oe := otherError.(type) {
 	case *ImportStatementParseError:
-		return oe.Statement == e.Statement
+		return oe.Statement == e.Statement && oe.Detail == e.Detail
 	default:
 		return false
 	}

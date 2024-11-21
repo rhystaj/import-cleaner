@@ -300,11 +300,11 @@ func AssertParseErrorHandledCorrectly(t *testing.T, statement string, expectedEr
 	result, error := parser.ParseImportStatement(statement)
 
 	if !reflect.DeepEqual(result, expectedImportStatement) {
-		t.Errorf("Failure in handling of invalid import statement '%s': %+v was returned but %+v was expected", statement, result, expectedImportStatement)
+		t.Errorf("Failure in handling of invalid import statement '%s': %+v was returned but '%+v' was expected", statement, result, expectedImportStatement)
 	}
 
 	if !errors.Is(error, expectedError) {
-		t.Errorf("Incorrect error returned in parsing of statement '%s': %+v was returned, but %+v was expected.", statement, error, expectedError)
+		t.Errorf("Incorrect error returned in parsing of statement '%s': '%+v' was returned, but '%+v' was expected.", statement, error, expectedError)
 	}
 }
 
@@ -321,6 +321,7 @@ func TestParseImportStatement_NotImportStatement(t *testing.T) {
 	testStatement := "not at all valid"
 	expectedError := parsing.ImportStatementParseError{
 		Statement: testStatement,
+		Detail:    "Not import statement",
 	}
 
 	AssertParseErrorHandledCorrectly(t, testStatement, &expectedError, testParser)
@@ -336,9 +337,9 @@ func TestParseImportStatement_Malformed(t *testing.T) {
 		FileManager: testDirectoryReader,
 	}
 
-	AssertParseErrorHandledCorrectly(t, "import", &parsing.ImportStatementParseError{Statement: "import"}, testParser)
-	AssertParseErrorHandledCorrectly(t, "from something", &parsing.ImportStatementParseError{Statement: "from something"}, testParser)
-	AssertParseErrorHandledCorrectly(t, "from something import", &parsing.ImportStatementParseError{Statement: "from something import"}, testParser)
+	AssertParseErrorHandledCorrectly(t, "import", &parsing.ImportStatementParseError{Statement: "import", Detail: "No module"}, testParser)
+	AssertParseErrorHandledCorrectly(t, "from something", &parsing.ImportStatementParseError{Statement: "from something", Detail: "'import' keyword expected"}, testParser)
+	AssertParseErrorHandledCorrectly(t, "from something import", &parsing.ImportStatementParseError{Statement: "from something import", Detail: "No dependecies listed"}, testParser)
 }
 
 func TestParseImportStatement_MalformedAliases(t *testing.T) {
@@ -351,9 +352,9 @@ func TestParseImportStatement_MalformedAliases(t *testing.T) {
 		FileManager: testDirectoryReader,
 	}
 
-	AssertParseErrorHandledCorrectly(t, "import mod as", &parsing.ImportStatementParseError{Statement: "import mod as"}, testParser)
-	AssertParseErrorHandledCorrectly(t, "from something import dependency, baddep as", &parsing.ImportStatementParseError{Statement: "from something import dependency, baddep as"}, testParser)
-	AssertParseErrorHandledCorrectly(t, "from something import dependency, bad dep", &parsing.ImportStatementParseError{Statement: "from something import dependency, bad dep"}, testParser)
+	AssertParseErrorHandledCorrectly(t, "import mod as", &parsing.ImportStatementParseError{Statement: "import mod as", Detail: "Module alias expected"}, testParser)
+	AssertParseErrorHandledCorrectly(t, "from something import dependency, baddep as", &parsing.ImportStatementParseError{Statement: "from something import dependency, baddep as", Detail: "Dependency alias expected"}, testParser)
+	AssertParseErrorHandledCorrectly(t, "from something import dependency, bad dep", &parsing.ImportStatementParseError{Statement: "from something import dependency, bad dep", Detail: "Malformed dependecy 'bad dep'"}, testParser)
 }
 
 func AssertStatementCorrectlyConvertedToString(t *testing.T, statement parsing.ImportStatement, expectedString string, parser parsing.ImportStatementParser) {
