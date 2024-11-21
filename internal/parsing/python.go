@@ -91,46 +91,50 @@ func (p PythonImportStatementParser) isExternalModule(modulePathParts []string) 
 	return true
 }
 
-func (p PythonImportStatementParser) parseModuleInfo(moduleInfoText string) (modulePathParts []string, moduleAlias string, successful bool) {
+func (p PythonImportStatementParser) parseModuleInfo(moduleInfoText string) (modulePathParts []string, moduleAlias string, errorMessage string) {
 	parts := strings.Split(moduleInfoText, " ")
 
 	if len(parts) == 0 {
-		return []string{}, "", false
+		return []string{}, "", "No module"
 	}
 
 	modulePathParts = strings.Split(parts[0], ".")
 	if len(parts) <= 1 {
-		return modulePathParts, "", true
+		return modulePathParts, "", ""
 	}
 
 	if len(parts) != 3 || parts[1] != "as" {
-		return []string{}, "", false
+		return []string{}, "", "Module alias expected"
 	}
 
-	return modulePathParts, parts[2], true
+	return modulePathParts, parts[2], ""
 }
 
-func (p PythonImportStatementParser) parseDependency(dependecyText string) (dependency Dependecy, successful bool) {
+func (p PythonImportStatementParser) parseDependency(dependecyText string) (dependency Dependecy, errorMessage string) {
 	parts := strings.Split(dependecyText, " ")
 
 	if len(parts) <= 1 {
 		return Dependecy{
 			Name:  parts[0],
 			Alias: "",
-		}, true
+		}, ""
 	}
 
-	if len(parts) != 3 || parts[1] != "as" {
-		return Dependecy{}, false
+	if len(parts) >= 2 && parts[1] != "as" {
+		return Dependecy{}, fmt.Sprintf("Malformed dependecy '%s'", dependecyText)
+	}
+
+	if parts[1] == "as" && len(parts) == 2 {
+		return Dependecy{}, "Dependency alias expected"
 	}
 
 	return Dependecy{
 		Name:  parts[0],
 		Alias: parts[2],
-	}, true
+	}, ""
 }
 
-func (p PythonImportStatementParser) parseDependenciesList(dependenciesListText string) (dependencies []Dependecy, successful bool) {
+func (p PythonImportStatementParser) parseDependenciesList(dependenciesListText string) (dependencies []Dependecy, errorMessage string) {
 	result := make([]Dependecy, 0)
 
 	currentStatementPart := ""
@@ -145,9 +149,9 @@ func (p PythonImportStatementParser) parseDependenciesList(dependenciesListText 
 			dependecyText = strings.ReplaceAll(dependecyText, char, "")
 		}
 
-		dependecy, dependencyParseSuccessful := p.parseDependency(dependecyText)
-		if !dependencyParseSuccessful {
-			return []Dependecy{}, false
+		dependecy, dependecyParseErrorMessage := p.parseDependency(dependecyText)
+		if dependecyParseErrorMessage != "" {
+			return []Dependecy{}, dependecyParseErrorMessage
 		}
 
 		if len(dependecyText) > 0 {
@@ -155,12 +159,13 @@ func (p PythonImportStatementParser) parseDependenciesList(dependenciesListText 
 		}
 	}
 
-	return result, true
+	return result, ""
 }
 
-func (p PythonImportStatementParser) generateErrorResultForStatement(statement string) (ImportStatement, *ImportStatementParseError) {
+func (p PythonImportStatementParser) generateErrorResultForStatement(statement string, detail string) (ImportStatement, *ImportStatementParseError) {
 	error := &ImportStatementParseError{
 		Statement: statement,
+		Detail:    detail,
 	}
 
 	return ImportStatement{[]string{}, "", []Dependecy{}, false}, error
@@ -172,17 +177,17 @@ func (p PythonImportStatementParser) ParseImportStatement(statementText string) 
 
 	currentStatementPart, statementRemaining, _ = strings.Cut(statementRemaining, " ")
 	if currentStatementPart != "import" && currentStatementPart != "from" {
-		return p.generateErrorResultForStatement(statementText)
+		return p.generateErrorResultForStatement(statementText, "Not import statement")
 	}
 
 	if currentStatementPart == "import" {
 		if statementRemaining == "" {
-			return p.generateErrorResultForStatement(statementText)
+			return p.generateErrorResultForStatement(statementText, "No module")
 		}
 
-		modulePathParts, moduleAlias, moduleParseSuccessful := p.parseModuleInfo(statementRemaining)
-		if !moduleParseSuccessful {
-			return p.generateErrorResultForStatement(statementText)
+		modulePathParts, moduleAlias, moduleParseErrorMessage := p.parseModuleInfo(statementRemaining)
+		if moduleParseErrorMessage != "" {
+			return p.generateErrorResultForStatement(statementText, moduleParseErrorMessage)
 		}
 
 		return ImportStatement{
@@ -194,23 +199,23 @@ func (p PythonImportStatementParser) ParseImportStatement(statementText string) 
 	}
 
 	currentStatementPart, statementRemaining, _ = strings.Cut(statementRemaining, " ")
-	modulePathParts, _, moduleParseSuccessful := p.parseModuleInfo(currentStatementPart)
-	if !moduleParseSuccessful {
-		return p.generateErrorResultForStatement(statementText)
+	modulePathParts, _, moduleParseErrorMessage := p.parseModuleInfo(currentStatementPart)
+	if moduleParseErrorMessage != "" {
+		return p.generateErrorResultForStatement(statementText, moduleParseErrorMessage)
 	}
 
 	currentStatementPart, statementRemaining, _ = strings.Cut(statementRemaining, " ")
 	if currentStatementPart != "import" {
-		return p.generateErrorResultForStatement(statementText)
+		return p.generateErrorResultForStatement(statementText, "'import' keyword expected")
 	}
 
 	if statementRemaining == "" {
-		return p.generateErrorResultForStatement(statementText)
+		return p.generateErrorResultForStatement(statementText, "No dependecies listed")
 	}
 
-	dependencies, dependeciesListParseSuccessful := p.parseDependenciesList(statementRemaining)
-	if !dependeciesListParseSuccessful {
-		return p.generateErrorResultForStatement(statementText)
+	dependencies, dependeciesListParseErrorMessage := p.parseDependenciesList(statementRemaining)
+	if dependeciesListParseErrorMessage != "" {
+		return p.generateErrorResultForStatement(statementText, dependeciesListParseErrorMessage)
 	}
 
 	external := p.isExternalModule(modulePathParts)
