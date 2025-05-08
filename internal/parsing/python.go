@@ -111,7 +111,7 @@ func (p PythonImportStatementParser) parseModuleInfo(moduleInfoText string) (mod
 }
 
 func (p PythonImportStatementParser) parseDependency(dependecyText string) (dependency Dependecy, errorMessage string) {
-	parts := strings.Split(dependecyText, " ")
+	parts := strings.Split(strings.Trim(dependecyText, " "), " ")
 
 	if len(parts) <= 1 {
 		return Dependecy{
