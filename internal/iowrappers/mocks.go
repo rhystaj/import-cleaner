@@ -68,24 +68,29 @@ func (dr MockFileManager) ReadDirectory(directoryName string) iter.Seq[Directory
 }
 
 func (dr MockFileManager) ReadBytesFromFile(fileName string) ([]byte, *FileReadError) {
-	contents := dr.nodeIndex[fileName].contents
-	if contents == nil {
+	node, fileExists := dr.nodeIndex[fileName]
+	if !fileExists {
 		return make([]byte, 0), &FileReadError{FilePath: fileName}
 	}
 
-	return []byte(*contents), nil
+	return []byte(*node.contents), nil
 }
 
 func (dr MockFileManager) ReadStringFromFile(fileName string) (string, *FileReadError) {
-	contents := dr.nodeIndex[fileName].contents
-	if contents == nil {
+	node, fileExists := dr.nodeIndex[fileName]
+	if !fileExists {
 		return "", &FileReadError{FilePath: fileName}
 	}
 
-	return *contents, nil
+	return *node.contents, nil
 }
 
 func (dr MockFileManager) WriteContentsToFile(fileName string, contents string) error {
-	dr.nodeIndex[fileName].contents = &contents
+	node, fileExists := dr.nodeIndex[fileName]
+	if !fileExists {
+		return &FileReadError{FilePath: fileName}
+	}
+
+	node.contents = &contents
 	return nil
 }
