@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"importcleaner/internal/config"
 	"importcleaner/internal/datastructures"
 	fileprocessing "importcleaner/internal/file_processing"
 	"importcleaner/internal/iowrappers"
@@ -11,14 +12,25 @@ import (
 	"strings"
 )
 
+const CONFIG_FILE_NAME = "config.yml"
+
 func main() {
 	targetRootDir := os.Args[1]
 
 	workingDir, _ := os.Getwd()
 
 	fullTargetRootDirPath := filepath.Join(workingDir, targetRootDir)
+	fullConfigFilePath := filepath.Join(fullTargetRootDirPath, CONFIG_FILE_NAME)
 
 	fileManager := iowrappers.FileManagerImpl{}
+
+	config, configReadError := config.ReadConfigYAML(fileManager, fullConfigFilePath)
+	if configReadError != nil {
+		fmt.Print(configReadError.Error())
+		os.Exit(1)
+	}
+
+	fmt.Printf("Config: %+v", config)
 
 	parser := parsing.PythonImportStatementParser{
 		WorkingDir:  fullTargetRootDirPath,
