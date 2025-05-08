@@ -8,11 +8,15 @@ import (
 	"strings"
 )
 
-type FileProcessor struct {
+type FileProcessor interface {
+	ProcessFile(filePath string, parser parsing.ImportStatementParser) error
+}
+
+type FileProcessorImpl struct {
 	FileManager iowrappers.FileManager
 }
 
-func (fp FileProcessor) extractStatements(text string, parser parsing.ImportStatementParser) ([]parsing.ImportStatement, []string, error) {
+func (fp FileProcessorImpl) extractStatements(text string, parser parsing.ImportStatementParser) ([]parsing.ImportStatement, []string, error) {
 	importStatements := make([]parsing.ImportStatement, 0)
 	otherStatements := make([]string, 0)
 
@@ -38,7 +42,7 @@ func (fp FileProcessor) extractStatements(text string, parser parsing.ImportStat
 	return importStatements, otherStatements, nil
 }
 
-func (fp FileProcessor) ProcessFile(filePath string, parser parsing.ImportStatementParser) error {
+func (fp FileProcessorImpl) ProcessFile(filePath string, parser parsing.ImportStatementParser) error {
 	fileContents, fileReadError := fp.FileManager.ReadStringFromFile(filePath)
 	if fileReadError != nil {
 		return fileReadError

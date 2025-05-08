@@ -2,7 +2,7 @@ package fileprocessing_test
 
 import (
 	"errors"
-	fileprocessing "importcleaner/internal/file_processing"
+	fileprocessing "importcleaner/internal/fileprocessing"
 	"importcleaner/internal/iowrappers"
 	"importcleaner/internal/parsing"
 	"testing"
@@ -66,7 +66,7 @@ class SomeClass:
 		FileManager: fileManager,
 	}
 
-	testFileProcessor := fileprocessing.FileProcessor{
+	testFileProcessor := fileprocessing.FileProcessorImpl{
 		FileManager: fileManager,
 	}
 
@@ -114,7 +114,7 @@ class SomeClass:
 		FileManager: fileManager,
 	}
 
-	testFileProcessor := fileprocessing.FileProcessor{
+	testFileProcessor := fileprocessing.FileProcessorImpl{
 		FileManager: fileManager,
 	}
 
@@ -179,7 +179,7 @@ from submod import SUBVALUE
 		FileManager: fileManager,
 	}
 
-	testFileProcessor := fileprocessing.FileProcessor{
+	testFileProcessor := fileprocessing.FileProcessorImpl{
 		FileManager: fileManager,
 	}
 
