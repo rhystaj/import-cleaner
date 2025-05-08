@@ -93,18 +93,10 @@ func AssertStatementParsedCorrectly(t *testing.T, statement string, directoryRea
 }
 
 func TestParseImportStatement_ValidRootImports_NoAliases(t *testing.T) {
-	testDirectoryReader := iowrappers.MockFileManager{
-		Items: []iowrappers.DirectoryItemInfo{
-			{
-				ItemName: "modulefile.py",
-				IsDir:    false,
-			},
-			{
-				ItemName: "moduledir",
-				IsDir:    true,
-			},
-		},
-	}
+	testDirectoryReader := iowrappers.InitialiseMockFileManager([]*iowrappers.MockFSNode{
+		iowrappers.CreateMockFSFile("modulefile.py", ""),
+		iowrappers.CreateMockFSDir("moduledir", make([]*iowrappers.MockFSNode, 0)),
+	})
 
 	AssertStatementParsedCorrectly(t, "import acoolpackage", testDirectoryReader, parsing.ImportStatement{
 		ModulePathParts: []string{"acoolpackage"},
@@ -126,18 +118,10 @@ func TestParseImportStatement_ValidRootImports_NoAliases(t *testing.T) {
 }
 
 func TestParseImportStatement_ValidRootImports_Aliases(t *testing.T) {
-	testDirectoryReader := iowrappers.MockFileManager{
-		Items: []iowrappers.DirectoryItemInfo{
-			{
-				ItemName: "modulefile.py",
-				IsDir:    false,
-			},
-			{
-				ItemName: "moduledir",
-				IsDir:    true,
-			},
-		},
-	}
+	testDirectoryReader := iowrappers.InitialiseMockFileManager([]*iowrappers.MockFSNode{
+		iowrappers.CreateMockFSFile("modulefile.py", ""),
+		iowrappers.CreateMockFSDir("moduledir", make([]*iowrappers.MockFSNode, 0)),
+	})
 
 	AssertStatementParsedCorrectly(t, "import acoolpackage as acp", testDirectoryReader, parsing.ImportStatement{
 		ModulePathParts: []string{"acoolpackage"},
@@ -162,18 +146,10 @@ func TestParseImportStatement_ValidRootImports_Aliases(t *testing.T) {
 }
 
 func TestParseImportStatement_ValidSelectiveImports_SingleLine(t *testing.T) {
-	testDirectoryReader := iowrappers.MockFileManager{
-		Items: []iowrappers.DirectoryItemInfo{
-			{
-				ItemName: "modulefile.py",
-				IsDir:    false,
-			},
-			{
-				ItemName: "moduledir",
-				IsDir:    true,
-			},
-		},
-	}
+	testDirectoryReader := iowrappers.InitialiseMockFileManager([]*iowrappers.MockFSNode{
+		iowrappers.CreateMockFSFile("modulefile.py", ""),
+		iowrappers.CreateMockFSDir("moduledir", make([]*iowrappers.MockFSNode, 0)),
+	})
 
 	AssertStatementParsedCorrectly(t, "from acoolpackage import somedependency", testDirectoryReader, parsing.ImportStatement{
 		ModulePathParts: []string{"acoolpackage"},
@@ -242,18 +218,10 @@ func TestParseImportStatement_ValidSelectiveImports_SingleLine(t *testing.T) {
 }
 
 func TestParseImportStatement_ValidSelectiveImports_MultipleLines(t *testing.T) {
-	testDirectoryReader := iowrappers.MockFileManager{
-		Items: []iowrappers.DirectoryItemInfo{
-			{
-				ItemName: "modulefile.py",
-				IsDir:    false,
-			},
-			{
-				ItemName: "moduledir",
-				IsDir:    true,
-			},
-		},
-	}
+	testDirectoryReader := iowrappers.InitialiseMockFileManager([]*iowrappers.MockFSNode{
+		iowrappers.CreateMockFSFile("modulefile.py", ""),
+		iowrappers.CreateMockFSDir("moduledir", make([]*iowrappers.MockFSNode, 0)),
+	})
 
 	AssertStatementParsedCorrectly(t, "from acoolpackage import (\n\tthis as t,\n\tandthis,\n\tandalsothis\n)", testDirectoryReader, parsing.ImportStatement{
 		ModulePathParts: []string{"acoolpackage"},
@@ -342,9 +310,7 @@ func AssertParseErrorHandledCorrectly(t *testing.T, statement string, expectedEr
 }
 
 func TestParseImportStatement_NotImportStatement(t *testing.T) {
-	testDirectoryReader := iowrappers.MockFileManager{
-		Items: []iowrappers.DirectoryItemInfo{},
-	}
+	testDirectoryReader := iowrappers.InitialiseMockFileManager(make([]*iowrappers.MockFSNode, 0))
 
 	testParser := parsing.PythonImportStatementParser{
 		WorkingDir:  "", //Doesn't matter for tesing purposes
@@ -361,9 +327,7 @@ func TestParseImportStatement_NotImportStatement(t *testing.T) {
 }
 
 func TestParseImportStatement_Malformed(t *testing.T) {
-	testDirectoryReader := iowrappers.MockFileManager{
-		Items: []iowrappers.DirectoryItemInfo{},
-	}
+	testDirectoryReader := iowrappers.InitialiseMockFileManager(make([]*iowrappers.MockFSNode, 0))
 
 	testParser := parsing.PythonImportStatementParser{
 		WorkingDir:  "", //Doesn't matter for tesing purposes
@@ -376,9 +340,7 @@ func TestParseImportStatement_Malformed(t *testing.T) {
 }
 
 func TestParseImportStatement_MalformedAliases(t *testing.T) {
-	testDirectoryReader := iowrappers.MockFileManager{
-		Items: []iowrappers.DirectoryItemInfo{},
-	}
+	testDirectoryReader := iowrappers.InitialiseMockFileManager(make([]*iowrappers.MockFSNode, 0))
 
 	testParser := parsing.PythonImportStatementParser{
 		WorkingDir:  "", //Doesn't matter for tesing purposes
@@ -399,9 +361,7 @@ func AssertStatementCorrectlyConvertedToString(t *testing.T, statement parsing.I
 }
 
 func TestStatementAsString(t *testing.T) {
-	testDirectoryReader := iowrappers.MockFileManager{
-		Items: []iowrappers.DirectoryItemInfo{},
-	}
+	testDirectoryReader := iowrappers.InitialiseMockFileManager(make([]*iowrappers.MockFSNode, 0))
 
 	testParser := parsing.PythonImportStatementParser{
 		WorkingDir:  "", //Doesn't matter for tesing purposes

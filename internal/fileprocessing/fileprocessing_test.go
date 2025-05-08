@@ -44,22 +44,11 @@ class SomeClass:
         pass
 `
 
-	testFileContents := make(map[string]string)
-	testFileContents[testFileName] = testInputFileContents
-
-	fileManager := iowrappers.MockFileManager{
-		Items: []iowrappers.DirectoryItemInfo{
-			{
-				ItemName: "submod.py",
-				IsDir:    false,
-			},
-			{
-				ItemName: "internal",
-				IsDir:    true,
-			},
-		},
-		FileContents: testFileContents,
-	}
+	fileManager := iowrappers.InitialiseMockFileManager([]*iowrappers.MockFSNode{
+		iowrappers.CreateMockFSFile(testFileName, testInputFileContents),
+		iowrappers.CreateMockFSFile("submod.py", ""),
+		iowrappers.CreateMockFSDir("internal", make([]*iowrappers.MockFSNode, 0)),
+	})
 
 	parser := parsing.PythonImportStatementParser{
 		WorkingDir:  "",
@@ -92,22 +81,11 @@ class SomeClass:
         pass
 `
 
-	testFileContents := make(map[string]string)
-	testFileContents[testFileName] = testInputFileContents
-
-	fileManager := iowrappers.MockFileManager{
-		Items: []iowrappers.DirectoryItemInfo{
-			{
-				ItemName: "submod.py",
-				IsDir:    false,
-			},
-			{
-				ItemName: "internal",
-				IsDir:    true,
-			},
-		},
-		FileContents: testFileContents,
-	}
+	fileManager := iowrappers.InitialiseMockFileManager([]*iowrappers.MockFSNode{
+		iowrappers.CreateMockFSFile(testFileName, testInputFileContents),
+		iowrappers.CreateMockFSFile("submod.py", ""),
+		iowrappers.CreateMockFSDir("internal", make([]*iowrappers.MockFSNode, 0)),
+	})
 
 	parser := parsing.PythonImportStatementParser{
 		WorkingDir:  "",
@@ -157,22 +135,11 @@ from submod import SUBVALUE
 		Detail:    "Module alias expected",
 	}
 
-	testFileContents := make(map[string]string)
-	testFileContents[testFileName] = testInputFileContents
-
-	fileManager := iowrappers.MockFileManager{
-		Items: []iowrappers.DirectoryItemInfo{
-			{
-				ItemName: "submod.py",
-				IsDir:    false,
-			},
-			{
-				ItemName: "internal",
-				IsDir:    true,
-			},
-		},
-		FileContents: testFileContents,
-	}
+	fileManager := iowrappers.InitialiseMockFileManager([]*iowrappers.MockFSNode{
+		iowrappers.CreateMockFSFile(testFileName, testInputFileContents),
+		iowrappers.CreateMockFSFile("submod.py", ""),
+		iowrappers.CreateMockFSDir("internal", make([]*iowrappers.MockFSNode, 0)),
+	})
 
 	parser := parsing.PythonImportStatementParser{
 		WorkingDir:  "",

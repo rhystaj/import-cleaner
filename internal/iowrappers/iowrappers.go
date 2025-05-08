@@ -12,11 +12,11 @@ type DirectoryItemInfo struct {
 }
 
 type FileReadError struct {
-	filePath string
+	FilePath string
 }
 
 func (e FileReadError) Error() string {
-	return fmt.Sprintf("File '%s' could not be read successfully", e.filePath)
+	return fmt.Sprintf("File '%s' could not be read successfully", e.FilePath)
 }
 
 type FileManager interface {
@@ -50,7 +50,7 @@ func (dr FileManagerImpl) ReadBytesFromFile(filepath string) ([]byte, *FileReadE
 	contents, err := os.ReadFile(filepath)
 	if err != nil {
 		return make([]byte, 0), &FileReadError{
-			filePath: filepath,
+			FilePath: filepath,
 		}
 	}
 

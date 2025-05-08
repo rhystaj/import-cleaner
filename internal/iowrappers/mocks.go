@@ -2,17 +2,65 @@ package iowrappers
 
 import (
 	"iter"
+	"path/filepath"
 )
 
-type MockFileManager struct {
-	Items        []DirectoryItemInfo
-	FileContents map[string]string
+type MockFSNode struct {
+	info     DirectoryItemInfo
+	children []*MockFSNode
+	contents *string
 }
 
-func (dr MockFileManager) ReadDirectory(_ string) iter.Seq[DirectoryItemInfo] {
+type MockFileManager struct {
+	nodeIndex map[string]*MockFSNode
+}
+
+func buildNodeIndexRecursively(currentPath *string, nodes []*MockFSNode, nodeIndex *map[string]*MockFSNode) {
+	for _, node := range nodes {
+		path := node.info.ItemName
+		if currentPath != nil {
+			path = filepath.Join(*currentPath, path)
+		}
+
+		(*nodeIndex)[path] = node
+		buildNodeIndexRecursively(&path, node.children, nodeIndex)
+	}
+}
+
+func CreateMockFSFile(name string, contents string) *MockFSNode {
+	return &MockFSNode{
+		info: DirectoryItemInfo{
+			ItemName: name,
+			IsDir:    false,
+		},
+		children: make([]*MockFSNode, 0),
+		contents: &contents,
+	}
+}
+
+func CreateMockFSDir(name string, children []*MockFSNode) *MockFSNode {
+	return &MockFSNode{
+		info: DirectoryItemInfo{
+			ItemName: name,
+			IsDir:    true,
+		},
+		children: children,
+		contents: nil,
+	}
+}
+
+func InitialiseMockFileManager(rootNodes []*MockFSNode) MockFileManager {
+	nodeIndex := make(map[string]*MockFSNode)
+	nodeIndex[""] = CreateMockFSDir("", rootNodes)
+
+	buildNodeIndexRecursively(nil, rootNodes, &nodeIndex)
+	return MockFileManager{nodeIndex: nodeIndex}
+}
+
+func (dr MockFileManager) ReadDirectory(directoryName string) iter.Seq[DirectoryItemInfo] {
 	return func(yield func(DirectoryItemInfo) bool) {
-		for _, item := range dr.Items {
-			if !(yield(item)) {
+		for _, item := range dr.nodeIndex[directoryName].children {
+			if !(yield(item.info)) {
 				return
 			}
 		}
@@ -20,14 +68,24 @@ func (dr MockFileManager) ReadDirectory(_ string) iter.Seq[DirectoryItemInfo] {
 }
 
 func (dr MockFileManager) ReadBytesFromFile(fileName string) ([]byte, *FileReadError) {
-	return []byte(dr.FileContents[fileName]), nil
+	contents := dr.nodeIndex[fileName].contents
+	if contents == nil {
+		return make([]byte, 0), &FileReadError{FilePath: fileName}
+	}
+
+	return []byte(*contents), nil
 }
 
 func (dr MockFileManager) ReadStringFromFile(fileName string) (string, *FileReadError) {
-	return dr.FileContents[fileName], nil
+	contents := dr.nodeIndex[fileName].contents
+	if contents == nil {
+		return "", &FileReadError{FilePath: fileName}
+	}
+
+	return *contents, nil
 }
 
 func (dr MockFileManager) WriteContentsToFile(fileName string, contents string) error {
-	dr.FileContents[fileName] = contents
+	dr.nodeIndex[fileName].contents = &contents
 	return nil
 }
