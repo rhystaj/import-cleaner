@@ -154,6 +154,7 @@ from submod import SUBVALUE
 
 	expectedError := parsing.ImportStatementParseError{
 		Statement: "import datetime as",
+		Detail:    "Module alias expected",
 	}
 
 	testFileContents := make(map[string]string)
