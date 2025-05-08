@@ -39,7 +39,7 @@ func (fp FileProcessor) extractStatements(text string, parser parsing.ImportStat
 }
 
 func (fp FileProcessor) ProcessFile(filePath string, parser parsing.ImportStatementParser) error {
-	fileContents, fileReadError := fp.FileManager.ReadContentsFromFile(filePath)
+	fileContents, fileReadError := fp.FileManager.ReadStringFromFile(filePath)
 	if fileReadError != nil {
 		return fileReadError
 	}

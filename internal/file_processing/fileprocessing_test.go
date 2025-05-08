@@ -76,7 +76,7 @@ class SomeClass:
 		t.Errorf("File processing returned error: %s", error.Error())
 	}
 
-	updatedFileContents, _ := fileManager.ReadContentsFromFile(testFileName)
+	updatedFileContents, _ := fileManager.ReadStringFromFile(testFileName)
 	if updatedFileContents != expectedOutputFileContents {
 		t.Errorf("File contents was '%s', \nbut '%s' \nwas expected.", updatedFileContents, expectedOutputFileContents)
 	}
@@ -124,7 +124,7 @@ class SomeClass:
 		t.Errorf("File processing returned error: %s", error.Error())
 	}
 
-	updatedFileContents, _ := fileManager.ReadContentsFromFile(testFileName)
+	updatedFileContents, _ := fileManager.ReadStringFromFile(testFileName)
 	if updatedFileContents != testInputFileContents {
 		t.Errorf("File with no import should remain unchanged, but output was '%s'", updatedFileContents)
 	}
@@ -188,7 +188,7 @@ from submod import SUBVALUE
 		t.Errorf("File processing expected error '%+v', but returned error '%+v'", expectedError, error)
 	}
 
-	updatedFileContents, _ := fileManager.ReadContentsFromFile(testFileName)
+	updatedFileContents, _ := fileManager.ReadStringFromFile(testFileName)
 	if updatedFileContents != testInputFileContents {
 		t.Errorf("The file contents should not have been modified.")
 	}

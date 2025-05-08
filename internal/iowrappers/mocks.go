@@ -19,7 +19,11 @@ func (dr MockFileManager) ReadDirectory(_ string) iter.Seq[DirectoryItemInfo] {
 	}
 }
 
-func (dr MockFileManager) ReadContentsFromFile(fileName string) (string, *FileReadError) {
+func (dr MockFileManager) ReadBytesFromFile(fileName string) ([]byte, *FileReadError) {
+	return []byte(dr.FileContents[fileName]), nil
+}
+
+func (dr MockFileManager) ReadStringFromFile(fileName string) (string, *FileReadError) {
 	return dr.FileContents[fileName], nil
 }
 

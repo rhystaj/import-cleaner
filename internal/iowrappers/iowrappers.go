@@ -21,7 +21,8 @@ func (e FileReadError) Error() string {
 
 type FileManager interface {
 	ReadDirectory(directoryName string) iter.Seq[DirectoryItemInfo]
-	ReadContentsFromFile(filepath string) (string, *FileReadError)
+	ReadBytesFromFile(filepath string) ([]byte, *FileReadError)
+	ReadStringFromFile(filepath string) (string, *FileReadError)
 	WriteContentsToFile(filepath string, contents string) error
 }
 
@@ -45,12 +46,21 @@ func (dr FileManagerImpl) ReadDirectory(directoryName string) iter.Seq[Directory
 	}
 }
 
-func (dr FileManagerImpl) ReadContentsFromFile(filepath string) (string, *FileReadError) {
-	contents, error := os.ReadFile(filepath)
-	if error != nil {
-		return "", &FileReadError{
+func (dr FileManagerImpl) ReadBytesFromFile(filepath string) ([]byte, *FileReadError) {
+	contents, err := os.ReadFile(filepath)
+	if err != nil {
+		return make([]byte, 0), &FileReadError{
 			filePath: filepath,
 		}
+	}
+
+	return contents, nil
+}
+
+func (dr FileManagerImpl) ReadStringFromFile(filepath string) (string, *FileReadError) {
+	contents, err := dr.ReadBytesFromFile(filepath)
+	if err != nil {
+		return "", err
 	}
 
 	return string(contents), nil
