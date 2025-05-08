@@ -81,3 +81,50 @@ func TestCleanImports_NoFilesIgnored(t *testing.T) {
 			expectedFilesProcessed, fileProcessor.processedFilepaths)
 	}
 }
+
+func TestCleanImports_FilesIgnored(t *testing.T) {
+
+	config := config.Config{
+		IgnoredPaths: []string{
+			"sys",
+			"subdir\\subsubdir\\dont.py",
+		},
+	}
+	filepath := "test"
+	fileManager := iowrappers.InitialiseMockFileManager([]*iowrappers.MockFSNode{
+		iowrappers.CreateMockFSDir(filepath, []*iowrappers.MockFSNode{
+			iowrappers.CreateMockFSFile("Readme.md", ""),
+			iowrappers.CreateMockFSFile("main.py", ""),
+			iowrappers.CreateMockFSDir("subdir", []*iowrappers.MockFSNode{
+				iowrappers.CreateMockFSFile("some_code.py", ""),
+				iowrappers.CreateMockFSFile("not_python.c", ""),
+				iowrappers.CreateMockFSFile("some_more_code.py", ""),
+				iowrappers.CreateMockFSDir("subsubdir", []*iowrappers.MockFSNode{
+					iowrappers.CreateMockFSFile("dont.py", ""),
+					iowrappers.CreateMockFSFile("do.py", ""),
+				}),
+			}),
+			iowrappers.CreateMockFSDir("sys", []*iowrappers.MockFSNode{
+				iowrappers.CreateMockFSFile("dangerous_code.py", ""),
+				iowrappers.CreateMockFSFile("not_python_either.c", ""),
+				iowrappers.CreateMockFSFile("really_dangerous_code.py", ""),
+			}),
+		}),
+	})
+	parser := MockParser{}
+	fileProcessor := MockFileProcessor{}
+
+	expectedFilesProcessed := []string{
+		"test\\main.py",
+		"test\\subdir\\some_code.py",
+		"test\\subdir\\some_more_code.py",
+		"test\\subdir\\subsubdir\\do.py",
+	}
+
+	program.CleanImports(config, filepath, fileManager, parser, &fileProcessor)
+
+	if !reflect.DeepEqual(expectedFilesProcessed, fileProcessor.processedFilepaths) {
+		t.Errorf("Incorrect files processed - Expected %+v, but recieved %+v",
+			expectedFilesProcessed, fileProcessor.processedFilepaths)
+	}
+}

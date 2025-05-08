@@ -7,7 +7,7 @@ import (
 )
 
 type Config struct {
-	IgnoredDirs []string `yaml:"ignoredDirs"`
+	IgnoredPaths []string `yaml:"ignoredPaths"`
 }
 
 type ConfigLoadError struct{}
