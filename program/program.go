@@ -18,8 +18,6 @@ func CleanImports(
 	parser parsing.ImportStatementParser,
 	fileProcessor fileprocessing.FileProcessor) {
 
-	fmt.Printf("Config: %+v\n", config)
-
 	directoryStack := datastructures.CreateNewStack[string]()
 	directoryStack.Push(&targetDirPath)
 
@@ -28,6 +26,18 @@ func CleanImports(
 
 		for dirItem := range fileManager.ReadDirectory(currentDir) {
 			fullItemPath := filepath.Join(currentDir, dirItem.ItemName)
+			relativeItemPath := strings.TrimPrefix(fullItemPath, targetDirPath+"\\")
+
+			ignorePath := false
+			for _, ignoredPath := range config.IgnoredPaths {
+				if strings.HasPrefix(relativeItemPath, ignoredPath) {
+					ignorePath = true
+					break
+				}
+			}
+			if ignorePath {
+				continue
+			}
 
 			if dirItem.IsDir {
 				directoryStack.Push(&fullItemPath)
@@ -38,7 +48,6 @@ func CleanImports(
 				continue
 			}
 
-			relativeItemPath := strings.TrimPrefix(fullItemPath, targetDirPath)
 			fileProcessingError := fileProcessor.ProcessFile(fullItemPath, parser)
 			if fileProcessingError != nil {
 				fmt.Printf("Error reading file '%s': %s\n", relativeItemPath, fileProcessingError.Error())
