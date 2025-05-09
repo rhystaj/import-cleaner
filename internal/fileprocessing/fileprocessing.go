@@ -53,7 +53,10 @@ func (fp FileProcessorImpl) ProcessFile(filePath string, parser parsing.ImportSt
 		return extractionError
 	}
 
-	statementGroups := organisation.OrganiseImportStatements(importStatements)
+	statementGroups := organisation.OrganiseImportStatements(
+		importStatements,
+		[]organisation.ImportStatementGroupRule{},
+	)
 
 	var outputContentsBuffer bytes.Buffer
 	for _, group := range statementGroups {

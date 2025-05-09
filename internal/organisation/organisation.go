@@ -6,7 +6,16 @@ import (
 	"strings"
 )
 
-func OrganiseImportStatements(statements []parsing.ImportStatement) [][]parsing.ImportStatement {
+type ImportStatementGroupRule struct {
+	DependencySourceType string
+	ModulePathPrefix     string
+}
+
+func OrganiseImportStatements(
+	statements []parsing.ImportStatement,
+	groupRules []ImportStatementGroupRule,
+) [][]parsing.ImportStatement {
+
 	groups := [][]parsing.ImportStatement{
 		make([]parsing.ImportStatement, 0),
 		make([]parsing.ImportStatement, 0),

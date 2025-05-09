@@ -95,7 +95,7 @@ func TestOrganiseImports(t *testing.T) {
 		},
 	}
 
-	result := organisation.OrganiseImportStatements(testImports)
+	result := organisation.OrganiseImportStatements(testImports, []organisation.ImportStatementGroupRule{})
 
 	if !reflect.DeepEqual(expectedResult, result) {
 		t.Errorf("Expected %+v, by recieved %+v\n", expectedResult, result)
