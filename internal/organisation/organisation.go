@@ -6,8 +6,16 @@ import (
 	"strings"
 )
 
+type DependencySourceType int
+
+const (
+	DependencySourceTypeNone DependencySourceType = iota
+	DependencySourceTypeInternal
+	DependencySourceTypeExternal
+)
+
 type ImportStatementGroupRule struct {
-	DependencySourceType string
+	DependencySourceType DependencySourceType
 	ModulePathPrefix     string
 }
 
