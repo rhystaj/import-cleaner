@@ -6,18 +6,17 @@ import (
 	"github.com/go-yaml/yaml"
 )
 
-type Config struct {
-	IgnoredPaths []string `yaml:"ignoredPaths"`
+type GroupingRuleYaml struct {
+	DependencySourceType string `yaml:"dependencySourceType"`
 }
 
-type ConfigLoadError struct{}
-
-func (e ConfigLoadError) Error() string {
-	return "Config is invalid and couldn't be loaded."
+type ConfigYaml struct {
+	IgnoredPaths  []string           `yaml:"ignoredPaths"`
+	GroupingRules []GroupingRuleYaml `yaml:"groupingRule"`
 }
 
-func ReadConfigYAML(fileManager iowrappers.FileManager, filePath string) (Config, *ConfigLoadError) {
-	var config Config
+func readConfigYAML(fileManager iowrappers.FileManager, filePath string) (ConfigYaml, *ConfigLoadError) {
+	var config ConfigYaml
 
 	fileBytes, fileReadError := fileManager.ReadBytesFromFile(filePath)
 	if fileReadError != nil {

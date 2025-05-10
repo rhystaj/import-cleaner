@@ -23,7 +23,7 @@ func main() {
 
 	fileManager := iowrappers.FileManagerImpl{}
 
-	config, configReadError := config.ReadConfigYAML(fileManager, fullConfigFilePath)
+	config, configReadError := config.LoadAndValidateConfigFromFile(fileManager, fullConfigFilePath)
 	if configReadError != nil {
 		fmt.Print(configReadError.Error())
 		os.Exit(1)
