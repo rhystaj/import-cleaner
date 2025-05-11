@@ -10,12 +10,6 @@ import (
 	"github.com/go-yaml/yaml"
 )
 
-type validTestCase struct {
-	description    string
-	input          config.ConfigYaml
-	expectedOutput config.Config
-}
-
 func TestLoadValidConfig(t *testing.T) {
 
 	testIgnoredPaths := []string{}
