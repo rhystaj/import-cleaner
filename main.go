@@ -26,18 +26,18 @@ func main() {
 
 	rawConfig, configLoadError := config.LoadRawConfigFromYAMLFile(fileManager, fullConfigFilePath)
 	if configLoadError != nil {
-		fmt.Print(configLoadError.Error())
+		fmt.Println(configLoadError.Error())
 	}
 
-	fmt.Printf("Raw config: %+v", rawConfig)
+	fmt.Printf("Raw config: %+v\n", rawConfig)
 
 	config, configValidationError := config.ProcessAndValidateConfig(rawConfig)
 	if configValidationError != nil {
-		fmt.Print(configValidationError.Error())
+		fmt.Println(configValidationError.Error())
 		os.Exit(1)
 	}
 
-	fmt.Printf("Config: %+v", config)
+	fmt.Printf("Config: %+v\n", config)
 
 	parser := parsing.PythonImportStatementParser{
 		WorkingDir:  fullTargetRootDirPath,

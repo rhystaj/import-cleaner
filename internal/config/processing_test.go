@@ -13,7 +13,7 @@ func TestLoadValidConfig(t *testing.T) {
 
 	testConfig := config.RawConfig{
 		IgnoredPaths: testIgnoredPaths,
-		GroupingRules: []config.GroupingRuleYaml{
+		GroupingRules: []config.RawGroupingRule{
 			{},
 			{
 				DependencySourceType: "internal",

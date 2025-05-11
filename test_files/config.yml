@@ -2,4 +2,4 @@ ignoredPaths:
   - ignored_dir
   - submod\ignored_file.py
 groupingRules:
-  - dependencySourceType: internal
+  - dependencySourceType: invalid
