@@ -3,6 +3,7 @@ package config
 import (
 	"importcleaner/internal/iowrappers"
 	"importcleaner/internal/organisation"
+	"strings"
 )
 
 type Config struct {
@@ -10,10 +11,26 @@ type Config struct {
 	GroupingRules []organisation.ImportStatementGroupRule
 }
 
-type ConfigLoadError struct{}
+type InvalidPath struct {
+	Path             string
+	ErrorDescription string
+}
+
+type ConfigLoadError struct {
+	InvalidPaths []InvalidPath
+}
 
 func (e ConfigLoadError) Error() string {
-	return "Config is invalid and couldn't be loaded."
+	if len(e.InvalidPaths) == 0 {
+		return "Config load error returned, but no invalid paths were specified."
+	}
+
+	var pathListStringBuilder strings.Builder
+	for _, invalidPath := range e.InvalidPaths {
+		pathListStringBuilder.WriteString("\n" + invalidPath.Path + " - " + invalidPath.ErrorDescription)
+	}
+
+	return "Errors detected in config: " + pathListStringBuilder.String()
 }
 
 func parseDependencySourceType(str string) (valid bool, result organisation.DependencySourceType) {
