@@ -28,15 +28,20 @@ func statementMatchesGroupRule(statement parsing.ImportStatement, groupRule Impo
 		!statement.External && groupRule.DependencySourceType == DependencySourceTypeInternal
 }
 
-func OrganiseImportStatements(
-	statements []parsing.ImportStatement,
-	groupRules []ImportStatementGroupRule,
-) [][]parsing.ImportStatement {
+type ImportStatementOrganiser interface {
+	OrganiseImportStatements(statements []parsing.ImportStatement) [][]parsing.ImportStatement
+}
 
-	groups := make([][]parsing.ImportStatement, len(groupRules)+1)
+type ImportStatementOrganiserImpl struct {
+	GroupRules []ImportStatementGroupRule
+}
+
+func (o ImportStatementOrganiserImpl) OrganiseImportStatements(statements []parsing.ImportStatement) [][]parsing.ImportStatement {
+
+	groups := make([][]parsing.ImportStatement, len(o.GroupRules)+1)
 	for _, statement := range statements {
 		statementGrouped := false
-		for groupIndex, groupRule := range groupRules {
+		for groupIndex, groupRule := range o.GroupRules {
 			if statementMatchesGroupRule(statement, groupRule) {
 				groups[groupIndex] = append(groups[groupIndex], statement)
 				statementGrouped = true
@@ -44,7 +49,7 @@ func OrganiseImportStatements(
 			}
 		}
 		if !statementGrouped {
-			groups[len(groupRules)] = append(groups[len(groupRules)], statement)
+			groups[len(o.GroupRules)] = append(groups[len(o.GroupRules)], statement)
 		}
 	}
 

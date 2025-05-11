@@ -14,6 +14,7 @@ type FileProcessor interface {
 
 type FileProcessorImpl struct {
 	FileManager iowrappers.FileManager
+	Organiser   organisation.ImportStatementOrganiser
 }
 
 func (fp FileProcessorImpl) extractStatements(text string, parser parsing.ImportStatementParser) ([]parsing.ImportStatement, []string, error) {
@@ -53,10 +54,7 @@ func (fp FileProcessorImpl) ProcessFile(filePath string, parser parsing.ImportSt
 		return extractionError
 	}
 
-	statementGroups := organisation.OrganiseImportStatements(
-		importStatements,
-		[]organisation.ImportStatementGroupRule{},
-	)
+	statementGroups := fp.Organiser.OrganiseImportStatements(importStatements)
 
 	var outputContentsBuffer bytes.Buffer
 	for _, group := range statementGroups {

@@ -52,7 +52,9 @@ func generateTextImports() []parsing.ImportStatement {
 
 func TestOrganiseImports_NoGroupsConfigured(t *testing.T) {
 
-	testConfig := []organisation.ImportStatementGroupRule{}
+	testOrganiser := organisation.ImportStatementOrganiserImpl{
+		GroupRules: []organisation.ImportStatementGroupRule{},
+	}
 	testImports := generateTextImports()
 
 	expectedResult := [][]parsing.ImportStatement{
@@ -98,7 +100,7 @@ func TestOrganiseImports_NoGroupsConfigured(t *testing.T) {
 		},
 	}
 
-	result := organisation.OrganiseImportStatements(testImports, testConfig)
+	result := testOrganiser.OrganiseImportStatements(testImports)
 
 	if !reflect.DeepEqual(expectedResult, result) {
 		t.Errorf("Expected %+v, by recieved %+v\n", expectedResult, result)
@@ -107,9 +109,11 @@ func TestOrganiseImports_NoGroupsConfigured(t *testing.T) {
 
 func TestOrganiseImports_ExternalGroup(t *testing.T) {
 
-	testConfig := []organisation.ImportStatementGroupRule{
-		{
-			DependencySourceType: organisation.DependencySourceTypeExternal,
+	testOrganiser := organisation.ImportStatementOrganiserImpl{
+		GroupRules: []organisation.ImportStatementGroupRule{
+			{
+				DependencySourceType: organisation.DependencySourceTypeExternal,
+			},
 		},
 	}
 	testImports := generateTextImports()
@@ -159,7 +163,7 @@ func TestOrganiseImports_ExternalGroup(t *testing.T) {
 		},
 	}
 
-	result := organisation.OrganiseImportStatements(testImports, testConfig)
+	result := testOrganiser.OrganiseImportStatements(testImports)
 
 	if !reflect.DeepEqual(expectedResult, result) {
 		t.Errorf("Expected %+v, by recieved %+v\n", expectedResult, result)
@@ -168,11 +172,14 @@ func TestOrganiseImports_ExternalGroup(t *testing.T) {
 
 func TestOrganiseImports_InternalGroup(t *testing.T) {
 
-	testConfig := []organisation.ImportStatementGroupRule{
-		{
-			DependencySourceType: organisation.DependencySourceTypeInternal,
+	testOrganiser := organisation.ImportStatementOrganiserImpl{
+		GroupRules: []organisation.ImportStatementGroupRule{
+			{
+				DependencySourceType: organisation.DependencySourceTypeInternal,
+			},
 		},
 	}
+
 	testImports := generateTextImports()
 
 	expectedResult := [][]parsing.ImportStatement{
@@ -220,7 +227,7 @@ func TestOrganiseImports_InternalGroup(t *testing.T) {
 		},
 	}
 
-	result := organisation.OrganiseImportStatements(testImports, testConfig)
+	result := testOrganiser.OrganiseImportStatements(testImports)
 
 	if !reflect.DeepEqual(expectedResult, result) {
 		t.Errorf("Expected %+v, by recieved %+v\n", expectedResult, result)

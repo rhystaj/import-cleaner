@@ -5,6 +5,7 @@ import (
 	"importcleaner/internal/config"
 	"importcleaner/internal/fileprocessing"
 	"importcleaner/internal/iowrappers"
+	"importcleaner/internal/organisation"
 	"importcleaner/internal/parsing"
 	"importcleaner/program"
 	"os"
@@ -34,8 +35,13 @@ func main() {
 		FileManager: fileManager,
 	}
 
+	organiser := organisation.ImportStatementOrganiserImpl{
+		GroupRules: config.GroupingRules,
+	}
+
 	fileProcessor := fileprocessing.FileProcessorImpl{
 		FileManager: fileManager,
+		Organiser:   organiser,
 	}
 
 	program.CleanImports(config, fullTargetRootDirPath, fileManager, parser, fileProcessor)

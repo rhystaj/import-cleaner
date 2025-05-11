@@ -12,7 +12,7 @@ type GroupingRuleYaml struct {
 
 type ConfigYaml struct {
 	IgnoredPaths  []string           `yaml:"ignoredPaths"`
-	GroupingRules []GroupingRuleYaml `yaml:"groupingRule"`
+	GroupingRules []GroupingRuleYaml `yaml:"groupingRules"`
 }
 
 func readConfigYAML(fileManager iowrappers.FileManager, filePath string) (ConfigYaml, *ConfigLoadError) {
