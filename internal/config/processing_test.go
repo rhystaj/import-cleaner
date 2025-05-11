@@ -2,19 +2,16 @@ package config_test
 
 import (
 	"importcleaner/internal/config"
-	"importcleaner/internal/iowrappers"
 	"importcleaner/internal/organisation"
 	"reflect"
 	"testing"
-
-	"github.com/go-yaml/yaml"
 )
 
 func TestLoadValidConfig(t *testing.T) {
 
 	testIgnoredPaths := []string{}
 
-	testYaml := config.ConfigYaml{
+	testConfig := config.RawConfig{
 		IgnoredPaths: testIgnoredPaths,
 		GroupingRules: []config.GroupingRuleYaml{
 			{},
@@ -42,14 +39,7 @@ func TestLoadValidConfig(t *testing.T) {
 		},
 	}
 
-	yamlBytes, _ := yaml.Marshal(testYaml)
-	yamlString := string(yamlBytes)
-
-	testFileManager := iowrappers.InitialiseMockFileManager([]*iowrappers.MockFSNode{
-		iowrappers.CreateMockFSFile("testFile.yml", yamlString),
-	})
-
-	result, _ := config.LoadAndValidateConfigFromFile(testFileManager, "testFile.yml")
+	result, _ := config.ProcessAndValidateConfig(testConfig)
 
 	if !reflect.DeepEqual(expectedOutput, result) {
 		t.Errorf("Expected %+v, but recieved %+v.", expectedOutput, result)

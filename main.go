@@ -24,11 +24,20 @@ func main() {
 
 	fileManager := iowrappers.FileManagerImpl{}
 
-	config, configReadError := config.LoadAndValidateConfigFromFile(fileManager, fullConfigFilePath)
-	if configReadError != nil {
-		fmt.Print(configReadError.Error())
+	rawConfig, configLoadError := config.LoadRawConfigFromYAMLFile(fileManager, fullConfigFilePath)
+	if configLoadError != nil {
+		fmt.Print(configLoadError.Error())
+	}
+
+	fmt.Printf("Raw config: %+v", rawConfig)
+
+	config, configValidationError := config.ProcessAndValidateConfig(rawConfig)
+	if configValidationError != nil {
+		fmt.Print(configValidationError.Error())
 		os.Exit(1)
 	}
+
+	fmt.Printf("Config: %+v", config)
 
 	parser := parsing.PythonImportStatementParser{
 		WorkingDir:  fullTargetRootDirPath,

@@ -1,7 +1,6 @@
 package config
 
 import (
-	"importcleaner/internal/iowrappers"
 	"importcleaner/internal/organisation"
 	"strings"
 )
@@ -16,11 +15,11 @@ type InvalidPath struct {
 	ErrorDescription string
 }
 
-type ConfigLoadError struct {
+type ConfigValidationError struct {
 	InvalidPaths []InvalidPath
 }
 
-func (e ConfigLoadError) Error() string {
+func (e ConfigValidationError) Error() string {
 	if len(e.InvalidPaths) == 0 {
 		return "Config load error returned, but no invalid paths were specified."
 	}
@@ -54,17 +53,15 @@ func processAndValidateGroupingRule(groupingRule GroupingRuleYaml) (organisation
 	}, nil
 }
 
-func LoadAndValidateConfigFromFile(fileManager iowrappers.FileManager, filePath string) (Config, *ConfigLoadError) {
-	configYaml, _ := readConfigYAML(fileManager, filePath)
-
-	processedGroupingRules := make([]organisation.ImportStatementGroupRule, len(configYaml.GroupingRules))
-	for i, ruleYaml := range configYaml.GroupingRules {
+func ProcessAndValidateConfig(rawConfig RawConfig) (Config, *ConfigValidationError) {
+	processedGroupingRules := make([]organisation.ImportStatementGroupRule, len(rawConfig.GroupingRules))
+	for i, ruleYaml := range rawConfig.GroupingRules {
 		processedRule, _ := processAndValidateGroupingRule(ruleYaml)
 		processedGroupingRules[i] = processedRule
 	}
 
 	return Config{
-		IgnoredPaths:  configYaml.IgnoredPaths,
+		IgnoredPaths:  rawConfig.IgnoredPaths,
 		GroupingRules: processedGroupingRules,
 	}, nil
 }
