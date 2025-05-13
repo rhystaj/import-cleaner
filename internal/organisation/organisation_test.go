@@ -3,12 +3,18 @@ package organisation_test
 import (
 	"importcleaner/internal/organisation"
 	"importcleaner/internal/parsing"
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-func generateTextImports() []parsing.ImportStatement {
+func generateTestImports() []parsing.ImportStatement {
 	return []parsing.ImportStatement{
+		{
+			ModulePathParts: []string{"helpers", "database"},
+			Dependecies:     []parsing.Dependecy{},
+			External:        false,
+		},
 		{
 			ModulePathParts: []string{"somecoolmodule"},
 			Dependecies:     []parsing.Dependecy{},
@@ -23,11 +29,31 @@ func generateTextImports() []parsing.ImportStatement {
 			External: true,
 		},
 		{
+			ModulePathParts: []string{"tools", "saw"},
+			Dependecies:     []parsing.Dependecy{},
+			External:        false,
+		},
+		{
+			ModulePathParts: []string{"pydantic", "types", "numeric"},
+			Dependecies:     []parsing.Dependecy{},
+			External:        true,
+		},
+		{
 			ModulePathParts: []string{"zzz"},
 			Dependecies: []parsing.Dependecy{
 				{Name: "zzzz", Alias: ""},
 			},
 			External: false,
+		},
+		{
+			ModulePathParts: []string{"pydantic", "validators"},
+			Dependecies:     []parsing.Dependecy{},
+			External:        true,
+		},
+		{
+			ModulePathParts: []string{"helpers", "commandline"},
+			Dependecies:     []parsing.Dependecy{},
+			External:        false,
 		},
 		{
 			ModulePathParts: []string{"anokdependencyiguess"},
@@ -36,6 +62,16 @@ func generateTextImports() []parsing.ImportStatement {
 				{Name: "doodad", Alias: ""},
 			},
 			External: false,
+		},
+		{
+			ModulePathParts: []string{"pydantic", "types", "string"},
+			Dependecies:     []parsing.Dependecy{},
+			External:        true,
+		},
+		{
+			ModulePathParts: []string{"tools", "hammer"},
+			Dependecies:     []parsing.Dependecy{},
+			External:        false,
 		},
 		{
 			ModulePathParts: []string{"abc"},
@@ -55,7 +91,7 @@ func TestOrganiseImports_NoGroupsConfigured(t *testing.T) {
 	testOrganiser := organisation.ImportStatementOrganiserImpl{
 		GroupRules: []organisation.ImportStatementGroupRule{},
 	}
-	testImports := generateTextImports()
+	testImports := generateTestImports()
 
 	expectedResult := [][]parsing.ImportStatement{
 		{
@@ -86,7 +122,42 @@ func TestOrganiseImports_NoGroupsConfigured(t *testing.T) {
 				External: true,
 			},
 			{
+				ModulePathParts: []string{"helpers", "commandline"},
+				Dependecies:     []parsing.Dependecy{},
+				External:        false,
+			},
+			{
+				ModulePathParts: []string{"helpers", "database"},
+				Dependecies:     []parsing.Dependecy{},
+				External:        false,
+			},
+			{
+				ModulePathParts: []string{"pydantic", "types", "numeric"},
+				Dependecies:     []parsing.Dependecy{},
+				External:        true,
+			},
+			{
+				ModulePathParts: []string{"pydantic", "types", "string"},
+				Dependecies:     []parsing.Dependecy{},
+				External:        true,
+			},
+			{
+				ModulePathParts: []string{"pydantic", "validators"},
+				Dependecies:     []parsing.Dependecy{},
+				External:        true,
+			},
+			{
 				ModulePathParts: []string{"somecoolmodule"},
+				Dependecies:     []parsing.Dependecy{},
+				External:        false,
+			},
+			{
+				ModulePathParts: []string{"tools", "hammer"},
+				Dependecies:     []parsing.Dependecy{},
+				External:        false,
+			},
+			{
+				ModulePathParts: []string{"tools", "saw"},
 				Dependecies:     []parsing.Dependecy{},
 				External:        false,
 			},
@@ -102,9 +173,7 @@ func TestOrganiseImports_NoGroupsConfigured(t *testing.T) {
 
 	result := testOrganiser.OrganiseImportStatements(testImports)
 
-	if !reflect.DeepEqual(expectedResult, result) {
-		t.Errorf("Expected %+v, by recieved %+v\n", expectedResult, result)
-	}
+	assert.Equal(t, expectedResult, result)
 }
 
 func TestOrganiseImports_ExternalGroup(t *testing.T) {
@@ -116,7 +185,7 @@ func TestOrganiseImports_ExternalGroup(t *testing.T) {
 			},
 		},
 	}
-	testImports := generateTextImports()
+	testImports := generateTestImports()
 
 	expectedResult := [][]parsing.ImportStatement{
 		{
@@ -138,6 +207,21 @@ func TestOrganiseImports_ExternalGroup(t *testing.T) {
 				},
 				External: true,
 			},
+			{
+				ModulePathParts: []string{"pydantic", "types", "numeric"},
+				Dependecies:     []parsing.Dependecy{},
+				External:        true,
+			},
+			{
+				ModulePathParts: []string{"pydantic", "types", "string"},
+				Dependecies:     []parsing.Dependecy{},
+				External:        true,
+			},
+			{
+				ModulePathParts: []string{"pydantic", "validators"},
+				Dependecies:     []parsing.Dependecy{},
+				External:        true,
+			},
 		},
 		{
 			{
@@ -149,7 +233,27 @@ func TestOrganiseImports_ExternalGroup(t *testing.T) {
 				External: false,
 			},
 			{
+				ModulePathParts: []string{"helpers", "commandline"},
+				Dependecies:     []parsing.Dependecy{},
+				External:        false,
+			},
+			{
+				ModulePathParts: []string{"helpers", "database"},
+				Dependecies:     []parsing.Dependecy{},
+				External:        false,
+			},
+			{
 				ModulePathParts: []string{"somecoolmodule"},
+				Dependecies:     []parsing.Dependecy{},
+				External:        false,
+			},
+			{
+				ModulePathParts: []string{"tools", "hammer"},
+				Dependecies:     []parsing.Dependecy{},
+				External:        false,
+			},
+			{
+				ModulePathParts: []string{"tools", "saw"},
 				Dependecies:     []parsing.Dependecy{},
 				External:        false,
 			},
@@ -165,9 +269,7 @@ func TestOrganiseImports_ExternalGroup(t *testing.T) {
 
 	result := testOrganiser.OrganiseImportStatements(testImports)
 
-	if !reflect.DeepEqual(expectedResult, result) {
-		t.Errorf("Expected %+v, by recieved %+v\n", expectedResult, result)
-	}
+	assert.Equal(t, expectedResult, result)
 }
 
 func TestOrganiseImports_InternalGroup(t *testing.T) {
@@ -180,7 +282,7 @@ func TestOrganiseImports_InternalGroup(t *testing.T) {
 		},
 	}
 
-	testImports := generateTextImports()
+	testImports := generateTestImports()
 
 	expectedResult := [][]parsing.ImportStatement{
 		{
@@ -193,7 +295,27 @@ func TestOrganiseImports_InternalGroup(t *testing.T) {
 				External: false,
 			},
 			{
+				ModulePathParts: []string{"helpers", "commandline"},
+				Dependecies:     []parsing.Dependecy{},
+				External:        false,
+			},
+			{
+				ModulePathParts: []string{"helpers", "database"},
+				Dependecies:     []parsing.Dependecy{},
+				External:        false,
+			},
+			{
 				ModulePathParts: []string{"somecoolmodule"},
+				Dependecies:     []parsing.Dependecy{},
+				External:        false,
+			},
+			{
+				ModulePathParts: []string{"tools", "hammer"},
+				Dependecies:     []parsing.Dependecy{},
+				External:        false,
+			},
+			{
+				ModulePathParts: []string{"tools", "saw"},
 				Dependecies:     []parsing.Dependecy{},
 				External:        false,
 			},
@@ -224,12 +346,25 @@ func TestOrganiseImports_InternalGroup(t *testing.T) {
 				},
 				External: true,
 			},
+			{
+				ModulePathParts: []string{"pydantic", "types", "numeric"},
+				Dependecies:     []parsing.Dependecy{},
+				External:        true,
+			},
+			{
+				ModulePathParts: []string{"pydantic", "types", "string"},
+				Dependecies:     []parsing.Dependecy{},
+				External:        true,
+			},
+			{
+				ModulePathParts: []string{"pydantic", "validators"},
+				Dependecies:     []parsing.Dependecy{},
+				External:        true,
+			},
 		},
 	}
 
 	result := testOrganiser.OrganiseImportStatements(testImports)
 
-	if !reflect.DeepEqual(expectedResult, result) {
-		t.Errorf("Expected %+v, by recieved %+v\n", expectedResult, result)
-	}
+	assert.Equal(t, expectedResult, result)
 }

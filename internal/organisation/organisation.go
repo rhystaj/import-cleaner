@@ -16,7 +16,7 @@ const (
 
 type ImportStatementGroupRule struct {
 	DependencySourceType DependencySourceType
-	ModulePathPrefix     string
+	ModulePaths          []string
 }
 
 func statementMatchesGroupRule(statement parsing.ImportStatement, groupRule ImportStatementGroupRule) bool {
