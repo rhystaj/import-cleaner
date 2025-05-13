@@ -374,13 +374,13 @@ func TestOrganiseImports_GroupByModulePaths(t *testing.T) {
 	testOrganiser := organisation.ImportStatementOrganiserImpl{
 		GroupRules: []organisation.ImportStatementGroupRule{
 			{
-				ModulePaths: []string{"dataclasses", "somecoolmodule", "abc"},
+				ModulePaths: [][]string{{"dataclasses"}, {"somecoolmodule"}, {"abc"}},
 			},
 			{
-				ModulePaths: []string{"tools", "helpers.database", "argparse"},
+				ModulePaths: [][]string{{"tools"}, {"helpers", "database"}, {"argparse"}},
 			},
 			{
-				ModulePaths: []string{"tools.hammer", "pydantic.types"},
+				ModulePaths: [][]string{{"tools", "hammer"}, {"pydantic", "types"}},
 			},
 		},
 	}

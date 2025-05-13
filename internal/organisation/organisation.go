@@ -16,16 +16,39 @@ const (
 
 type ImportStatementGroupRule struct {
 	DependencySourceType DependencySourceType
-	ModulePaths          []string
+	ModulePaths          [][]string
 }
 
 func statementMatchesGroupRule(statement parsing.ImportStatement, groupRule ImportStatementGroupRule) bool {
-	if groupRule.DependencySourceType == DependencySourceTypeNone {
-		return true
+	var dependecySourceTypeMatches bool
+	switch groupRule.DependencySourceType {
+	case DependencySourceTypeNone:
+		dependecySourceTypeMatches = true
+	case DependencySourceTypeInternal:
+		dependecySourceTypeMatches = !statement.External
+	case DependencySourceTypeExternal:
+		dependecySourceTypeMatches = statement.External
 	}
 
-	return statement.External && groupRule.DependencySourceType == DependencySourceTypeExternal ||
-		!statement.External && groupRule.DependencySourceType == DependencySourceTypeInternal
+	hasMatchingPath := true
+	if len(groupRule.ModulePaths) > 0 {
+		hasMatchingPath = false
+		for _, groupRulePath := range groupRule.ModulePaths {
+			pathsMatch := true
+			for groupRulePathIndex, groupRulePathPart := range groupRulePath {
+				if groupRulePathIndex > len(statement.ModulePathParts)-1 || groupRulePathPart != statement.ModulePathParts[groupRulePathIndex] {
+					pathsMatch = false
+					break
+				}
+			}
+			if pathsMatch {
+				hasMatchingPath = true
+				break
+			}
+		}
+	}
+
+	return dependecySourceTypeMatches && hasMatchingPath
 }
 
 type ImportStatementOrganiser interface {
