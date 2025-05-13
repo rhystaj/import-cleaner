@@ -19,6 +19,18 @@ type ImportStatementGroupRule struct {
 	ModulePaths          [][]string
 }
 
+func statementModulePathMatchesGroupRuleModulePath(statementModulePath []string, groupRuleModulePath []string) bool {
+	for groupRuleModulePathIndex, groupRuleModulePathPart := range groupRuleModulePath {
+		if groupRuleModulePathIndex > len(statementModulePath)-1 {
+			return false
+		}
+		if groupRuleModulePathPart != statementModulePath[groupRuleModulePathIndex] {
+			return false
+		}
+	}
+	return true
+}
+
 func statementMatchesGroupRule(statement parsing.ImportStatement, groupRule ImportStatementGroupRule) bool {
 	var dependecySourceTypeMatches bool
 	switch groupRule.DependencySourceType {
@@ -33,15 +45,8 @@ func statementMatchesGroupRule(statement parsing.ImportStatement, groupRule Impo
 	hasMatchingPath := true
 	if len(groupRule.ModulePaths) > 0 {
 		hasMatchingPath = false
-		for _, groupRulePath := range groupRule.ModulePaths {
-			pathsMatch := true
-			for groupRulePathIndex, groupRulePathPart := range groupRulePath {
-				if groupRulePathIndex > len(statement.ModulePathParts)-1 || groupRulePathPart != statement.ModulePathParts[groupRulePathIndex] {
-					pathsMatch = false
-					break
-				}
-			}
-			if pathsMatch {
+		for _, groupRuleModulePath := range groupRule.ModulePaths {
+			if statementModulePathMatchesGroupRuleModulePath(statement.ModulePathParts, groupRuleModulePath) {
 				hasMatchingPath = true
 				break
 			}
