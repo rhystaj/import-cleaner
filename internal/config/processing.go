@@ -57,8 +57,14 @@ func processAndValidateGroupingRule(rawGroupingRule RawGroupingRule) (organisati
 		})
 	}
 
+	processedModulePaths := make([][]string, len(rawGroupingRule.ModulePaths))
+	for i, rawModulePath := range rawGroupingRule.ModulePaths {
+		processedModulePaths[i] = strings.Split(rawModulePath, ".")
+	}
+
 	return organisation.ImportStatementGroupRule{
 		DependencySourceType: dependencySourceType,
+		ModulePaths:          processedModulePaths,
 	}, invalidPaths
 }
 
