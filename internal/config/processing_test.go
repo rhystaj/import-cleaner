@@ -3,11 +3,12 @@ package config_test
 import (
 	"importcleaner/internal/config"
 	"importcleaner/internal/organisation"
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-func TestLoadValidConfig(t *testing.T) {
+func TestProcessAndValidationConfig_ValidConfig(t *testing.T) {
 
 	testIgnoredPaths := []string{}
 
@@ -39,9 +40,47 @@ func TestLoadValidConfig(t *testing.T) {
 		},
 	}
 
-	result, _ := config.ProcessAndValidateConfig(testConfig)
+	result, err := config.ProcessAndValidateConfig(testConfig)
 
-	if !reflect.DeepEqual(expectedOutput, result) {
-		t.Errorf("Expected %+v, but recieved %+v.", expectedOutput, result)
+	assert.Nil(t, err)
+	assert.Equal(t, expectedOutput, result)
+}
+
+func TestProcessAndValidationConfig_InvalidConfig(t *testing.T) {
+
+	testIgnoredPaths := []string{}
+
+	testConfig := config.RawConfig{
+		IgnoredPaths: testIgnoredPaths,
+		GroupingRules: []config.RawGroupingRule{
+			{},
+			{
+				DependencySourceType: "notvalid",
+			},
+			{
+				DependencySourceType: "external",
+			},
+			{
+				DependencySourceType: "notvalideither",
+			},
+		},
 	}
+
+	expectedError := config.ConfigValidationError{
+		InvalidPaths: []config.InvalidPath{
+			{
+				Path:             "groupingRules.dependencySourceType",
+				ErrorDescription: "Must be 'internal', or 'external', but was 'notvalid'",
+			},
+			{
+				Path:             "groupingRules.dependencySourceType",
+				ErrorDescription: "Must be 'internal', or 'external', but was 'notvalideither'",
+			},
+		},
+	}
+
+	_, err := config.ProcessAndValidateConfig(testConfig)
+
+	assert.NotNil(t, err)
+	assert.Equal(t, expectedError, *err)
 }
