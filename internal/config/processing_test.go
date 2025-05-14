@@ -18,9 +18,19 @@ func TestProcessAndValidationConfig_ValidConfig(t *testing.T) {
 			{},
 			{
 				DependencySourceType: "internal",
+				ModulePaths: []string{
+					"somecoolmodule",
+					"helpers.database",
+				},
 			},
 			{
 				DependencySourceType: "external",
+			},
+			{
+				ModulePaths: []string{
+					"pydantic.types",
+					"argparse",
+				},
 			},
 		},
 	}
@@ -30,12 +40,25 @@ func TestProcessAndValidationConfig_ValidConfig(t *testing.T) {
 		GroupingRules: []organisation.ImportStatementGroupRule{
 			{
 				DependencySourceType: organisation.DependencySourceTypeNone,
+				ModulePaths:          [][]string{},
 			},
 			{
 				DependencySourceType: organisation.DependencySourceTypeInternal,
+				ModulePaths: [][]string{
+					{"somecoolmodule"},
+					{"helpers", "database"},
+				},
 			},
 			{
 				DependencySourceType: organisation.DependencySourceTypeExternal,
+				ModulePaths:          [][]string{},
+			},
+			{
+				DependencySourceType: organisation.DependencySourceTypeNone,
+				ModulePaths: [][]string{
+					{"pydantic", "types"},
+					{"argparse"},
+				},
 			},
 		},
 	}

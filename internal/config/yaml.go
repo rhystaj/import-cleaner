@@ -8,7 +8,8 @@ import (
 )
 
 type RawGroupingRule struct {
-	DependencySourceType string `yaml:"dependencySourceType"`
+	DependencySourceType string   `yaml:"dependencySourceType"`
+	ModulePaths          []string `yaml:"modulePaths"`
 }
 
 type RawConfig struct {
