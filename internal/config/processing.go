@@ -63,19 +63,19 @@ func processAndValidateGroupingRule(rawGroupingRule RawGroupingRule) (organisati
 }
 
 func ProcessAndValidateConfig(rawConfig RawConfig) (Config, *ConfigValidationError) {
-	var invalidPaths []InvalidPath
+	var configInvalidPaths []InvalidPath
 
 	processedGroupingRules := make([]organisation.ImportStatementGroupRule, len(rawConfig.GroupingRules))
 	for i, ruleYaml := range rawConfig.GroupingRules {
-		var processedRule organisation.ImportStatementGroupRule
-		processedRule, invalidPaths = processAndValidateGroupingRule(ruleYaml)
+		processedRule, groupRuleInvalidPaths := processAndValidateGroupingRule(ruleYaml)
 		processedGroupingRules[i] = processedRule
+		configInvalidPaths = append(configInvalidPaths, groupRuleInvalidPaths...)
 	}
 
 	var validationError *ConfigValidationError
-	if len(invalidPaths) > 0 {
+	if len(configInvalidPaths) > 0 {
 		validationError = &ConfigValidationError{
-			InvalidPaths: invalidPaths,
+			InvalidPaths: configInvalidPaths,
 		}
 	}
 
