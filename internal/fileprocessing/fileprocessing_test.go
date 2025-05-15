@@ -4,6 +4,7 @@ import (
 	"errors"
 	fileprocessing "importcleaner/internal/fileprocessing"
 	"importcleaner/internal/iowrappers"
+	"importcleaner/internal/organisation"
 	"importcleaner/internal/parsing"
 	"testing"
 )
@@ -50,6 +51,14 @@ class SomeClass:
 		iowrappers.CreateMockFSDir("internal", make([]*iowrappers.MockFSNode, 0)),
 	})
 
+	testOrganiser := organisation.ImportStatementOrganiserImpl{
+		GroupRules: []organisation.ImportStatementGroupRule{
+			{
+				DependencySourceType: organisation.DependencySourceTypeExternal,
+			},
+		},
+	}
+
 	parser := parsing.PythonImportStatementParser{
 		WorkingDir:  "",
 		FileManager: fileManager,
@@ -57,6 +66,7 @@ class SomeClass:
 
 	testFileProcessor := fileprocessing.FileProcessorImpl{
 		FileManager: fileManager,
+		Organiser:   testOrganiser,
 	}
 
 	error := testFileProcessor.ProcessFile(testFileName, parser)
@@ -87,6 +97,14 @@ class SomeClass:
 		iowrappers.CreateMockFSDir("internal", make([]*iowrappers.MockFSNode, 0)),
 	})
 
+	testOrganiser := organisation.ImportStatementOrganiserImpl{
+		GroupRules: []organisation.ImportStatementGroupRule{
+			{
+				DependencySourceType: organisation.DependencySourceTypeExternal,
+			},
+		},
+	}
+
 	parser := parsing.PythonImportStatementParser{
 		WorkingDir:  "",
 		FileManager: fileManager,
@@ -94,6 +112,7 @@ class SomeClass:
 
 	testFileProcessor := fileprocessing.FileProcessorImpl{
 		FileManager: fileManager,
+		Organiser:   testOrganiser,
 	}
 
 	error := testFileProcessor.ProcessFile(testFileName, parser)
@@ -141,6 +160,14 @@ from submod import SUBVALUE
 		iowrappers.CreateMockFSDir("internal", make([]*iowrappers.MockFSNode, 0)),
 	})
 
+	testOrganiser := organisation.ImportStatementOrganiserImpl{
+		GroupRules: []organisation.ImportStatementGroupRule{
+			{
+				DependencySourceType: organisation.DependencySourceTypeExternal,
+			},
+		},
+	}
+
 	parser := parsing.PythonImportStatementParser{
 		WorkingDir:  "",
 		FileManager: fileManager,
@@ -148,6 +175,7 @@ from submod import SUBVALUE
 
 	testFileProcessor := fileprocessing.FileProcessorImpl{
 		FileManager: fileManager,
+		Organiser:   testOrganiser,
 	}
 
 	error := testFileProcessor.ProcessFile(testFileName, parser)
