@@ -65,13 +65,13 @@ func TestCleanImports_NoFilesIgnored(t *testing.T) {
 	fileProcessor := MockFileProcessor{}
 
 	expectedFilesProcessed := []string{
-		"test\\main.py",
-		"test\\sys\\dangerous_code.py",
-		"test\\sys\\really_dangerous_code.py",
-		"test\\subdir\\some_code.py",
-		"test\\subdir\\some_more_code.py",
-		"test\\subdir\\subsubdir\\dont.py",
-		"test\\subdir\\subsubdir\\do.py",
+		"test/main.py",
+		"test/sys/dangerous_code.py",
+		"test/sys/really_dangerous_code.py",
+		"test/subdir/some_code.py",
+		"test/subdir/some_more_code.py",
+		"test/subdir/subsubdir/dont.py",
+		"test/subdir/subsubdir/do.py",
 	}
 
 	program.CleanImports(config, filepath, fileManager, parser, &fileProcessor)
@@ -87,7 +87,7 @@ func TestCleanImports_FilesIgnored(t *testing.T) {
 	config := config.Config{
 		IgnoredPaths: []string{
 			"sys",
-			"subdir\\subsubdir\\dont.py",
+			"subdir/subsubdir/dont.py",
 		},
 	}
 	filepath := "test"
@@ -115,10 +115,10 @@ func TestCleanImports_FilesIgnored(t *testing.T) {
 	fileProcessor := MockFileProcessor{}
 
 	expectedFilesProcessed := []string{
-		"test\\main.py",
-		"test\\subdir\\some_code.py",
-		"test\\subdir\\some_more_code.py",
-		"test\\subdir\\subsubdir\\do.py",
+		"test/main.py",
+		"test/subdir/some_code.py",
+		"test/subdir/some_more_code.py",
+		"test/subdir/subsubdir/do.py",
 	}
 
 	program.CleanImports(config, filepath, fileManager, parser, &fileProcessor)
