@@ -26,7 +26,7 @@ func CleanImports(
 
 		for dirItem := range fileManager.ReadDirectory(currentDir) {
 			fullItemPath := filepath.Join(currentDir, dirItem.ItemName)
-			relativeItemPath := strings.TrimPrefix(fullItemPath, targetDirPath+"\\")
+			relativeItemPath := strings.TrimPrefix(fullItemPath, targetDirPath+"/")
 
 			ignorePath := false
 			for _, ignoredPath := range config.IgnoredPaths {
