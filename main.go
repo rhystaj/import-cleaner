@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 )
 
-const CONFIG_FILE_NAME = "config.yml"
+const CONFIG_FILE_NAME = "imports-config.yml"
 
 func main() {
 	targetRootDir := os.Args[1]
@@ -25,6 +25,7 @@ func main() {
 	rawConfig, configLoadError := config.LoadRawConfigFromYAMLFile(fileManager, fullConfigFilePath)
 	if configLoadError != nil {
 		fmt.Println(configLoadError.Error())
+		os.Exit(1)
 	}
 
 	config, configValidationError := config.ProcessAndValidateConfig(rawConfig)
