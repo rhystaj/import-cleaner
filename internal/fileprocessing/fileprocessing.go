@@ -9,22 +9,23 @@ import (
 )
 
 type FileProcessor interface {
-	ProcessFile(filePath string, parser parsing.ImportStatementParser) error
+	ProcessFile(filePath string) error
 }
 
 type FileProcessorImpl struct {
+	Parser      parsing.ImportStatementParser
 	FileManager iowrappers.FileManager
 	Organiser   organisation.ImportStatementOrganiser
 }
 
-func (fp FileProcessorImpl) extractStatements(text string, parser parsing.ImportStatementParser) ([]parsing.ImportStatement, []string, error) {
+func (fp FileProcessorImpl) extractStatements(text string) ([]parsing.ImportStatement, []string, error) {
 	importStatements := make([]parsing.ImportStatement, 0)
 	otherStatements := make([]string, 0)
 
 	var ignoreEmptyStatement bool
-	for statement := range parser.StatementsInText(text) {
-		if parser.IsImportStatement(statement) {
-			importStatement, err := parser.ParseImportStatement(statement)
+	for statement := range fp.Parser.StatementsInText(text) {
+		if fp.Parser.IsIntendedImportStatement(statement) {
+			importStatement, err := fp.Parser.ParseImportStatement(statement)
 			if err != nil {
 				return make([]parsing.ImportStatement, 0), make([]string, 0), err
 			}
@@ -43,13 +44,13 @@ func (fp FileProcessorImpl) extractStatements(text string, parser parsing.Import
 	return importStatements, otherStatements, nil
 }
 
-func (fp FileProcessorImpl) ProcessFile(filePath string, parser parsing.ImportStatementParser) error {
+func (fp FileProcessorImpl) ProcessFile(filePath string) error {
 	fileContents, fileReadError := fp.FileManager.ReadStringFromFile(filePath)
 	if fileReadError != nil {
 		return fileReadError
 	}
 
-	importStatements, otherStatements, extractionError := fp.extractStatements(fileContents, parser)
+	importStatements, otherStatements, extractionError := fp.extractStatements(fileContents)
 	if extractionError != nil {
 		return extractionError
 	}
@@ -63,13 +64,14 @@ func (fp FileProcessorImpl) ProcessFile(filePath string, parser parsing.ImportSt
 		}
 
 		for _, statement := range group {
-			statementAsText := parser.StatementAsString(statement)
-			outputContentsBuffer.WriteString(statementAsText + "\n")
+			statementAsText, _ := statement.AsText() //TODO: Properly handle error
+			outputContentsBuffer.WriteString(statementAsText)
+			outputContentsBuffer.WriteString("\n")
 		}
 		outputContentsBuffer.WriteString("\n")
 	}
 
-	outputContentsBuffer.WriteString(strings.Join(otherStatements, "\n"))
+	outputContentsBuffer.WriteString(strings.Join(otherStatements, ""))
 
 	fp.FileManager.WriteContentsToFile(filePath, outputContentsBuffer.String())
 

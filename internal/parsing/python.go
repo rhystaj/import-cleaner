@@ -9,6 +9,19 @@ import (
 	"strings"
 )
 
+type PythonDependecy struct {
+	Name  string
+	Alias string
+}
+
+type PythonImportStatement struct {
+	RawText         string
+	ModulePathParts []string
+	ModuleAlias     string
+	Dependecies     []PythonDependecy
+	External        bool
+}
+
 type PythonImportStatementParser struct {
 	WorkingDir  string
 	FileManager iowrappers.FileManager
@@ -22,10 +35,12 @@ func (p PythonImportStatementParser) StatementsInText(text string) iter.Seq[stri
 
 	return func(yield func(string) bool) {
 		for _, r := range text {
+			statementBuffer.WriteRune(r)
+
 			if r == '\n' && bracketStack.Size() <= 0 {
+
 				if ignoreNextLineBreak {
 					ignoreNextLineBreak = false
-					statementBuffer.WriteRune(r)
 					continue
 				}
 
@@ -44,8 +59,6 @@ func (p PythonImportStatementParser) StatementsInText(text string) iter.Seq[stri
 			} else if bracketStack.Size() > 0 && IsCorrespondingCloseBracket(r, *bracketStack.Peek()) {
 				bracketStack.Pop()
 			}
-
-			statementBuffer.WriteRune(r)
 		}
 
 		yield(statementBuffer.String())
@@ -53,7 +66,7 @@ func (p PythonImportStatementParser) StatementsInText(text string) iter.Seq[stri
 
 }
 
-func (p PythonImportStatementParser) IsImportStatement(statementText string) bool {
+func (p PythonImportStatementParser) IsIntendedImportStatement(statementText string) bool {
 	statementParts := strings.Split(statementText, " ")
 
 	if len(statementParts) < 2 {
@@ -110,32 +123,32 @@ func (p PythonImportStatementParser) parseModuleInfo(moduleInfoText string) (mod
 	return modulePathParts, parts[2], ""
 }
 
-func (p PythonImportStatementParser) parseDependency(dependecyText string) (dependency Dependecy, errorMessage string) {
+func (p PythonImportStatementParser) parseDependency(dependecyText string) (dependency PythonDependecy, errorMessage string) {
 	parts := strings.Split(strings.Trim(dependecyText, " "), " ")
 
 	if len(parts) <= 1 {
-		return Dependecy{
+		return PythonDependecy{
 			Name:  parts[0],
 			Alias: "",
 		}, ""
 	}
 
 	if len(parts) >= 2 && parts[1] != "as" {
-		return Dependecy{}, fmt.Sprintf("Malformed dependecy '%s'", dependecyText)
+		return PythonDependecy{}, fmt.Sprintf("Malformed dependecy '%s'", dependecyText)
 	}
 
 	if parts[1] == "as" && len(parts) == 2 {
-		return Dependecy{}, "Dependency alias expected"
+		return PythonDependecy{}, "Dependency alias expected"
 	}
 
-	return Dependecy{
+	return PythonDependecy{
 		Name:  parts[0],
 		Alias: parts[2],
 	}, ""
 }
 
-func (p PythonImportStatementParser) parseDependenciesList(dependenciesListText string) (dependencies []Dependecy, errorMessage string) {
-	result := make([]Dependecy, 0)
+func (p PythonImportStatementParser) parseDependenciesList(dependenciesListText string) (dependencies []PythonDependecy, errorMessage string) {
+	result := make([]PythonDependecy, 0)
 
 	currentStatementPart := ""
 	statementRemaining := dependenciesListText
@@ -151,7 +164,7 @@ func (p PythonImportStatementParser) parseDependenciesList(dependenciesListText 
 
 		dependecy, dependecyParseErrorMessage := p.parseDependency(dependecyText)
 		if dependecyParseErrorMessage != "" {
-			return []Dependecy{}, dependecyParseErrorMessage
+			return []PythonDependecy{}, dependecyParseErrorMessage
 		}
 
 		if len(dependecyText) > 0 {
@@ -168,7 +181,7 @@ func (p PythonImportStatementParser) generateErrorResultForStatement(statement s
 		Detail:    detail,
 	}
 
-	return ImportStatement{[]string{}, "", []Dependecy{}, false}, error
+	return PythonImportStatement{"", []string{}, "", []PythonDependecy{}, false}, error
 }
 
 func (p PythonImportStatementParser) ParseImportStatement(statementText string) (ImportStatement, error) {
@@ -190,10 +203,11 @@ func (p PythonImportStatementParser) ParseImportStatement(statementText string) 
 			return p.generateErrorResultForStatement(statementText, moduleParseErrorMessage)
 		}
 
-		return ImportStatement{
+		return PythonImportStatement{
+			RawText:         statementText,
 			ModulePathParts: modulePathParts,
 			ModuleAlias:     moduleAlias,
-			Dependecies:     []Dependecy{},
+			Dependecies:     []PythonDependecy{},
 			External:        p.isExternalModule(modulePathParts),
 		}, nil
 	}
@@ -220,10 +234,10 @@ func (p PythonImportStatementParser) ParseImportStatement(statementText string) 
 
 	external := p.isExternalModule(modulePathParts)
 
-	return ImportStatement{modulePathParts, "", dependencies, external}, nil
+	return PythonImportStatement{statementText, modulePathParts, "", dependencies, external}, nil
 }
 
-func (p PythonImportStatementParser) dependecyAsString(dependecy Dependecy) string {
+func (p PythonImportStatement) dependecyAsString(dependecy PythonDependecy) string {
 	result := dependecy.Name
 
 	if dependecy.Alias != "" {
@@ -233,17 +247,36 @@ func (p PythonImportStatementParser) dependecyAsString(dependecy Dependecy) stri
 	return result
 }
 
-func (p PythonImportStatementParser) StatementAsString(statement ImportStatement) string {
-	modulePath := strings.Join(statement.ModulePathParts, ".")
+func (p PythonImportStatement) AsText() (string, error) {
+	modulePath := strings.Join(p.ModulePathParts, ".")
 
-	if len(statement.Dependecies) > 0 {
+	if len(p.Dependecies) > 0 {
 		dependencyNames := make([]string, 0)
-		for _, dep := range statement.Dependecies {
+		for _, dep := range p.Dependecies {
 			dependencyNames = append(dependencyNames, p.dependecyAsString(dep))
 		}
 
-		return fmt.Sprintf("from %s import %s", modulePath, strings.Join(dependencyNames, ", "))
+		result := fmt.Sprintf("from %s import %s", modulePath, strings.Join(dependencyNames, ", "))
+		return result, nil
 	} else {
-		return fmt.Sprintf("import %s", modulePath)
+		result := fmt.Sprintf("import %s", modulePath)
+		return result, nil
+	}
+}
+
+func (p PythonImportStatement) GetGenericDetails() ImportStatementGenericDetails {
+	dependencies := make([]GenericDependecy, len(p.Dependecies))
+	for i, dependency := range p.Dependecies {
+		dependencies[i] = GenericDependecy{
+			Name:  dependency.Name,
+			Alias: dependency.Alias,
+		}
+	}
+
+	return ImportStatementGenericDetails{
+		ModulePathParts: p.ModulePathParts,
+		ModuleAlias:     p.ModuleAlias,
+		Dependecies:     dependencies,
+		External:        p.External,
 	}
 }

@@ -38,11 +38,14 @@ import datetime
 from internal import VALUE
 from submod import SUBVALUE
 
+
 x = VALUE
+
 
 class SomeClass:
     def __init__(self) -> None:
         pass
+
 `
 
 	fileManager := iowrappers.InitialiseMockFileManager([]*iowrappers.MockFSNode{
@@ -65,11 +68,12 @@ class SomeClass:
 	}
 
 	testFileProcessor := fileprocessing.FileProcessorImpl{
+		Parser:      parser,
 		FileManager: fileManager,
 		Organiser:   testOrganiser,
 	}
 
-	error := testFileProcessor.ProcessFile(testFileName, parser)
+	error := testFileProcessor.ProcessFile(testFileName)
 
 	if error != nil {
 		t.Errorf("File processing returned error: %s", error.Error())
@@ -111,11 +115,12 @@ class SomeClass:
 	}
 
 	testFileProcessor := fileprocessing.FileProcessorImpl{
+		Parser:      parser,
 		FileManager: fileManager,
 		Organiser:   testOrganiser,
 	}
 
-	error := testFileProcessor.ProcessFile(testFileName, parser)
+	error := testFileProcessor.ProcessFile(testFileName)
 
 	if error != nil {
 		t.Errorf("File processing returned error: %s", error.Error())
@@ -150,7 +155,7 @@ from submod import SUBVALUE
 `
 
 	expectedError := parsing.ImportStatementParseError{
-		Statement: "import datetime as",
+		Statement: "import datetime as\n",
 		Detail:    "Module alias expected",
 	}
 
@@ -174,11 +179,12 @@ from submod import SUBVALUE
 	}
 
 	testFileProcessor := fileprocessing.FileProcessorImpl{
+		Parser:      parser,
 		FileManager: fileManager,
 		Organiser:   testOrganiser,
 	}
 
-	error := testFileProcessor.ProcessFile(testFileName, parser)
+	error := testFileProcessor.ProcessFile(testFileName)
 	if !errors.Is(error, &expectedError) {
 		t.Errorf("File processing expected error '%+v', but returned error '%+v'", expectedError, error)
 	}

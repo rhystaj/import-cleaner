@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestStatementsInText(t *testing.T) {
+func TestStatementsInText_Python(t *testing.T) {
 	testParser := parsing.PythonImportStatementParser{}
 
 	testText := `from something import data
@@ -22,9 +22,9 @@ text = "some text" + /
 	"some text on a new line"`
 
 	expectedStatements := []string{
-		"from something import data",
-		"from big import (\n\tthis,\n\tandthis,\n\tandalsothis\n)",
-		"",
+		"from something import data\n",
+		"from big import (\n\tthis,\n\tandthis,\n\tandalsothis\n)\n",
+		"\n",
 		"text = \"some text\" + /\n\t\"some text on a new line\"",
 	}
 
@@ -63,19 +63,19 @@ func TestIsImportStatement(t *testing.T) {
 	}
 
 	for _, statement := range validStatements {
-		if !testParser.IsImportStatement(statement) {
+		if !testParser.IsIntendedImportStatement(statement) {
 			t.Fail()
 		}
 	}
 
 	for _, statement := range invalidStatements {
-		if testParser.IsImportStatement(statement) {
+		if testParser.IsIntendedImportStatement(statement) {
 			t.Fail()
 		}
 	}
 }
 
-func AssertStatementParsedCorrectly(t *testing.T, statement string, directoryReader iowrappers.FileManager, expectedResult parsing.ImportStatement) {
+func AssertPythonImportStatementParsedCorrectly(t *testing.T, statement string, directoryReader iowrappers.FileManager, expectedResult parsing.PythonImportStatement) {
 	testParser := parsing.PythonImportStatementParser{
 		WorkingDir:  "", //Doesn't matter for tesing purposes
 		FileManager: directoryReader,
@@ -98,21 +98,24 @@ func TestParseImportStatement_ValidRootImports_NoAliases(t *testing.T) {
 		iowrappers.CreateMockFSDir("moduledir", make([]*iowrappers.MockFSNode, 0)),
 	})
 
-	AssertStatementParsedCorrectly(t, "import acoolpackage", testDirectoryReader, parsing.ImportStatement{
+	AssertPythonImportStatementParsedCorrectly(t, "import acoolpackage", testDirectoryReader, parsing.PythonImportStatement{
+		RawText:         "import acoolpackage",
 		ModulePathParts: []string{"acoolpackage"},
-		Dependecies:     []parsing.Dependecy{},
+		Dependecies:     []parsing.PythonDependecy{},
 		External:        true,
 	})
 
-	AssertStatementParsedCorrectly(t, "import modulefile", testDirectoryReader, parsing.ImportStatement{
+	AssertPythonImportStatementParsedCorrectly(t, "import modulefile", testDirectoryReader, parsing.PythonImportStatement{
+		RawText:         "import modulefile",
 		ModulePathParts: []string{"modulefile"},
-		Dependecies:     []parsing.Dependecy{},
+		Dependecies:     []parsing.PythonDependecy{},
 		External:        false,
 	})
 
-	AssertStatementParsedCorrectly(t, "import moduledir.subdep", testDirectoryReader, parsing.ImportStatement{
+	AssertPythonImportStatementParsedCorrectly(t, "import moduledir.subdep", testDirectoryReader, parsing.PythonImportStatement{
+		RawText:         "import moduledir.subdep",
 		ModulePathParts: []string{"moduledir", "subdep"},
-		Dependecies:     []parsing.Dependecy{},
+		Dependecies:     []parsing.PythonDependecy{},
 		External:        false,
 	})
 }
@@ -123,24 +126,27 @@ func TestParseImportStatement_ValidRootImports_Aliases(t *testing.T) {
 		iowrappers.CreateMockFSDir("moduledir", make([]*iowrappers.MockFSNode, 0)),
 	})
 
-	AssertStatementParsedCorrectly(t, "import acoolpackage as acp", testDirectoryReader, parsing.ImportStatement{
+	AssertPythonImportStatementParsedCorrectly(t, "import acoolpackage as acp", testDirectoryReader, parsing.PythonImportStatement{
+		RawText:         "import acoolpackage as acp",
 		ModulePathParts: []string{"acoolpackage"},
 		ModuleAlias:     "acp",
-		Dependecies:     []parsing.Dependecy{},
+		Dependecies:     []parsing.PythonDependecy{},
 		External:        true,
 	})
 
-	AssertStatementParsedCorrectly(t, "import modulefile as mf", testDirectoryReader, parsing.ImportStatement{
+	AssertPythonImportStatementParsedCorrectly(t, "import modulefile as mf", testDirectoryReader, parsing.PythonImportStatement{
+		RawText:         "import modulefile as mf",
 		ModulePathParts: []string{"modulefile"},
 		ModuleAlias:     "mf",
-		Dependecies:     []parsing.Dependecy{},
+		Dependecies:     []parsing.PythonDependecy{},
 		External:        false,
 	})
 
-	AssertStatementParsedCorrectly(t, "import moduledir.subdep as md", testDirectoryReader, parsing.ImportStatement{
+	AssertPythonImportStatementParsedCorrectly(t, "import moduledir.subdep as md", testDirectoryReader, parsing.PythonImportStatement{
+		RawText:         "import moduledir.subdep as md",
 		ModulePathParts: []string{"moduledir", "subdep"},
 		ModuleAlias:     "md",
-		Dependecies:     []parsing.Dependecy{},
+		Dependecies:     []parsing.PythonDependecy{},
 		External:        false,
 	})
 }
@@ -151,64 +157,71 @@ func TestParseImportStatement_ValidSelectiveImports_SingleLine(t *testing.T) {
 		iowrappers.CreateMockFSDir("moduledir", make([]*iowrappers.MockFSNode, 0)),
 	})
 
-	AssertStatementParsedCorrectly(t, "from acoolpackage import somedependency", testDirectoryReader, parsing.ImportStatement{
+	AssertPythonImportStatementParsedCorrectly(t, "from acoolpackage import somedependency", testDirectoryReader, parsing.PythonImportStatement{
+		RawText:         "from acoolpackage import somedependency",
 		ModulePathParts: []string{"acoolpackage"},
 		ModuleAlias:     "",
-		Dependecies: []parsing.Dependecy{
+		Dependecies: []parsing.PythonDependecy{
 			{Name: "somedependency", Alias: ""},
 		},
 		External: true,
 	})
 
-	AssertStatementParsedCorrectly(t, "from modulefile import somedependency", testDirectoryReader, parsing.ImportStatement{
+	AssertPythonImportStatementParsedCorrectly(t, "from modulefile import somedependency", testDirectoryReader, parsing.PythonImportStatement{
+		RawText:         "from modulefile import somedependency",
 		ModulePathParts: []string{"modulefile"},
 		ModuleAlias:     "",
-		Dependecies: []parsing.Dependecy{
+		Dependecies: []parsing.PythonDependecy{
 			{Name: "somedependency", Alias: ""},
 		},
 		External: false,
 	})
 
-	AssertStatementParsedCorrectly(t, "from moduledir.subdep import somedependency", testDirectoryReader, parsing.ImportStatement{
+	AssertPythonImportStatementParsedCorrectly(t, "from moduledir.subdep import somedependency", testDirectoryReader, parsing.PythonImportStatement{
+		RawText:         "from moduledir.subdep import somedependency",
 		ModulePathParts: []string{"moduledir", "subdep"},
 		ModuleAlias:     "",
-		Dependecies: []parsing.Dependecy{
+		Dependecies: []parsing.PythonDependecy{
 			{Name: "somedependency", Alias: ""},
 		},
 		External: false,
 	})
 
-	AssertStatementParsedCorrectly(t, "from acoolpackage import somedependency as sd", testDirectoryReader, parsing.ImportStatement{
+	AssertPythonImportStatementParsedCorrectly(t, "from acoolpackage import somedependency as sd", testDirectoryReader, parsing.PythonImportStatement{
+		RawText:         "from acoolpackage import somedependency as sd",
 		ModulePathParts: []string{"acoolpackage"},
 		ModuleAlias:     "",
-		Dependecies: []parsing.Dependecy{
+		Dependecies: []parsing.PythonDependecy{
 			{Name: "somedependency", Alias: "sd"},
 		},
 		External: true,
 	})
 
-	AssertStatementParsedCorrectly(t, "from modulefile import somedependency as sd", testDirectoryReader, parsing.ImportStatement{
+	AssertPythonImportStatementParsedCorrectly(t, "from modulefile import somedependency as sd", testDirectoryReader, parsing.PythonImportStatement{
+		RawText:         "from modulefile import somedependency as sd",
 		ModulePathParts: []string{"modulefile"},
 		ModuleAlias:     "",
-		Dependecies: []parsing.Dependecy{
+		Dependecies: []parsing.PythonDependecy{
 			{Name: "somedependency", Alias: "sd"},
 		},
 		External: false,
 	})
 
-	AssertStatementParsedCorrectly(t, "from moduledir.subdep import somedependency as sd", testDirectoryReader, parsing.ImportStatement{
+	AssertPythonImportStatementParsedCorrectly(t, "from moduledir.subdep import somedependency as sd", testDirectoryReader, parsing.PythonImportStatement{
+		RawText:         "from moduledir.subdep import somedependency as sd",
 		ModulePathParts: []string{"moduledir", "subdep"},
 		ModuleAlias:     "",
-		Dependecies: []parsing.Dependecy{
+		Dependecies: []parsing.PythonDependecy{
 			{Name: "somedependency", Alias: "sd"},
 		},
 		External: false,
 	})
 
-	AssertStatementParsedCorrectly(t, "from acoolpackage import somedependency, anotherthing as at, somethingelse", testDirectoryReader, parsing.ImportStatement{
+	AssertPythonImportStatementParsedCorrectly(t, "from acoolpackage import somedependency, anotherthing as at, somethingelse", testDirectoryReader, parsing.PythonImportStatement{
+		RawText:         "from acoolpackage import somedependency, anotherthing as at, somethingelse",
 		ModulePathParts: []string{"acoolpackage"},
 		ModuleAlias:     "",
-		Dependecies: []parsing.Dependecy{
+		Dependecies: []parsing.PythonDependecy{
 			{Name: "somedependency", Alias: ""},
 			{Name: "anotherthing", Alias: "at"},
 			{Name: "somethingelse", Alias: ""},
@@ -223,10 +236,11 @@ func TestParseImportStatement_ValidSelectiveImports_MultipleLines(t *testing.T) 
 		iowrappers.CreateMockFSDir("moduledir", make([]*iowrappers.MockFSNode, 0)),
 	})
 
-	AssertStatementParsedCorrectly(t, "from acoolpackage import (\n\tthis as t,\n\tandthis,\n\tandalsothis\n)", testDirectoryReader, parsing.ImportStatement{
+	AssertPythonImportStatementParsedCorrectly(t, "from acoolpackage import (\n\tthis as t,\n\tandthis,\n\tandalsothis\n)", testDirectoryReader, parsing.PythonImportStatement{
+		RawText:         "from acoolpackage import (\n\tthis as t,\n\tandthis,\n\tandalsothis\n)",
 		ModulePathParts: []string{"acoolpackage"},
 		ModuleAlias:     "",
-		Dependecies: []parsing.Dependecy{
+		Dependecies: []parsing.PythonDependecy{
 			{Name: "this", Alias: "t"},
 			{Name: "andthis", Alias: ""},
 			{Name: "andalsothis", Alias: ""},
@@ -234,10 +248,11 @@ func TestParseImportStatement_ValidSelectiveImports_MultipleLines(t *testing.T) 
 		External: true,
 	})
 
-	AssertStatementParsedCorrectly(t, "from modulefile import (\n\tthis,\n\tandthis as at,\n\tandalsothis\n)", testDirectoryReader, parsing.ImportStatement{
+	AssertPythonImportStatementParsedCorrectly(t, "from modulefile import (\n\tthis,\n\tandthis as at,\n\tandalsothis\n)", testDirectoryReader, parsing.PythonImportStatement{
+		RawText:         "from modulefile import (\n\tthis,\n\tandthis as at,\n\tandalsothis\n)",
 		ModulePathParts: []string{"modulefile"},
 		ModuleAlias:     "",
-		Dependecies: []parsing.Dependecy{
+		Dependecies: []parsing.PythonDependecy{
 			{Name: "this", Alias: ""},
 			{Name: "andthis", Alias: "at"},
 			{Name: "andalsothis", Alias: ""},
@@ -245,10 +260,11 @@ func TestParseImportStatement_ValidSelectiveImports_MultipleLines(t *testing.T) 
 		External: false,
 	})
 
-	AssertStatementParsedCorrectly(t, "from moduledir import (\n   this,\n   andthis,\n   andalsothis as aat\n)", testDirectoryReader, parsing.ImportStatement{
+	AssertPythonImportStatementParsedCorrectly(t, "from moduledir import (\n   this,\n   andthis,\n   andalsothis as aat\n)", testDirectoryReader, parsing.PythonImportStatement{
+		RawText:         "from moduledir import (\n   this,\n   andthis,\n   andalsothis as aat\n)",
 		ModulePathParts: []string{"moduledir"},
 		ModuleAlias:     "",
-		Dependecies: []parsing.Dependecy{
+		Dependecies: []parsing.PythonDependecy{
 			{Name: "this", Alias: ""},
 			{Name: "andthis", Alias: ""},
 			{Name: "andalsothis", Alias: "aat"},
@@ -256,10 +272,11 @@ func TestParseImportStatement_ValidSelectiveImports_MultipleLines(t *testing.T) 
 		External: false,
 	})
 
-	AssertStatementParsedCorrectly(t, "from acoolpackage import (\n   this as t,\n   andthis,\n   andalsothis\n)", testDirectoryReader, parsing.ImportStatement{
+	AssertPythonImportStatementParsedCorrectly(t, "from acoolpackage import (\n   this as t,\n   andthis,\n   andalsothis\n)", testDirectoryReader, parsing.PythonImportStatement{
+		RawText:         "from acoolpackage import (\n   this as t,\n   andthis,\n   andalsothis\n)",
 		ModulePathParts: []string{"acoolpackage"},
 		ModuleAlias:     "",
-		Dependecies: []parsing.Dependecy{
+		Dependecies: []parsing.PythonDependecy{
 			{Name: "this", Alias: "t"},
 			{Name: "andthis", Alias: ""},
 			{Name: "andalsothis", Alias: ""},
@@ -267,10 +284,11 @@ func TestParseImportStatement_ValidSelectiveImports_MultipleLines(t *testing.T) 
 		External: true,
 	})
 
-	AssertStatementParsedCorrectly(t, "from modulefile import (\n   this,\n   andthis as at,\n   andalsothis\n)", testDirectoryReader, parsing.ImportStatement{
+	AssertPythonImportStatementParsedCorrectly(t, "from modulefile import (\n   this,\n   andthis as at,\n   andalsothis\n)", testDirectoryReader, parsing.PythonImportStatement{
+		RawText:         "from modulefile import (\n   this,\n   andthis as at,\n   andalsothis\n)",
 		ModulePathParts: []string{"modulefile"},
 		ModuleAlias:     "",
-		Dependecies: []parsing.Dependecy{
+		Dependecies: []parsing.PythonDependecy{
 			{Name: "this", Alias: ""},
 			{Name: "andthis", Alias: "at"},
 			{Name: "andalsothis", Alias: ""},
@@ -278,10 +296,11 @@ func TestParseImportStatement_ValidSelectiveImports_MultipleLines(t *testing.T) 
 		External: false,
 	})
 
-	AssertStatementParsedCorrectly(t, "from moduledir import (\n\tthis,\n\tandthis,\n\tandalsothis as aat\n)", testDirectoryReader, parsing.ImportStatement{
+	AssertPythonImportStatementParsedCorrectly(t, "from moduledir import (\n\tthis,\n\tandthis,\n\tandalsothis as aat\n)", testDirectoryReader, parsing.PythonImportStatement{
+		RawText:         "from moduledir import (\n\tthis,\n\tandthis,\n\tandalsothis as aat\n)",
 		ModulePathParts: []string{"moduledir"},
 		ModuleAlias:     "",
-		Dependecies: []parsing.Dependecy{
+		Dependecies: []parsing.PythonDependecy{
 			{Name: "this", Alias: ""},
 			{Name: "andthis", Alias: ""},
 			{Name: "andalsothis", Alias: "aat"},
@@ -290,11 +309,11 @@ func TestParseImportStatement_ValidSelectiveImports_MultipleLines(t *testing.T) 
 	})
 }
 
-func AssertParseErrorHandledCorrectly(t *testing.T, statement string, expectedError error, parser parsing.ImportStatementParser) {
-	expectedImportStatement := parsing.ImportStatement{
+func AssertParseErrorHandledCorrectly(t *testing.T, statement string, expectedError error, parser parsing.PythonImportStatementParser) {
+	expectedImportStatement := parsing.PythonImportStatement{
 		ModulePathParts: []string{},
 		ModuleAlias:     "",
-		Dependecies:     []parsing.Dependecy{},
+		Dependecies:     []parsing.PythonDependecy{},
 		External:        false,
 	}
 
@@ -352,48 +371,41 @@ func TestParseImportStatement_MalformedAliases(t *testing.T) {
 	AssertParseErrorHandledCorrectly(t, "from something import dependency, bad dep", &parsing.ImportStatementParseError{Statement: "from something import dependency, bad dep", Detail: "Malformed dependecy 'bad dep'"}, testParser)
 }
 
-func AssertStatementCorrectlyConvertedToString(t *testing.T, statement parsing.ImportStatement, expectedString string, parser parsing.ImportStatementParser) {
-	result := parser.StatementAsString(statement)
+func AssertStatementCorrectlyConvertedToText(t *testing.T, statement parsing.PythonImportStatement, expectedString string) {
+	result, _ := statement.AsText()
 
 	if result != expectedString {
 		t.Errorf("Failure to convert statement %+v to string: Expected '%s', but retrieved '%s'", statement, expectedString, result)
 	}
 }
 
-func TestStatementAsString(t *testing.T) {
-	testDirectoryReader := iowrappers.InitialiseMockFileManager(make([]*iowrappers.MockFSNode, 0))
-
-	testParser := parsing.PythonImportStatementParser{
-		WorkingDir:  "", //Doesn't matter for tesing purposes
-		FileManager: testDirectoryReader,
-	}
-
-	AssertStatementCorrectlyConvertedToString(t, parsing.ImportStatement{
+func Test_PythonImportStatement_AsText(t *testing.T) {
+	AssertStatementCorrectlyConvertedToText(t, parsing.PythonImportStatement{
 		ModulePathParts: []string{"somemod"},
 		ModuleAlias:     "",
-		Dependecies:     []parsing.Dependecy{},
+		Dependecies:     []parsing.PythonDependecy{},
 		External:        true,
-	}, "import somemod", testParser)
+	}, "import somemod")
 
-	AssertStatementCorrectlyConvertedToString(t, parsing.ImportStatement{
+	AssertStatementCorrectlyConvertedToText(t, parsing.PythonImportStatement{
 		ModulePathParts: []string{"bigmod"},
 		ModuleAlias:     "",
-		Dependecies: []parsing.Dependecy{
+		Dependecies: []parsing.PythonDependecy{
 			{Name: "something", Alias: ""},
 			{Name: "thingwithalias", Alias: "twa"},
 			{Name: "anotherthing", Alias: ""},
 		},
 		External: true,
-	}, "from bigmod import something, thingwithalias as twa, anotherthing", testParser)
+	}, "from bigmod import something, thingwithalias as twa, anotherthing")
 
-	AssertStatementCorrectlyConvertedToString(t, parsing.ImportStatement{
+	AssertStatementCorrectlyConvertedToText(t, parsing.PythonImportStatement{
 		ModulePathParts: []string{"mod", "with", "multiple", "parts"},
 		ModuleAlias:     "",
-		Dependecies: []parsing.Dependecy{
+		Dependecies: []parsing.PythonDependecy{
 			{Name: "something", Alias: "s"},
 			{Name: "thingwithalias", Alias: ""},
 			{Name: "anotherthing", Alias: "at"},
 		},
 		External: true,
-	}, "from mod.with.multiple.parts import something as s, thingwithalias, anotherthing as at", testParser)
+	}, "from mod.with.multiple.parts import something as s, thingwithalias, anotherthing as at")
 }

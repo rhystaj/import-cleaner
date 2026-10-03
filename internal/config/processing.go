@@ -7,6 +7,7 @@ import (
 )
 
 type Config struct {
+	Language      string
 	IgnoredPaths  []string
 	GroupingRules []organisation.ImportStatementGroupRule
 }
@@ -86,6 +87,7 @@ func ProcessAndValidateConfig(rawConfig RawConfig) (Config, *ConfigValidationErr
 	}
 
 	return Config{
+		Language:      rawConfig.Language,
 		IgnoredPaths:  rawConfig.IgnoredPaths,
 		GroupingRules: processedGroupingRules,
 	}, validationError

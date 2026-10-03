@@ -2,44 +2,19 @@ package program_test
 
 import (
 	"importcleaner/internal/config"
+	fileprocessing "importcleaner/internal/fileprocessing"
 	"importcleaner/internal/iowrappers"
-	"importcleaner/internal/parsing"
 	"importcleaner/program"
-	"iter"
-	"reflect"
 	"testing"
+
+	"github.com/ovechkin-dm/mockio/v2/mock"
 )
-
-type MockParser struct{}
-
-func (p MockParser) StatementsInText(text string) iter.Seq[string] {
-	return func(yield func(string) bool) {}
-}
-
-func (p MockParser) IsImportStatement(statementText string) bool {
-	return false
-}
-
-func (p MockParser) ParseImportStatement(statementText string) (parsing.ImportStatement, error) {
-	return parsing.ImportStatement{}, nil
-}
-
-func (p MockParser) StatementAsString(statement parsing.ImportStatement) string {
-	return ""
-}
-
-type MockFileProcessor struct {
-	processedFilepaths []string
-}
-
-func (fp *MockFileProcessor) ProcessFile(filePath string, parser parsing.ImportStatementParser) error {
-	fp.processedFilepaths = append(fp.processedFilepaths, filePath)
-	return nil
-}
 
 func TestCleanImports_NoFilesIgnored(t *testing.T) {
 
-	config := config.Config{}
+	config := config.Config{
+		Language: "python",
+	}
 	filepath := "test"
 	fileManager := iowrappers.InitialiseMockFileManager([]*iowrappers.MockFSNode{
 		iowrappers.CreateMockFSDir(filepath, []*iowrappers.MockFSNode{
@@ -61,8 +36,13 @@ func TestCleanImports_NoFilesIgnored(t *testing.T) {
 			}),
 		}),
 	})
-	parser := MockParser{}
-	fileProcessor := MockFileProcessor{}
+
+	mockController := mock.NewMockController(t)
+	mockFileProcessor := mock.Mock[fileprocessing.FileProcessor](mockController)
+	mockFileProcessorFactory := mock.Mock[fileprocessing.FileProcessorFactory](mockController)
+
+	mock.When(mockFileProcessor.ProcessFile(mock.AnyString())).ThenReturn(nil)
+	mock.When(mockFileProcessorFactory.CreatePythonFileProcessor()).ThenReturn(mockFileProcessor, nil)
 
 	expectedFilesProcessed := []string{
 		"test/main.py",
@@ -74,17 +54,17 @@ func TestCleanImports_NoFilesIgnored(t *testing.T) {
 		"test/subdir/subsubdir/do.py",
 	}
 
-	program.CleanImports(config, filepath, fileManager, parser, &fileProcessor)
+	program.CleanImports(config, filepath, fileManager, mockFileProcessorFactory)
 
-	if !reflect.DeepEqual(expectedFilesProcessed, fileProcessor.processedFilepaths) {
-		t.Errorf("Incorrect files processed - Expected %+v, but recieved %+v",
-			expectedFilesProcessed, fileProcessor.processedFilepaths)
+	for _, filepath := range expectedFilesProcessed {
+		mock.Verify(mockFileProcessor, mock.Once()).ProcessFile(filepath)
 	}
 }
 
 func TestCleanImports_FilesIgnored(t *testing.T) {
 
 	config := config.Config{
+		Language: "python",
 		IgnoredPaths: []string{
 			"sys",
 			"subdir/subsubdir/dont.py",
@@ -111,8 +91,13 @@ func TestCleanImports_FilesIgnored(t *testing.T) {
 			}),
 		}),
 	})
-	parser := MockParser{}
-	fileProcessor := MockFileProcessor{}
+
+	mockController := mock.NewMockController(t)
+	mockFileProcessor := mock.Mock[fileprocessing.FileProcessor](mockController)
+	mockFileProcessorFactory := mock.Mock[fileprocessing.FileProcessorFactory](mockController)
+
+	mock.When(mockFileProcessor.ProcessFile(mock.AnyString())).ThenReturn(nil)
+	mock.When(mockFileProcessorFactory.CreatePythonFileProcessor()).ThenReturn(mockFileProcessor, nil)
 
 	expectedFilesProcessed := []string{
 		"test/main.py",
@@ -121,10 +106,9 @@ func TestCleanImports_FilesIgnored(t *testing.T) {
 		"test/subdir/subsubdir/do.py",
 	}
 
-	program.CleanImports(config, filepath, fileManager, parser, &fileProcessor)
+	program.CleanImports(config, filepath, fileManager, mockFileProcessorFactory)
 
-	if !reflect.DeepEqual(expectedFilesProcessed, fileProcessor.processedFilepaths) {
-		t.Errorf("Incorrect files processed - Expected %+v, but recieved %+v",
-			expectedFilesProcessed, fileProcessor.processedFilepaths)
+	for _, filepath := range expectedFilesProcessed {
+		mock.Verify(mockFileProcessor, mock.Once()).ProcessFile(filepath)
 	}
 }

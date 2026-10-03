@@ -1,6 +1,7 @@
+language: python
 ignoredPaths:
   - ignored_dir
-  - submod\ignored_file.py
+  - submod/ignored_file.py
 groupingRules:
   - modulePaths: ["dataclasses", "submod"]
   - dependencySourceType: internal

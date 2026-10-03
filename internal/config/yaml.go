@@ -13,6 +13,7 @@ type RawGroupingRule struct {
 }
 
 type RawConfig struct {
+	Language      string            `yaml:"language"`
 	IgnoredPaths  []string          `yaml:"ignoredPaths"`
 	GroupingRules []RawGroupingRule `yaml:"groupingRules"`
 }

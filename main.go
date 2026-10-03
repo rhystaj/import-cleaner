@@ -5,8 +5,6 @@ import (
 	"importcleaner/internal/config"
 	"importcleaner/internal/fileprocessing"
 	"importcleaner/internal/iowrappers"
-	"importcleaner/internal/organisation"
-	"importcleaner/internal/parsing"
 	"importcleaner/program"
 	"os"
 	"path/filepath"
@@ -29,29 +27,21 @@ func main() {
 		fmt.Println(configLoadError.Error())
 	}
 
-	fmt.Printf("Raw config: %+v\n", rawConfig)
-
 	config, configValidationError := config.ProcessAndValidateConfig(rawConfig)
 	if configValidationError != nil {
 		fmt.Println(configValidationError.Error())
 		os.Exit(1)
 	}
 
-	fmt.Printf("Config: %+v\n", config)
-
-	parser := parsing.PythonImportStatementParser{
+	fileProcessorFactory := fileprocessing.FileProcessorFactoryImpl{
+		Config:      config,
 		WorkingDir:  fullTargetRootDirPath,
 		FileManager: fileManager,
 	}
 
-	organiser := organisation.ImportStatementOrganiserImpl{
-		GroupRules: config.GroupingRules,
+	cleanImportsError := program.CleanImports(config, fullTargetRootDirPath, fileManager, fileProcessorFactory)
+	if cleanImportsError != nil {
+		fmt.Println(cleanImportsError.Error())
+		os.Exit(1)
 	}
-
-	fileProcessor := fileprocessing.FileProcessorImpl{
-		FileManager: fileManager,
-		Organiser:   organiser,
-	}
-
-	program.CleanImports(config, fullTargetRootDirPath, fileManager, parser, fileProcessor)
 }

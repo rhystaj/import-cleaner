@@ -32,21 +32,23 @@ func statementModulePathMatchesGroupRuleModulePath(statementModulePath []string,
 }
 
 func statementMatchesGroupRule(statement parsing.ImportStatement, groupRule ImportStatementGroupRule) bool {
+	statmentDetails := statement.GetGenericDetails()
+
 	var dependecySourceTypeMatches bool
 	switch groupRule.DependencySourceType {
 	case DependencySourceTypeNone:
 		dependecySourceTypeMatches = true
 	case DependencySourceTypeInternal:
-		dependecySourceTypeMatches = !statement.External
+		dependecySourceTypeMatches = !statmentDetails.External
 	case DependencySourceTypeExternal:
-		dependecySourceTypeMatches = statement.External
+		dependecySourceTypeMatches = statmentDetails.External
 	}
 
 	hasMatchingPath := true
 	if len(groupRule.ModulePaths) > 0 {
 		hasMatchingPath = false
 		for _, groupRuleModulePath := range groupRule.ModulePaths {
-			if statementModulePathMatchesGroupRuleModulePath(statement.ModulePathParts, groupRuleModulePath) {
+			if statementModulePathMatchesGroupRuleModulePath(statmentDetails.ModulePathParts, groupRuleModulePath) {
 				hasMatchingPath = true
 				break
 			}
@@ -99,9 +101,12 @@ func (o ImportStatementOrganiserImpl) OrganiseImportStatements(statements []pars
 				}
 			},
 			func(a parsing.ImportStatement, b parsing.ImportStatement) int {
+				aDetails := a.GetGenericDetails()
+				bDetails := b.GetGenericDetails()
+
 				return strings.Compare(
-					strings.Join(a.ModulePathParts, ""),
-					strings.Join(b.ModulePathParts, ""),
+					strings.Join(aDetails.ModulePathParts, ""),
+					strings.Join(bDetails.ModulePathParts, ""),
 				)
 			})
 	}

@@ -8,85 +8,125 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type testImportStatement struct {
+	details parsing.ImportStatementGenericDetails
+}
+
+func (s testImportStatement) AsText() (string, error) {
+	panic("not implemented")
+}
+
+func (s testImportStatement) GetGenericDetails() parsing.ImportStatementGenericDetails {
+	return s.details
+}
+
 func generateTestImports() []parsing.ImportStatement {
 	return []parsing.ImportStatement{
-		{
-			ModulePathParts: []string{"helpers", "database"},
-			Dependecies:     []parsing.Dependecy{},
-			External:        false,
-		},
-		{
-			ModulePathParts: []string{"somecoolmodule"},
-			Dependecies:     []parsing.Dependecy{},
-			External:        false,
-		},
-		{
-			ModulePathParts: []string{"dataclasses"},
-			Dependecies: []parsing.Dependecy{
-				{Name: "dataclass", Alias: ""},
-				{Name: "field", Alias: ""},
+		testImportStatement{
+			details: parsing.ImportStatementGenericDetails{
+				ModulePathParts: []string{"helpers", "database"},
+				Dependecies:     []parsing.GenericDependecy{},
+				External:        false,
 			},
-			External: true,
 		},
-		{
-			ModulePathParts: []string{"tools", "saw"},
-			Dependecies:     []parsing.Dependecy{},
-			External:        false,
-		},
-		{
-			ModulePathParts: []string{"pydantic", "types", "numeric"},
-			Dependecies:     []parsing.Dependecy{},
-			External:        true,
-		},
-		{
-			ModulePathParts: []string{"zzz"},
-			Dependecies: []parsing.Dependecy{
-				{Name: "zzzz", Alias: ""},
+		testImportStatement{
+			details: parsing.ImportStatementGenericDetails{
+				ModulePathParts: []string{"somecoolmodule"},
+				Dependecies:     []parsing.GenericDependecy{},
+				External:        false,
 			},
-			External: false,
 		},
-		{
-			ModulePathParts: []string{"pydantic", "validators"},
-			Dependecies:     []parsing.Dependecy{},
-			External:        true,
-		},
-		{
-			ModulePathParts: []string{"helpers", "commandline"},
-			Dependecies:     []parsing.Dependecy{},
-			External:        false,
-		},
-		{
-			ModulePathParts: []string{"anokdependencyiguess"},
-			Dependecies: []parsing.Dependecy{
-				{Name: "thing", Alias: ""},
-				{Name: "doodad", Alias: ""},
+		testImportStatement{
+			details: parsing.ImportStatementGenericDetails{
+				ModulePathParts: []string{"dataclasses"},
+				Dependecies: []parsing.GenericDependecy{
+					{Name: "dataclass", Alias: ""},
+					{Name: "field", Alias: ""},
+				},
+				External: true,
 			},
-			External: false,
 		},
-		{
-			ModulePathParts: []string{"pydantic", "types", "string"},
-			Dependecies:     []parsing.Dependecy{},
-			External:        true,
+		testImportStatement{
+			details: parsing.ImportStatementGenericDetails{
+				ModulePathParts: []string{"tools", "saw"},
+				Dependecies:     []parsing.GenericDependecy{},
+				External:        false,
+			},
 		},
-		{
-			ModulePathParts: []string{"helpers", "imported"},
-			Dependecies:     []parsing.Dependecy{},
-			External:        true,
+		testImportStatement{
+			details: parsing.ImportStatementGenericDetails{
+				ModulePathParts: []string{"pydantic", "types", "numeric"},
+				Dependecies:     []parsing.GenericDependecy{},
+				External:        true,
+			},
 		},
-		{
-			ModulePathParts: []string{"tools", "hammer"},
-			Dependecies:     []parsing.Dependecy{},
-			External:        false,
+		testImportStatement{
+			details: parsing.ImportStatementGenericDetails{
+				ModulePathParts: []string{"zzz"},
+				Dependecies: []parsing.GenericDependecy{
+					{Name: "zzzz", Alias: ""},
+				},
+				External: false,
+			},
 		},
-		{
-			ModulePathParts: []string{"abc"},
-			Dependecies:     []parsing.Dependecy{},
-			External:        true,
+		testImportStatement{
+			details: parsing.ImportStatementGenericDetails{
+				ModulePathParts: []string{"pydantic", "validators"},
+				Dependecies:     []parsing.GenericDependecy{},
+				External:        true,
+			},
 		},
-		{
-			ModulePathParts: []string{"argparse"},
-			Dependecies:     []parsing.Dependecy{},
-			External:        true,
+		testImportStatement{
+			details: parsing.ImportStatementGenericDetails{
+				ModulePathParts: []string{"helpers", "commandline"},
+				Dependecies:     []parsing.GenericDependecy{},
+				External:        false,
+			},
+		},
+		testImportStatement{
+			details: parsing.ImportStatementGenericDetails{
+				ModulePathParts: []string{"anokdependencyiguess"},
+				Dependecies: []parsing.GenericDependecy{
+					{Name: "thing", Alias: ""},
+					{Name: "doodad", Alias: ""},
+				},
+				External: false,
+			},
+		},
+		testImportStatement{
+			details: parsing.ImportStatementGenericDetails{
+				ModulePathParts: []string{"pydantic", "types", "string"},
+				Dependecies:     []parsing.GenericDependecy{},
+				External:        true,
+			},
+		},
+		testImportStatement{
+			details: parsing.ImportStatementGenericDetails{
+				ModulePathParts: []string{"helpers", "imported"},
+				Dependecies:     []parsing.GenericDependecy{},
+				External:        true,
+			},
+		},
+		testImportStatement{
+			details: parsing.ImportStatementGenericDetails{
+				ModulePathParts: []string{"tools", "hammer"},
+				Dependecies:     []parsing.GenericDependecy{},
+				External:        false,
+			},
+		},
+		testImportStatement{
+			details: parsing.ImportStatementGenericDetails{
+				ModulePathParts: []string{"abc"},
+				Dependecies:     []parsing.GenericDependecy{},
+				External:        true,
+			},
+		},
+		testImportStatement{
+			details: parsing.ImportStatementGenericDetails{
+				ModulePathParts: []string{"argparse"},
+				Dependecies:     []parsing.GenericDependecy{},
+				External:        true,
+			},
 		},
 	}
 }
@@ -100,83 +140,111 @@ func TestOrganiseImports_NoGroupsConfigured(t *testing.T) {
 
 	expectedResult := [][]parsing.ImportStatement{
 		{
-			{
-				ModulePathParts: []string{"abc"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        true,
-			},
-			{
-				ModulePathParts: []string{"anokdependencyiguess"},
-				Dependecies: []parsing.Dependecy{
-					{Name: "thing", Alias: ""},
-					{Name: "doodad", Alias: ""},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"abc"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        true,
 				},
-				External: false,
 			},
-			{
-				ModulePathParts: []string{"argparse"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        true,
-			},
-			{
-				ModulePathParts: []string{"dataclasses"},
-				Dependecies: []parsing.Dependecy{
-					{Name: "dataclass", Alias: ""},
-					{Name: "field", Alias: ""},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"anokdependencyiguess"},
+					Dependecies: []parsing.GenericDependecy{
+						{Name: "thing", Alias: ""},
+						{Name: "doodad", Alias: ""},
+					},
+					External: false,
 				},
-				External: true,
 			},
-			{
-				ModulePathParts: []string{"helpers", "commandline"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        false,
-			},
-			{
-				ModulePathParts: []string{"helpers", "database"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        false,
-			},
-			{
-				ModulePathParts: []string{"helpers", "imported"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        true,
-			},
-			{
-				ModulePathParts: []string{"pydantic", "types", "numeric"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        true,
-			},
-			{
-				ModulePathParts: []string{"pydantic", "types", "string"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        true,
-			},
-			{
-				ModulePathParts: []string{"pydantic", "validators"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        true,
-			},
-			{
-				ModulePathParts: []string{"somecoolmodule"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        false,
-			},
-			{
-				ModulePathParts: []string{"tools", "hammer"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        false,
-			},
-			{
-				ModulePathParts: []string{"tools", "saw"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        false,
-			},
-			{
-				ModulePathParts: []string{"zzz"},
-				Dependecies: []parsing.Dependecy{
-					{Name: "zzzz", Alias: ""},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"argparse"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        true,
 				},
-				External: false,
+			},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"dataclasses"},
+					Dependecies: []parsing.GenericDependecy{
+						{Name: "dataclass", Alias: ""},
+						{Name: "field", Alias: ""},
+					},
+					External: true,
+				},
+			},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"helpers", "commandline"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        false,
+				},
+			},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"helpers", "database"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        false,
+				},
+			},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"helpers", "imported"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        true,
+				},
+			},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"pydantic", "types", "numeric"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        true,
+				},
+			},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"pydantic", "types", "string"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        true,
+				},
+			},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"pydantic", "validators"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        true,
+				},
+			},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"somecoolmodule"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        false,
+				},
+			},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"tools", "hammer"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        false,
+				},
+			},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"tools", "saw"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        false,
+				},
+			},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"zzz"},
+					Dependecies: []parsing.GenericDependecy{
+						{Name: "zzzz", Alias: ""},
+					},
+					External: false,
+				},
 			},
 		},
 	}
@@ -199,85 +267,113 @@ func TestOrganiseImports_ExternalGroup(t *testing.T) {
 
 	expectedResult := [][]parsing.ImportStatement{
 		{
-			{
-				ModulePathParts: []string{"abc"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        true,
-			},
-			{
-				ModulePathParts: []string{"argparse"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        true,
-			},
-			{
-				ModulePathParts: []string{"dataclasses"},
-				Dependecies: []parsing.Dependecy{
-					{Name: "dataclass", Alias: ""},
-					{Name: "field", Alias: ""},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"abc"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        true,
 				},
-				External: true,
 			},
-			{
-				ModulePathParts: []string{"helpers", "imported"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        true,
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"argparse"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        true,
+				},
 			},
-			{
-				ModulePathParts: []string{"pydantic", "types", "numeric"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        true,
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"dataclasses"},
+					Dependecies: []parsing.GenericDependecy{
+						{Name: "dataclass", Alias: ""},
+						{Name: "field", Alias: ""},
+					},
+					External: true,
+				},
 			},
-			{
-				ModulePathParts: []string{"pydantic", "types", "string"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        true,
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"helpers", "imported"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        true,
+				},
 			},
-			{
-				ModulePathParts: []string{"pydantic", "validators"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        true,
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"pydantic", "types", "numeric"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        true,
+				},
+			},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"pydantic", "types", "string"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        true,
+				},
+			},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"pydantic", "validators"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        true,
+				},
 			},
 		},
 		{
-			{
-				ModulePathParts: []string{"anokdependencyiguess"},
-				Dependecies: []parsing.Dependecy{
-					{Name: "thing", Alias: ""},
-					{Name: "doodad", Alias: ""},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"anokdependencyiguess"},
+					Dependecies: []parsing.GenericDependecy{
+						{Name: "thing", Alias: ""},
+						{Name: "doodad", Alias: ""},
+					},
+					External: false,
 				},
-				External: false,
 			},
-			{
-				ModulePathParts: []string{"helpers", "commandline"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        false,
-			},
-			{
-				ModulePathParts: []string{"helpers", "database"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        false,
-			},
-			{
-				ModulePathParts: []string{"somecoolmodule"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        false,
-			},
-			{
-				ModulePathParts: []string{"tools", "hammer"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        false,
-			},
-			{
-				ModulePathParts: []string{"tools", "saw"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        false,
-			},
-			{
-				ModulePathParts: []string{"zzz"},
-				Dependecies: []parsing.Dependecy{
-					{Name: "zzzz", Alias: ""},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"helpers", "commandline"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        false,
 				},
-				External: false,
+			},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"helpers", "database"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        false,
+				},
+			},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"somecoolmodule"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        false,
+				},
+			},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"tools", "hammer"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        false,
+				},
+			},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"tools", "saw"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        false,
+				},
+			},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"zzz"},
+					Dependecies: []parsing.GenericDependecy{
+						{Name: "zzzz", Alias: ""},
+					},
+					External: false,
+				},
 			},
 		},
 	}
@@ -301,85 +397,113 @@ func TestOrganiseImports_InternalGroup(t *testing.T) {
 
 	expectedResult := [][]parsing.ImportStatement{
 		{
-			{
-				ModulePathParts: []string{"anokdependencyiguess"},
-				Dependecies: []parsing.Dependecy{
-					{Name: "thing", Alias: ""},
-					{Name: "doodad", Alias: ""},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"anokdependencyiguess"},
+					Dependecies: []parsing.GenericDependecy{
+						{Name: "thing", Alias: ""},
+						{Name: "doodad", Alias: ""},
+					},
+					External: false,
 				},
-				External: false,
 			},
-			{
-				ModulePathParts: []string{"helpers", "commandline"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        false,
-			},
-			{
-				ModulePathParts: []string{"helpers", "database"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        false,
-			},
-			{
-				ModulePathParts: []string{"somecoolmodule"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        false,
-			},
-			{
-				ModulePathParts: []string{"tools", "hammer"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        false,
-			},
-			{
-				ModulePathParts: []string{"tools", "saw"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        false,
-			},
-			{
-				ModulePathParts: []string{"zzz"},
-				Dependecies: []parsing.Dependecy{
-					{Name: "zzzz", Alias: ""},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"helpers", "commandline"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        false,
 				},
-				External: false,
+			},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"helpers", "database"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        false,
+				},
+			},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"somecoolmodule"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        false,
+				},
+			},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"tools", "hammer"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        false,
+				},
+			},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"tools", "saw"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        false,
+				},
+			},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"zzz"},
+					Dependecies: []parsing.GenericDependecy{
+						{Name: "zzzz", Alias: ""},
+					},
+					External: false,
+				},
 			},
 		},
 		{
-			{
-				ModulePathParts: []string{"abc"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        true,
-			},
-			{
-				ModulePathParts: []string{"argparse"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        true,
-			},
-			{
-				ModulePathParts: []string{"dataclasses"},
-				Dependecies: []parsing.Dependecy{
-					{Name: "dataclass", Alias: ""},
-					{Name: "field", Alias: ""},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"abc"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        true,
 				},
-				External: true,
 			},
-			{
-				ModulePathParts: []string{"helpers", "imported"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        true,
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"argparse"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        true,
+				},
 			},
-			{
-				ModulePathParts: []string{"pydantic", "types", "numeric"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        true,
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"dataclasses"},
+					Dependecies: []parsing.GenericDependecy{
+						{Name: "dataclass", Alias: ""},
+						{Name: "field", Alias: ""},
+					},
+					External: true,
+				},
 			},
-			{
-				ModulePathParts: []string{"pydantic", "types", "string"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        true,
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"helpers", "imported"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        true,
+				},
 			},
-			{
-				ModulePathParts: []string{"pydantic", "validators"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        true,
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"pydantic", "types", "numeric"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        true,
+				},
+			},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"pydantic", "types", "string"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        true,
+				},
+			},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"pydantic", "validators"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        true,
+				},
 			},
 		},
 	}
@@ -409,90 +533,118 @@ func TestOrganiseImports_GroupByModulePaths(t *testing.T) {
 
 	expectedResult := [][]parsing.ImportStatement{
 		{
-			{
-				ModulePathParts: []string{"abc"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        true,
-			},
-			{
-				ModulePathParts: []string{"dataclasses"},
-				Dependecies: []parsing.Dependecy{
-					{Name: "dataclass", Alias: ""},
-					{Name: "field", Alias: ""},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"abc"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        true,
 				},
-				External: true,
 			},
-			{
-				ModulePathParts: []string{"somecoolmodule"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        false,
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"dataclasses"},
+					Dependecies: []parsing.GenericDependecy{
+						{Name: "dataclass", Alias: ""},
+						{Name: "field", Alias: ""},
+					},
+					External: true,
+				},
+			},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"somecoolmodule"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        false,
+				},
 			},
 		},
 		{
-			{
-				ModulePathParts: []string{"argparse"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        true,
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"argparse"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        true,
+				},
 			},
-			{
-				ModulePathParts: []string{"helpers", "database"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        false,
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"helpers", "database"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        false,
+				},
 			},
-			{
+			testImportStatement{
 				//In this group and not in later group because this is the first group that references its parent
-				ModulePathParts: []string{"tools", "hammer"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        false,
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"tools", "hammer"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        false,
+				},
 			},
-			{
-				ModulePathParts: []string{"tools", "saw"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        false,
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"tools", "saw"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        false,
+				},
 			},
 		},
 		{
-			{
-				ModulePathParts: []string{"pydantic", "types", "numeric"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        true,
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"pydantic", "types", "numeric"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        true,
+				},
 			},
-			{
-				ModulePathParts: []string{"pydantic", "types", "string"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        true,
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"pydantic", "types", "string"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        true,
+				},
 			},
 		},
 		{
-			{
-				ModulePathParts: []string{"anokdependencyiguess"},
-				Dependecies: []parsing.Dependecy{
-					{Name: "thing", Alias: ""},
-					{Name: "doodad", Alias: ""},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"anokdependencyiguess"},
+					Dependecies: []parsing.GenericDependecy{
+						{Name: "thing", Alias: ""},
+						{Name: "doodad", Alias: ""},
+					},
+					External: false,
 				},
-				External: false,
 			},
-			{
-				ModulePathParts: []string{"helpers", "commandline"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        false,
-			},
-			{
-				ModulePathParts: []string{"helpers", "imported"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        true,
-			},
-			{
-				ModulePathParts: []string{"pydantic", "validators"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        true,
-			},
-			{
-				ModulePathParts: []string{"zzz"},
-				Dependecies: []parsing.Dependecy{
-					{Name: "zzzz", Alias: ""},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"helpers", "commandline"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        false,
 				},
-				External: false,
+			},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"helpers", "imported"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        true,
+				},
+			},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"pydantic", "validators"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        true,
+				},
+			},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"zzz"},
+					Dependecies: []parsing.GenericDependecy{
+						{Name: "zzzz", Alias: ""},
+					},
+					External: false,
+				},
 			},
 		},
 	}
@@ -523,89 +675,117 @@ func TestOrganiseImports_CompositeGroups(t *testing.T) {
 
 	expectedResult := [][]parsing.ImportStatement{
 		{
-			{
-				ModulePathParts: []string{"argparse"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        true,
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"argparse"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        true,
+				},
 			},
-			{
-				ModulePathParts: []string{"helpers", "imported"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        true,
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"helpers", "imported"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        true,
+				},
 			},
 		},
 		{
-			{
-				ModulePathParts: []string{"dataclasses"},
-				Dependecies: []parsing.Dependecy{
-					{Name: "dataclass", Alias: ""},
-					{Name: "field", Alias: ""},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"dataclasses"},
+					Dependecies: []parsing.GenericDependecy{
+						{Name: "dataclass", Alias: ""},
+						{Name: "field", Alias: ""},
+					},
+					External: true,
 				},
-				External: true,
 			},
-			{
-				ModulePathParts: []string{"helpers", "commandline"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        false,
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"helpers", "commandline"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        false,
+				},
 			},
-			{
-				ModulePathParts: []string{"helpers", "database"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        false,
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"helpers", "database"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        false,
+				},
 			},
-			{
-				ModulePathParts: []string{"somecoolmodule"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        false,
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"somecoolmodule"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        false,
+				},
 			},
 		},
 		{
-			{
-				ModulePathParts: []string{"anokdependencyiguess"},
-				Dependecies: []parsing.Dependecy{
-					{Name: "thing", Alias: ""},
-					{Name: "doodad", Alias: ""},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"anokdependencyiguess"},
+					Dependecies: []parsing.GenericDependecy{
+						{Name: "thing", Alias: ""},
+						{Name: "doodad", Alias: ""},
+					},
+					External: false,
 				},
-				External: false,
 			},
-			{
-				ModulePathParts: []string{"tools", "hammer"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        false,
-			},
-			{
-				ModulePathParts: []string{"tools", "saw"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        false,
-			},
-			{
-				ModulePathParts: []string{"zzz"},
-				Dependecies: []parsing.Dependecy{
-					{Name: "zzzz", Alias: ""},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"tools", "hammer"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        false,
 				},
-				External: false,
+			},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"tools", "saw"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        false,
+				},
+			},
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"zzz"},
+					Dependecies: []parsing.GenericDependecy{
+						{Name: "zzzz", Alias: ""},
+					},
+					External: false,
+				},
 			},
 		},
 		{
-			{
-				ModulePathParts: []string{"abc"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        true,
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"abc"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        true,
+				},
 			},
-			{
-				ModulePathParts: []string{"pydantic", "types", "numeric"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        true,
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"pydantic", "types", "numeric"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        true,
+				},
 			},
-			{
-				ModulePathParts: []string{"pydantic", "types", "string"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        true,
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"pydantic", "types", "string"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        true,
+				},
 			},
-			{
-				ModulePathParts: []string{"pydantic", "validators"},
-				Dependecies:     []parsing.Dependecy{},
-				External:        true,
+			testImportStatement{
+				details: parsing.ImportStatementGenericDetails{
+					ModulePathParts: []string{"pydantic", "validators"},
+					Dependecies:     []parsing.GenericDependecy{},
+					External:        true,
+				},
 			},
 		},
 	}

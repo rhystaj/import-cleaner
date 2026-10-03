@@ -1,48 +1,29 @@
 package parsing
 
 import (
-	"fmt"
 	"iter"
 )
 
-type Dependecy struct {
+type GenericDependecy struct {
 	Name  string
 	Alias string
 }
 
-type ImportStatement struct {
+type ImportStatementGenericDetails struct {
+	RawText         string
 	ModulePathParts []string
 	ModuleAlias     string
-	Dependecies     []Dependecy
+	Dependecies     []GenericDependecy
 	External        bool
 }
 
-type ImportStatementParseError struct {
-	Statement string
-	Detail    string
-}
-
-func (e *ImportStatementParseError) Error() string {
-	message := fmt.Sprintf("%s is not a valid import statement", e.Statement)
-	if e.Detail != "" {
-		message += " - " + e.Detail
-	}
-
-	return message
-}
-
-func (e *ImportStatementParseError) Is(otherError error) bool {
-	switch oe := otherError.(type) {
-	case *ImportStatementParseError:
-		return oe.Statement == e.Statement && oe.Detail == e.Detail
-	default:
-		return false
-	}
+type ImportStatement interface {
+	AsText() (string, error)
+	GetGenericDetails() ImportStatementGenericDetails
 }
 
 type ImportStatementParser interface {
 	StatementsInText(text string) iter.Seq[string]
-	IsImportStatement(statementText string) bool
+	IsIntendedImportStatement(statementText string) bool
 	ParseImportStatement(statementText string) (ImportStatement, error)
-	StatementAsString(statement ImportStatement) string
 }
