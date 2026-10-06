@@ -6,6 +6,7 @@ import (
 	fileprocessing "importcleaner/internal/fileprocessing"
 	"importcleaner/internal/iowrappers"
 	lp "importcleaner/internal/languageprocessing"
+	"importcleaner/internal/languageprocessing/python"
 	"importcleaner/internal/organisation"
 	"testing"
 )
@@ -63,7 +64,7 @@ class SomeClass:
 		},
 	}
 
-	parser := lp.PythonImportStatementParser{
+	parser := python.PythonImportStatementParser{
 		WorkingDir:  "",
 		FileManager: fileManager,
 	}
@@ -110,7 +111,7 @@ class SomeClass:
 		},
 	}
 
-	parser := lp.PythonImportStatementParser{
+	parser := python.PythonImportStatementParser{
 		WorkingDir:  "",
 		FileManager: fileManager,
 	}
@@ -174,7 +175,7 @@ from submod import SUBVALUE
 		},
 	}
 
-	parser := lp.PythonImportStatementParser{
+	parser := python.PythonImportStatementParser{
 		WorkingDir:  "",
 		FileManager: fileManager,
 	}
