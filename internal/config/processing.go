@@ -2,14 +2,26 @@ package config
 
 import (
 	"fmt"
-	"importcleaner/internal/organisation"
 	"strings"
 )
+
+type DependencySourceType int
+
+const (
+	DependencySourceTypeNone DependencySourceType = iota
+	DependencySourceTypeInternal
+	DependencySourceTypeExternal
+)
+
+type ImportStatementGroupRuleDefinition struct {
+	DependencySourceType DependencySourceType
+	ModulePaths          [][]string
+}
 
 type Config struct {
 	Language      string
 	IgnoredPaths  []string
-	GroupingRules []organisation.ImportStatementGroupRule
+	GroupingRules []ImportStatementGroupRuleDefinition
 }
 
 type InvalidPath struct {
@@ -28,26 +40,29 @@ func (e ConfigValidationError) Error() string {
 
 	var pathListStringBuilder strings.Builder
 	for _, invalidPath := range e.InvalidPaths {
-		pathListStringBuilder.WriteString("\n\t" + invalidPath.Path + " - " + invalidPath.ErrorDescription)
+		pathListStringBuilder.WriteString("\n\t")
+		pathListStringBuilder.WriteString(invalidPath.Path)
+		pathListStringBuilder.WriteString(" - ")
+		pathListStringBuilder.WriteString(invalidPath.ErrorDescription)
 	}
 
 	return "Errors detected in config: " + pathListStringBuilder.String()
 }
 
-func parseDependencySourceType(str string) (valid bool, result organisation.DependencySourceType) {
+func parseDependencySourceType(str string) (valid bool, result DependencySourceType) {
 	switch str {
 	case "":
-		return true, organisation.DependencySourceTypeNone
+		return true, DependencySourceTypeNone
 	case "internal":
-		return true, organisation.DependencySourceTypeInternal
+		return true, DependencySourceTypeInternal
 	case "external":
-		return true, organisation.DependencySourceTypeExternal
+		return true, DependencySourceTypeExternal
 	default:
-		return false, organisation.DependencySourceTypeNone
+		return false, DependencySourceTypeNone
 	}
 }
 
-func processAndValidateGroupingRule(rawGroupingRule RawGroupingRule) (organisation.ImportStatementGroupRule, []InvalidPath) {
+func processAndValidateGroupingRule(rawGroupingRule RawGroupingRuleDefinition) (ImportStatementGroupRuleDefinition, []InvalidPath) {
 	invalidPaths := make([]InvalidPath, 0)
 
 	dependencySourceTypeValid, dependencySourceType := parseDependencySourceType(rawGroupingRule.DependencySourceType)
@@ -63,7 +78,7 @@ func processAndValidateGroupingRule(rawGroupingRule RawGroupingRule) (organisati
 		processedModulePaths[i] = strings.Split(rawModulePath, ".")
 	}
 
-	return organisation.ImportStatementGroupRule{
+	return ImportStatementGroupRuleDefinition{
 		DependencySourceType: dependencySourceType,
 		ModulePaths:          processedModulePaths,
 	}, invalidPaths
@@ -72,7 +87,7 @@ func processAndValidateGroupingRule(rawGroupingRule RawGroupingRule) (organisati
 func ProcessAndValidateConfig(rawConfig RawConfig) (Config, *ConfigValidationError) {
 	var configInvalidPaths []InvalidPath
 
-	processedGroupingRules := make([]organisation.ImportStatementGroupRule, len(rawConfig.GroupingRules))
+	processedGroupingRules := make([]ImportStatementGroupRuleDefinition, len(rawConfig.GroupingRules))
 	for i, ruleYaml := range rawConfig.GroupingRules {
 		processedRule, groupRuleInvalidPaths := processAndValidateGroupingRule(ruleYaml)
 		processedGroupingRules[i] = processedRule

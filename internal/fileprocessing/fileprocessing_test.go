@@ -2,6 +2,7 @@ package fileprocessing_test
 
 import (
 	"errors"
+	"importcleaner/internal/config"
 	fileprocessing "importcleaner/internal/fileprocessing"
 	"importcleaner/internal/iowrappers"
 	"importcleaner/internal/organisation"
@@ -56,9 +57,9 @@ class SomeClass:
 
 	testOrganiser := organisation.ImportStatementOrganiserImpl{
 		GroupRules: []organisation.ImportStatementGroupRule{
-			{
-				DependencySourceType: organisation.DependencySourceTypeExternal,
-			},
+			organisation.NewGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
+				DependencySourceType: config.DependencySourceTypeExternal,
+			}),
 		},
 	}
 
@@ -103,9 +104,9 @@ class SomeClass:
 
 	testOrganiser := organisation.ImportStatementOrganiserImpl{
 		GroupRules: []organisation.ImportStatementGroupRule{
-			{
-				DependencySourceType: organisation.DependencySourceTypeExternal,
-			},
+			organisation.NewGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
+				DependencySourceType: config.DependencySourceTypeExternal,
+			}),
 		},
 	}
 
@@ -167,9 +168,9 @@ from submod import SUBVALUE
 
 	testOrganiser := organisation.ImportStatementOrganiserImpl{
 		GroupRules: []organisation.ImportStatementGroupRule{
-			{
-				DependencySourceType: organisation.DependencySourceTypeExternal,
-			},
+			organisation.NewGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
+				DependencySourceType: config.DependencySourceTypeExternal,
+			}),
 		},
 	}
 

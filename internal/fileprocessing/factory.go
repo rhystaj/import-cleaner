@@ -22,6 +22,11 @@ type FileProcessorFactoryImpl struct {
 }
 
 func (f FileProcessorFactoryImpl) CreatePythonFileProcessor() (FileProcessor, error) {
+	groupingRules := make([]organisation.ImportStatementGroupRule, len(f.Config.GroupingRules))
+	for i, rule := range f.Config.GroupingRules {
+		groupingRules[i] = organisation.NewGroupingRuleFromDefinition(rule)
+	}
+
 	return PythonFileProcessor{
 		Parser: parsing.PythonImportStatementParser{
 			WorkingDir:  f.WorkingDir,
@@ -29,17 +34,22 @@ func (f FileProcessorFactoryImpl) CreatePythonFileProcessor() (FileProcessor, er
 		},
 		FileManager: f.FileManager,
 		Organiser: organisation.ImportStatementOrganiserImpl{
-			GroupRules: f.Config.GroupingRules,
+			GroupRules: groupingRules,
 		},
 	}, nil
 }
 
 func (f FileProcessorFactoryImpl) CreateTypescriptFileProcessor() (FileProcessor, error) {
+	groupingRules := make([]organisation.ImportStatementGroupRule, len(f.Config.GroupingRules))
+	for i, rule := range f.Config.GroupingRules {
+		groupingRules[i] = organisation.NewGroupingRuleFromDefinition(rule)
+	}
+
 	return TypescriptFileProcessor{
 		Parser:      parsing.TypescriptImportStatementParser{},
 		FileManager: f.FileManager,
 		Organiser: organisation.ImportStatementOrganiserImpl{
-			GroupRules: f.Config.GroupingRules,
+			GroupRules: groupingRules,
 		},
 	}, nil
 }

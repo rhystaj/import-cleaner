@@ -2,7 +2,6 @@ package config_test
 
 import (
 	"importcleaner/internal/config"
-	"importcleaner/internal/organisation"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,7 +13,7 @@ func TestProcessAndValidationConfig_ValidConfig(t *testing.T) {
 
 	testConfig := config.RawConfig{
 		IgnoredPaths: testIgnoredPaths,
-		GroupingRules: []config.RawGroupingRule{
+		GroupingRules: []config.RawGroupingRuleDefinition{
 			{},
 			{
 				DependencySourceType: "internal",
@@ -37,24 +36,24 @@ func TestProcessAndValidationConfig_ValidConfig(t *testing.T) {
 
 	expectedOutput := config.Config{
 		IgnoredPaths: testIgnoredPaths,
-		GroupingRules: []organisation.ImportStatementGroupRule{
+		GroupingRules: []config.ImportStatementGroupRuleDefinition{
 			{
-				DependencySourceType: organisation.DependencySourceTypeNone,
+				DependencySourceType: config.DependencySourceTypeNone,
 				ModulePaths:          [][]string{},
 			},
 			{
-				DependencySourceType: organisation.DependencySourceTypeInternal,
+				DependencySourceType: config.DependencySourceTypeInternal,
 				ModulePaths: [][]string{
 					{"somecoolmodule"},
 					{"helpers", "database"},
 				},
 			},
 			{
-				DependencySourceType: organisation.DependencySourceTypeExternal,
+				DependencySourceType: config.DependencySourceTypeExternal,
 				ModulePaths:          [][]string{},
 			},
 			{
-				DependencySourceType: organisation.DependencySourceTypeNone,
+				DependencySourceType: config.DependencySourceTypeNone,
 				ModulePaths: [][]string{
 					{"pydantic", "types"},
 					{"argparse"},
@@ -75,7 +74,7 @@ func TestProcessAndValidationConfig_InvalidConfig(t *testing.T) {
 
 	testConfig := config.RawConfig{
 		IgnoredPaths: testIgnoredPaths,
-		GroupingRules: []config.RawGroupingRule{
+		GroupingRules: []config.RawGroupingRuleDefinition{
 			{},
 			{
 				DependencySourceType: "notvalid",

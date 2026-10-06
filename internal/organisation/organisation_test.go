@@ -1,6 +1,7 @@
 package organisation_test
 
 import (
+	"importcleaner/internal/config"
 	"importcleaner/internal/organisation"
 	"importcleaner/internal/parsing"
 	"testing"
@@ -258,9 +259,9 @@ func TestOrganiseImports_ExternalGroup(t *testing.T) {
 
 	testOrganiser := organisation.ImportStatementOrganiserImpl{
 		GroupRules: []organisation.ImportStatementGroupRule{
-			{
-				DependencySourceType: organisation.DependencySourceTypeExternal,
-			},
+			organisation.NewGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
+				DependencySourceType: config.DependencySourceTypeExternal,
+			}),
 		},
 	}
 	testImports := generateTestImports()
@@ -387,9 +388,9 @@ func TestOrganiseImports_InternalGroup(t *testing.T) {
 
 	testOrganiser := organisation.ImportStatementOrganiserImpl{
 		GroupRules: []organisation.ImportStatementGroupRule{
-			{
-				DependencySourceType: organisation.DependencySourceTypeInternal,
-			},
+			organisation.NewGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
+				DependencySourceType: config.DependencySourceTypeInternal,
+			}),
 		},
 	}
 
@@ -517,15 +518,15 @@ func TestOrganiseImports_GroupByModulePaths(t *testing.T) {
 
 	testOrganiser := organisation.ImportStatementOrganiserImpl{
 		GroupRules: []organisation.ImportStatementGroupRule{
-			{
+			organisation.NewGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
 				ModulePaths: [][]string{{"dataclasses"}, {"somecoolmodule"}, {"abc"}},
-			},
-			{
+			}),
+			organisation.NewGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
 				ModulePaths: [][]string{{"tools"}, {"helpers", "database"}, {"argparse"}},
-			},
-			{
+			}),
+			organisation.NewGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
 				ModulePaths: [][]string{{"tools", "hammer"}, {"pydantic", "types"}},
-			},
+			}),
 		},
 	}
 
@@ -658,16 +659,16 @@ func TestOrganiseImports_CompositeGroups(t *testing.T) {
 
 	testOrganiser := organisation.ImportStatementOrganiserImpl{
 		GroupRules: []organisation.ImportStatementGroupRule{
-			{
+			organisation.NewGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
+				DependencySourceType: config.DependencySourceTypeExternal,
 				ModulePaths:          [][]string{{"helpers"}, {"anokdependencyiguess"}, {"argparse"}},
-				DependencySourceType: organisation.DependencySourceTypeExternal,
-			},
-			{
+			}),
+			organisation.NewGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
 				ModulePaths: [][]string{{"helpers"}, {"dataclasses"}, {"somecoolmodule"}},
-			},
-			{
-				DependencySourceType: organisation.DependencySourceTypeInternal,
-			},
+			}),
+			organisation.NewGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
+				DependencySourceType: config.DependencySourceTypeInternal,
+			}),
 		},
 	}
 
