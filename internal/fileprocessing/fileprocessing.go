@@ -3,8 +3,8 @@ package fileprocessing
 import (
 	"bytes"
 	"importcleaner/internal/iowrappers"
+	lp "importcleaner/internal/languageprocessing"
 	"importcleaner/internal/organisation"
-	"importcleaner/internal/parsing"
 	"strings"
 )
 
@@ -13,13 +13,13 @@ type FileProcessor interface {
 }
 
 type FileProcessorImpl struct {
-	Parser      parsing.ImportStatementParser
+	Parser      lp.ImportStatementParser
 	FileManager iowrappers.FileManager
 	Organiser   organisation.ImportStatementOrganiser
 }
 
-func (fp FileProcessorImpl) extractStatements(text string) ([]parsing.ImportStatement, []string, error) {
-	importStatements := make([]parsing.ImportStatement, 0)
+func (fp FileProcessorImpl) extractStatements(text string) ([]lp.ImportStatement, []string, error) {
+	importStatements := make([]lp.ImportStatement, 0)
 	otherStatements := make([]string, 0)
 
 	var ignoreEmptyStatement bool
@@ -27,7 +27,7 @@ func (fp FileProcessorImpl) extractStatements(text string) ([]parsing.ImportStat
 		if fp.Parser.IsIntendedImportStatement(statement) {
 			importStatement, err := fp.Parser.ParseImportStatement(statement)
 			if err != nil {
-				return make([]parsing.ImportStatement, 0), make([]string, 0), err
+				return make([]lp.ImportStatement, 0), make([]string, 0), err
 			}
 			importStatements = append(importStatements, importStatement)
 			ignoreEmptyStatement = true

@@ -3,8 +3,8 @@ package fileprocessing
 import (
 	"importcleaner/internal/config"
 	"importcleaner/internal/iowrappers"
+	lp "importcleaner/internal/languageprocessing"
 	"importcleaner/internal/organisation"
-	"importcleaner/internal/parsing"
 )
 
 type PythonFileProcessor = FileProcessorImpl
@@ -28,7 +28,7 @@ func (f FileProcessorFactoryImpl) CreatePythonFileProcessor() (FileProcessor, er
 	}
 
 	return PythonFileProcessor{
-		Parser: parsing.PythonImportStatementParser{
+		Parser: lp.PythonImportStatementParser{
 			WorkingDir:  f.WorkingDir,
 			FileManager: f.FileManager,
 		},
@@ -46,7 +46,7 @@ func (f FileProcessorFactoryImpl) CreateTypescriptFileProcessor() (FileProcessor
 	}
 
 	return TypescriptFileProcessor{
-		Parser:      parsing.TypescriptImportStatementParser{},
+		Parser:      lp.TypescriptImportStatementParser{},
 		FileManager: f.FileManager,
 		Organiser: organisation.ImportStatementOrganiserImpl{
 			GroupRules: groupingRules,

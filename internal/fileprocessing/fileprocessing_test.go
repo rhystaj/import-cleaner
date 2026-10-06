@@ -5,8 +5,8 @@ import (
 	"importcleaner/internal/config"
 	fileprocessing "importcleaner/internal/fileprocessing"
 	"importcleaner/internal/iowrappers"
+	lp "importcleaner/internal/languageprocessing"
 	"importcleaner/internal/organisation"
-	"importcleaner/internal/parsing"
 	"testing"
 )
 
@@ -63,7 +63,7 @@ class SomeClass:
 		},
 	}
 
-	parser := parsing.PythonImportStatementParser{
+	parser := lp.PythonImportStatementParser{
 		WorkingDir:  "",
 		FileManager: fileManager,
 	}
@@ -110,7 +110,7 @@ class SomeClass:
 		},
 	}
 
-	parser := parsing.PythonImportStatementParser{
+	parser := lp.PythonImportStatementParser{
 		WorkingDir:  "",
 		FileManager: fileManager,
 	}
@@ -155,7 +155,7 @@ class SomeClass:
 from submod import SUBVALUE
 `
 
-	expectedError := parsing.ImportStatementParseError{
+	expectedError := lp.ImportStatementParseError{
 		Statement: "import datetime as\n",
 		Detail:    "Module alias expected",
 	}
@@ -174,7 +174,7 @@ from submod import SUBVALUE
 		},
 	}
 
-	parser := parsing.PythonImportStatementParser{
+	parser := lp.PythonImportStatementParser{
 		WorkingDir:  "",
 		FileManager: fileManager,
 	}

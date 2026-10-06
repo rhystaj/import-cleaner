@@ -2,11 +2,11 @@ package organisation
 
 import (
 	"importcleaner/internal/config"
-	"importcleaner/internal/parsing"
+	lp "importcleaner/internal/languageprocessing"
 )
 
 type ImportStatementGroupRule interface {
-	AppliesTo(statement parsing.ImportStatement) bool
+	AppliesTo(statement lp.ImportStatement) bool
 }
 
 type GenericImportStatementGroupRule struct {
@@ -33,7 +33,7 @@ func (gr GenericImportStatementGroupRule) statementModulePathMatchesGroupRuleMod
 	return true
 }
 
-func (gr GenericImportStatementGroupRule) AppliesTo(statement parsing.ImportStatement) bool {
+func (gr GenericImportStatementGroupRule) AppliesTo(statement lp.ImportStatement) bool {
 	statmentDetails := statement.GetGenericDetails()
 
 	var dependecySourceTypeMatches bool
