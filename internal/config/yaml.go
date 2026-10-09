@@ -7,15 +7,16 @@ import (
 	"github.com/go-yaml/yaml"
 )
 
-type RawGroupingRule struct {
+type RawGroupingRuleDefinition struct {
 	DependencySourceType string   `yaml:"dependencySourceType"`
 	ModulePaths          []string `yaml:"modulePaths"`
+	IsTypeImport         string   `yaml:"isTypeImport"`
 }
 
 type RawConfig struct {
-	Language      string            `yaml:"language"`
-	IgnoredPaths  []string          `yaml:"ignoredPaths"`
-	GroupingRules []RawGroupingRule `yaml:"groupingRules"`
+	Language      string                      `yaml:"language"`
+	IgnoredPaths  []string                    `yaml:"ignoredPaths"`
+	GroupingRules []RawGroupingRuleDefinition `yaml:"groupingRules"`
 }
 
 type ConfigLoadError struct {

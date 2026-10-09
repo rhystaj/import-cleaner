@@ -1,0 +1,61 @@
+package organisation
+
+import (
+	"importcleaner/internal/config"
+	lp "importcleaner/internal/languageprocessing"
+)
+
+type ImportStatementGroupRule[S lp.ImportStatement] interface {
+	AppliesTo(statement S) bool
+}
+
+type GenericImportStatementGroupRule struct {
+	dependencySourceType config.DependencySourceType
+	modulePaths          [][]string
+}
+
+func NewGenericGroupingRuleFromDefinition(definition config.ImportStatementGroupRuleDefinition) ImportStatementGroupRule[lp.ImportStatement] {
+	return GenericImportStatementGroupRule{
+		dependencySourceType: definition.DependencySourceType,
+		modulePaths:          definition.ModulePaths,
+	}
+}
+
+func (gr GenericImportStatementGroupRule) statementModulePathMatchesGroupRuleModulePath(statementModulePath []string, groupRuleModulePath []string) bool {
+	for groupRuleModulePathIndex, groupRuleModulePathPart := range groupRuleModulePath {
+		if groupRuleModulePathIndex > len(statementModulePath)-1 {
+			return false
+		}
+		if groupRuleModulePathPart != statementModulePath[groupRuleModulePathIndex] {
+			return false
+		}
+	}
+	return true
+}
+
+func (gr GenericImportStatementGroupRule) AppliesTo(statement lp.ImportStatement) bool {
+	statmentDetails := statement.GetGenericDetails()
+
+	var dependecySourceTypeMatches bool
+	switch gr.dependencySourceType {
+	case config.DependencySourceTypeNone:
+		dependecySourceTypeMatches = true
+	case config.DependencySourceTypeInternal:
+		dependecySourceTypeMatches = !statmentDetails.External
+	case config.DependencySourceTypeExternal:
+		dependecySourceTypeMatches = statmentDetails.External
+	}
+
+	hasMatchingPath := true
+	if len(gr.modulePaths) > 0 {
+		hasMatchingPath = false
+		for _, groupRuleModulePath := range gr.modulePaths {
+			if gr.statementModulePathMatchesGroupRuleModulePath(statmentDetails.ModulePathParts, groupRuleModulePath) {
+				hasMatchingPath = true
+				break
+			}
+		}
+	}
+
+	return dependecySourceTypeMatches && hasMatchingPath
+}

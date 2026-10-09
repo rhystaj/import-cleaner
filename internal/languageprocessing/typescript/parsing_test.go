@@ -1,7 +1,8 @@
-package parsing_test
+package typescript_test
 
 import (
-	"importcleaner/internal/parsing"
+	lp "importcleaner/internal/languageprocessing"
+	"importcleaner/internal/languageprocessing/typescript"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -9,7 +10,7 @@ import (
 
 type inidvidualDependencyParseCase struct {
 	Text       string
-	Dependency parsing.TypescriptDependecy
+	Dependency typescript.TypescriptDependecy
 }
 
 type generateIndividualDependencyCasesArgs struct {
@@ -23,7 +24,7 @@ func generateIndividualDependencyCases(args generateIndividualDependencyCasesArg
 
 	cases = append(cases, inidvidualDependencyParseCase{
 		Text: args.Name,
-		Dependency: parsing.TypescriptDependecy{
+		Dependency: typescript.TypescriptDependecy{
 			Name: args.Name,
 		},
 	})
@@ -31,7 +32,7 @@ func generateIndividualDependencyCases(args generateIndividualDependencyCasesArg
 	if args.Alias != "" {
 		cases = append(cases, inidvidualDependencyParseCase{
 			Text: args.Name + " as " + args.Alias,
-			Dependency: parsing.TypescriptDependecy{
+			Dependency: typescript.TypescriptDependecy{
 				Name:  args.Name,
 				Alias: args.Alias,
 			},
@@ -41,7 +42,7 @@ func generateIndividualDependencyCases(args generateIndividualDependencyCasesArg
 	if args.IncludeTypeKeywordCase {
 		cases = append(cases, inidvidualDependencyParseCase{
 			Text: "type " + args.Name,
-			Dependency: parsing.TypescriptDependecy{
+			Dependency: typescript.TypescriptDependecy{
 				Name:         args.Name,
 				IsTypeImport: true,
 			},
@@ -51,7 +52,7 @@ func generateIndividualDependencyCases(args generateIndividualDependencyCasesArg
 	if args.Alias != "" && args.IncludeTypeKeywordCase {
 		cases = append(cases, inidvidualDependencyParseCase{
 			Text: "type " + args.Name + " as " + args.Alias,
-			Dependency: parsing.TypescriptDependecy{
+			Dependency: typescript.TypescriptDependecy{
 				Name:         args.Name,
 				Alias:        args.Alias,
 				IsTypeImport: true,
@@ -78,7 +79,7 @@ func generateValidDependencySetPartCases(args generateValidDependencySetPartCase
 		}) {
 			defaultCases = append(defaultCases, dependencySetCase{
 				Text: inidividualCase.Text,
-				Dependencies: []parsing.TypescriptDependecy{
+				Dependencies: []typescript.TypescriptDependecy{
 					{
 						Name:         inidividualCase.Dependency.Name,
 						IsDefault:    true,
@@ -103,7 +104,7 @@ func generateValidDependencySetPartCases(args generateValidDependencySetPartCase
 		}) {
 			nonDefaultCases = append(nonDefaultCases, dependencySetCase{
 				Text: "{ " + inidividualCaseA.Text + ", " + inidividualCaseB.Text + " }",
-				Dependencies: []parsing.TypescriptDependecy{
+				Dependencies: []typescript.TypescriptDependecy{
 					inidividualCaseA.Dependency,
 					inidividualCaseB.Dependency,
 				},
@@ -111,7 +112,7 @@ func generateValidDependencySetPartCases(args generateValidDependencySetPartCase
 			if args.IncludeNewLineCases {
 				nonDefaultCases = append(nonDefaultCases, dependencySetCase{
 					Text: "{\n\t" + inidividualCaseA.Text + ",\n\t" + inidividualCaseB.Text + "\n}",
-					Dependencies: []parsing.TypescriptDependecy{
+					Dependencies: []typescript.TypescriptDependecy{
 						inidividualCaseA.Dependency,
 						inidividualCaseB.Dependency,
 					},
@@ -170,7 +171,7 @@ import anotherThing from 'anothercoolmodule
 		"import anotherThing from 'anothercoolmodule\n",
 	}
 
-	testParser := parsing.TypescriptImportStatementParser{}
+	testParser := typescript.TypescriptImportStatementParser{}
 
 	testResult := testParser.StatementsInText(testText)
 	resultingStatements := make([]string, 0)
@@ -184,7 +185,7 @@ import anotherThing from 'anothercoolmodule
 
 func TestInIntendedImportStatement_True_Typescript(t *testing.T) {
 
-	testParser := parsing.TypescriptImportStatementParser{}
+	testParser := typescript.TypescriptImportStatementParser{}
 
 	testValues := []string{
 		"import * from 'something",
@@ -202,7 +203,7 @@ func TestInIntendedImportStatement_True_Typescript(t *testing.T) {
 
 func TestIsIntendedImportStatement_False_Typescript(t *testing.T) {
 
-	testParser := parsing.TypescriptImportStatementParser{}
+	testParser := typescript.TypescriptImportStatementParser{}
 
 	testValues := []string{
 		"nope",
@@ -220,7 +221,7 @@ func TestIsIntendedImportStatement_False_Typescript(t *testing.T) {
 
 type dependencySetCase struct {
 	Text                string
-	Dependencies        []parsing.TypescriptDependecy
+	Dependencies        []typescript.TypescriptDependecy
 	ExpectedErrorDetail string
 }
 
@@ -297,7 +298,7 @@ func validModuleParseCases() []moduleParseCase {
 
 func TestParseImportStatement_ValidNonTypeImport_Typescript(t *testing.T) {
 
-	testParser := parsing.TypescriptImportStatementParser{}
+	testParser := typescript.TypescriptImportStatementParser{}
 
 	for _, dependencyCase := range generateValidDependencySetPartCases(generateValidDependencySetPartCasesArgs{
 		IncludeDefaultCases:    true,
@@ -308,7 +309,7 @@ func TestParseImportStatement_ValidNonTypeImport_Typescript(t *testing.T) {
 			for _, statementSuffix := range []string{";", "", "\n", ";\n"} {
 				statement := "import " + dependencyCase.Text + " " + moduleCase.Text + statementSuffix
 
-				expectedResult := parsing.TypescriptImportStatement{
+				expectedResult := typescript.TypescriptImportStatement{
 					ModulePathParts: moduleCase.ExpectedModulePathPaths,
 					External:        moduleCase.ExpectedExternal,
 					Dependecies:     dependencyCase.Dependencies,
@@ -327,7 +328,7 @@ func TestParseImportStatement_ValidNonTypeImport_Typescript(t *testing.T) {
 
 func TestParseImportStatement_ValidTypeImport_Typescript(t *testing.T) {
 
-	testParser := parsing.TypescriptImportStatementParser{}
+	testParser := typescript.TypescriptImportStatementParser{}
 
 	for _, dependencyCase := range generateValidDependencySetPartCases(generateValidDependencySetPartCasesArgs{
 		IncludeDefaultCases:    false,
@@ -338,7 +339,7 @@ func TestParseImportStatement_ValidTypeImport_Typescript(t *testing.T) {
 			for _, statementSuffix := range []string{";", "", "\n", ";\n"} {
 				statement := "import type " + dependencyCase.Text + " " + moduleCase.Text + statementSuffix
 
-				expectedResult := parsing.TypescriptImportStatement{
+				expectedResult := typescript.TypescriptImportStatement{
 					ModulePathParts: moduleCase.ExpectedModulePathPaths,
 					External:        moduleCase.ExpectedExternal,
 					Dependecies:     dependencyCase.Dependencies,
@@ -358,13 +359,13 @@ func TestParseImportStatement_ValidTypeImport_Typescript(t *testing.T) {
 
 func AssertCorrectErrorHandlingForInvalidTypescriotImportStatement(t *testing.T, statement string, expectedError error) {
 
-	testParser := parsing.TypescriptImportStatementParser{}
+	testParser := typescript.TypescriptImportStatementParser{}
 
 	resultingImportStatement, resultingError := testParser.ParseImportStatement(statement)
 
 	t.Run(statement, func(t_ *testing.T) {
 		assert.NotNil(t_, resultingError)
-		assert.Equal(t_, parsing.TypescriptImportStatement{}, resultingImportStatement)
+		assert.Equal(t_, typescript.TypescriptImportStatement{}, resultingImportStatement)
 		assert.ErrorIs(t_, expectedError, resultingError)
 	})
 
@@ -373,7 +374,7 @@ func AssertCorrectErrorHandlingForInvalidTypescriotImportStatement(t *testing.T,
 func TestParseImportStatement_InvalidStatement_NoFromKeyword_Typescript(t *testing.T) {
 	const EXPECTED_ERROR_DETAIL = "Statement doesn't include 'from' keyword"
 
-	AssertCorrectErrorHandlingForInvalidTypescriotImportStatement(t, "import", &parsing.ImportStatementParseError{
+	AssertCorrectErrorHandlingForInvalidTypescriotImportStatement(t, "import", &lp.ImportStatementParseError{
 		Statement: "import",
 		Detail:    EXPECTED_ERROR_DETAIL,
 	})
@@ -384,7 +385,7 @@ func TestParseImportStatement_InvalidStatement_NoFromKeyword_Typescript(t *testi
 		IncludeNewLineCases:    true,
 	}) {
 		statementNoFrom := "import " + depCase.Text
-		AssertCorrectErrorHandlingForInvalidTypescriotImportStatement(t, statementNoFrom, &parsing.ImportStatementParseError{
+		AssertCorrectErrorHandlingForInvalidTypescriotImportStatement(t, statementNoFrom, &lp.ImportStatementParseError{
 			Statement: statementNoFrom,
 			Detail:    EXPECTED_ERROR_DETAIL,
 		})
@@ -410,7 +411,7 @@ func TestParseImportStatement_InvalidStatement_InvalidDependencyDeclaration(t *t
 	for _, testCase := range testCases {
 		for _, moduleCase := range validModuleParseCases() {
 			statement := "import " + testCase.Text + " from " + moduleCase.Text
-			AssertCorrectErrorHandlingForInvalidTypescriotImportStatement(t, statement, &parsing.ImportStatementParseError{
+			AssertCorrectErrorHandlingForInvalidTypescriotImportStatement(t, statement, &lp.ImportStatementParseError{
 				Statement: statement,
 				Detail:    testCase.ExpectedErrorDetail,
 			})
@@ -475,7 +476,7 @@ func Test_TypescriptImportStatement_AsText_ValidNonTypeImport(t *testing.T) {
 	for _, dependencyCase := range dependencyCases {
 		for _, moduleCase := range moduleCases {
 			expectedStatement := "import " + dependencyCase.Text + " from " + moduleCase.ExpectedStatement + ";"
-			testStatement := parsing.TypescriptImportStatement{
+			testStatement := typescript.TypescriptImportStatement{
 				ModulePathParts: moduleCase.ModulePathParts,
 				External:        false,
 				Dependecies:     dependencyCase.Dependencies,
@@ -499,7 +500,7 @@ func Test_TypescriptImportStatement_AsText_ValidTypeImport(t *testing.T) {
 	for _, dependencyCase := range dependencyCases {
 		for _, moduleCase := range moduleCases {
 			expectedStatement := "import type " + dependencyCase.Text + " from " + moduleCase.ExpectedStatement + ";"
-			testStatement := parsing.TypescriptImportStatement{
+			testStatement := typescript.TypescriptImportStatement{
 				ModulePathParts: moduleCase.ModulePathParts,
 				External:        false,
 				Dependecies:     dependencyCase.Dependencies,
@@ -517,9 +518,9 @@ func Test_TypescriptImportStatement_AsText_ValidTypeImport(t *testing.T) {
 }
 
 func AssertCorrectErrorHandlingForInvalidTypescriotImportStatementWrite(
-	t *testing.T, description string, statement parsing.TypescriptImportStatement, expectedErrorDetail string) {
+	t *testing.T, description string, statement typescript.TypescriptImportStatement, expectedErrorDetail string) {
 
-	expectedError := parsing.ImportStatementWriteError{
+	expectedError := lp.ImportStatementWriteError{
 		Statement: statement,
 		Detail:    expectedErrorDetail,
 	}
@@ -538,10 +539,10 @@ func Test_TypescriptImportStatement_AsText_NoDependencies_Error(t *testing.T) {
 
 	for _, moduleCase := range moduleAsStatementStringCases() {
 		description := moduleCase.Description
-		testStatement := parsing.TypescriptImportStatement{
+		testStatement := typescript.TypescriptImportStatement{
 			ModulePathParts: moduleCase.ModulePathParts,
 			External:        false,
-			Dependecies:     []parsing.TypescriptDependecy{},
+			Dependecies:     []typescript.TypescriptDependecy{},
 		}
 		AssertCorrectErrorHandlingForInvalidTypescriotImportStatementWrite(t, description, testStatement, EXPECTED_ERROR_DETAIL)
 	}
@@ -552,10 +553,10 @@ func Test_TypescriptImportStatement_AsText_MultipleDefaultDependencies_Error(t *
 
 	for _, moduleCase := range moduleAsStatementStringCases() {
 		description := moduleCase.Description
-		testStatement := parsing.TypescriptImportStatement{
+		testStatement := typescript.TypescriptImportStatement{
 			ModulePathParts: moduleCase.ModulePathParts,
 			External:        false,
-			Dependecies: []parsing.TypescriptDependecy{
+			Dependecies: []typescript.TypescriptDependecy{
 				{Name: "something", IsDefault: true},
 				{Name: "anotherThing", IsDefault: true},
 			},

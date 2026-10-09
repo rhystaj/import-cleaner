@@ -3,8 +3,8 @@ package fileprocessing
 import (
 	"bytes"
 	"importcleaner/internal/iowrappers"
+	lp "importcleaner/internal/languageprocessing"
 	"importcleaner/internal/organisation"
-	"importcleaner/internal/parsing"
 	"strings"
 )
 
@@ -12,14 +12,14 @@ type FileProcessor interface {
 	ProcessFile(filePath string) error
 }
 
-type FileProcessorImpl struct {
-	Parser      parsing.ImportStatementParser
+type FileProcessorImpl[S lp.ImportStatement] struct {
+	Parser      lp.ImportStatementParser
 	FileManager iowrappers.FileManager
-	Organiser   organisation.ImportStatementOrganiser
+	Organiser   organisation.ImportStatementOrganiser[S]
 }
 
-func (fp FileProcessorImpl) extractStatements(text string) ([]parsing.ImportStatement, []string, error) {
-	importStatements := make([]parsing.ImportStatement, 0)
+func (fp FileProcessorImpl[S]) extractStatements(text string) ([]S, []string, error) {
+	importStatements := make([]S, 0)
 	otherStatements := make([]string, 0)
 
 	var ignoreEmptyStatement bool
@@ -27,9 +27,9 @@ func (fp FileProcessorImpl) extractStatements(text string) ([]parsing.ImportStat
 		if fp.Parser.IsIntendedImportStatement(statement) {
 			importStatement, err := fp.Parser.ParseImportStatement(statement)
 			if err != nil {
-				return make([]parsing.ImportStatement, 0), make([]string, 0), err
+				return make([]S, 0), make([]string, 0), err
 			}
-			importStatements = append(importStatements, importStatement)
+			importStatements = append(importStatements, importStatement.(S))
 			ignoreEmptyStatement = true
 			continue
 		}
@@ -44,7 +44,7 @@ func (fp FileProcessorImpl) extractStatements(text string) ([]parsing.ImportStat
 	return importStatements, otherStatements, nil
 }
 
-func (fp FileProcessorImpl) ProcessFile(filePath string) error {
+func (fp FileProcessorImpl[S]) ProcessFile(filePath string) error {
 	fileContents, fileReadError := fp.FileManager.ReadStringFromFile(filePath)
 	if fileReadError != nil {
 		return fileReadError

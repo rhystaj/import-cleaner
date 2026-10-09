@@ -1,8 +1,8 @@
 package config_test
 
 import (
+	types "importcleaner/internal"
 	"importcleaner/internal/config"
-	"importcleaner/internal/organisation"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,7 +14,7 @@ func TestProcessAndValidationConfig_ValidConfig(t *testing.T) {
 
 	testConfig := config.RawConfig{
 		IgnoredPaths: testIgnoredPaths,
-		GroupingRules: []config.RawGroupingRule{
+		GroupingRules: []config.RawGroupingRuleDefinition{
 			{},
 			{
 				DependencySourceType: "internal",
@@ -25,40 +25,46 @@ func TestProcessAndValidationConfig_ValidConfig(t *testing.T) {
 			},
 			{
 				DependencySourceType: "external",
+				IsTypeImport:         "true",
 			},
 			{
 				ModulePaths: []string{
 					"pydantic.types",
 					"argparse",
 				},
+				IsTypeImport: "false",
 			},
 		},
 	}
 
 	expectedOutput := config.Config{
 		IgnoredPaths: testIgnoredPaths,
-		GroupingRules: []organisation.ImportStatementGroupRule{
+		GroupingRules: []config.ImportStatementGroupRuleDefinition{
 			{
-				DependencySourceType: organisation.DependencySourceTypeNone,
+				DependencySourceType: config.DependencySourceTypeNone,
 				ModulePaths:          [][]string{},
+				IsTypeImport:         types.OBNil,
 			},
 			{
-				DependencySourceType: organisation.DependencySourceTypeInternal,
+				DependencySourceType: config.DependencySourceTypeInternal,
 				ModulePaths: [][]string{
 					{"somecoolmodule"},
 					{"helpers", "database"},
 				},
+				IsTypeImport: types.OBNil,
 			},
 			{
-				DependencySourceType: organisation.DependencySourceTypeExternal,
+				DependencySourceType: config.DependencySourceTypeExternal,
 				ModulePaths:          [][]string{},
+				IsTypeImport:         types.OBTrue,
 			},
 			{
-				DependencySourceType: organisation.DependencySourceTypeNone,
+				DependencySourceType: config.DependencySourceTypeNone,
 				ModulePaths: [][]string{
 					{"pydantic", "types"},
 					{"argparse"},
 				},
+				IsTypeImport: types.OBFalse,
 			},
 		},
 	}
@@ -75,13 +81,14 @@ func TestProcessAndValidationConfig_InvalidConfig(t *testing.T) {
 
 	testConfig := config.RawConfig{
 		IgnoredPaths: testIgnoredPaths,
-		GroupingRules: []config.RawGroupingRule{
+		GroupingRules: []config.RawGroupingRuleDefinition{
 			{},
 			{
 				DependencySourceType: "notvalid",
 			},
 			{
 				DependencySourceType: "external",
+				IsTypeImport:         "notvalid",
 			},
 			{
 				DependencySourceType: "notvalideither",
@@ -94,6 +101,10 @@ func TestProcessAndValidationConfig_InvalidConfig(t *testing.T) {
 			{
 				Path:             "groupingRules.dependencySourceType",
 				ErrorDescription: "Must be 'internal', or 'external', but was 'notvalid'",
+			},
+			{
+				Path:             "groupingRules.isTypeImport",
+				ErrorDescription: "Must be 'true', or 'false', but was 'notvalid'",
 			},
 			{
 				Path:             "groupingRules.dependencySourceType",

@@ -1,8 +1,9 @@
-package parsing
+package typescript
 
 import (
 	"bytes"
 	"importcleaner/internal/datastructures"
+	lp "importcleaner/internal/languageprocessing"
 	"iter"
 	"slices"
 	"strings"
@@ -46,7 +47,7 @@ func (p TypescriptImportStatementParser) StatementsInText(text string) iter.Seq[
 		lookahead, _ := datastructures.CreateNewLookahead[string](2)
 
 		textState := TextStateStandard
-		for lah := range lookahead.ProcessSequence(DelimitedStringSequence(text, []rune{' ', ';', '\n'})) {
+		for lah := range lookahead.ProcessSequence(lp.DelimitedStringSequence(text, []rune{' ', ';', '\n'})) {
 			if textState == TextStateStandard && strings.TrimSpace(*lah.PeekStart()) == "import" {
 				if stringBuffer.Len() > 0 {
 					if !yield(stringBuffer.String()) {
@@ -174,10 +175,10 @@ func (p TypescriptImportStatementParser) parseDependenciesList(dependenciesText 
 	return append(defaultDependencies, nonDefaultDependencies...), ""
 }
 
-func (p TypescriptImportStatementParser) ParseImportStatement(statementText string) (ImportStatement, error) {
+func (p TypescriptImportStatementParser) ParseImportStatement(statementText string) (lp.ImportStatement, error) {
 
 	buildErrorResponse := func(errorDetail string) (TypescriptImportStatement, error) {
-		return TypescriptImportStatement{}, &ImportStatementParseError{
+		return TypescriptImportStatement{}, &lp.ImportStatementParseError{
 			Detail:    errorDetail,
 			Statement: statementText,
 		}
@@ -242,7 +243,7 @@ func (p TypescriptImportStatement) dependencyAsStatementString(dependency *Types
 
 func (p TypescriptImportStatement) AsText() (string, error) {
 	if len(p.Dependecies) == 0 {
-		return "", &ImportStatementWriteError{
+		return "", &lp.ImportStatementWriteError{
 			Statement: p,
 			Detail:    "No dependencies were specified",
 		}
@@ -261,7 +262,7 @@ func (p TypescriptImportStatement) AsText() (string, error) {
 	for _, dependency := range p.Dependecies {
 		if dependency.IsDefault {
 			if defaultDependency != nil {
-				return "", &ImportStatementWriteError{
+				return "", &lp.ImportStatementWriteError{
 					Statement: p,
 					Detail:    "Multiple default dependencies are not allowed",
 				}
@@ -298,16 +299,16 @@ func (p TypescriptImportStatement) AsText() (string, error) {
 	return statementStringBuilder.String(), nil
 }
 
-func (p TypescriptImportStatement) GetGenericDetails() ImportStatementGenericDetails {
-	dependencies := make([]GenericDependecy, len(p.Dependecies))
+func (p TypescriptImportStatement) GetGenericDetails() lp.ImportStatementGenericDetails {
+	dependencies := make([]lp.GenericDependecy, len(p.Dependecies))
 	for i, dependency := range p.Dependecies {
-		dependencies[i] = GenericDependecy{
+		dependencies[i] = lp.GenericDependecy{
 			Name:  dependency.Name,
 			Alias: dependency.Alias,
 		}
 	}
 
-	return ImportStatementGenericDetails{
+	return lp.ImportStatementGenericDetails{
 		ModulePathParts: p.ModulePathParts,
 		ModuleAlias:     p.ModuleAlias,
 		Dependecies:     dependencies,

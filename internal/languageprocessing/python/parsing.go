@@ -1,10 +1,11 @@
-package parsing
+package python
 
 import (
 	"bytes"
 	"fmt"
 	"importcleaner/internal/datastructures"
 	"importcleaner/internal/iowrappers"
+	lp "importcleaner/internal/languageprocessing"
 	"iter"
 	"strings"
 )
@@ -54,9 +55,9 @@ func (p PythonImportStatementParser) StatementsInText(text string) iter.Seq[stri
 
 			if r == '/' {
 				ignoreNextLineBreak = true
-			} else if IsOpenBracket(r) {
+			} else if lp.IsOpenBracket(r) {
 				bracketStack.Push(&r)
-			} else if bracketStack.Size() > 0 && IsCorrespondingCloseBracket(r, *bracketStack.Peek()) {
+			} else if bracketStack.Size() > 0 && lp.IsCorrespondingCloseBracket(r, *bracketStack.Peek()) {
 				bracketStack.Pop()
 			}
 		}
@@ -175,8 +176,8 @@ func (p PythonImportStatementParser) parseDependenciesList(dependenciesListText 
 	return result, ""
 }
 
-func (p PythonImportStatementParser) generateErrorResultForStatement(statement string, detail string) (ImportStatement, *ImportStatementParseError) {
-	error := &ImportStatementParseError{
+func (p PythonImportStatementParser) generateErrorResultForStatement(statement string, detail string) (lp.ImportStatement, *lp.ImportStatementParseError) {
+	error := &lp.ImportStatementParseError{
 		Statement: statement,
 		Detail:    detail,
 	}
@@ -184,7 +185,7 @@ func (p PythonImportStatementParser) generateErrorResultForStatement(statement s
 	return PythonImportStatement{"", []string{}, "", []PythonDependecy{}, false}, error
 }
 
-func (p PythonImportStatementParser) ParseImportStatement(statementText string) (ImportStatement, error) {
+func (p PythonImportStatementParser) ParseImportStatement(statementText string) (lp.ImportStatement, error) {
 	currentStatementPart := ""
 	statementRemaining := strings.TrimSpace(statementText)
 
@@ -264,16 +265,16 @@ func (p PythonImportStatement) AsText() (string, error) {
 	}
 }
 
-func (p PythonImportStatement) GetGenericDetails() ImportStatementGenericDetails {
-	dependencies := make([]GenericDependecy, len(p.Dependecies))
+func (p PythonImportStatement) GetGenericDetails() lp.ImportStatementGenericDetails {
+	dependencies := make([]lp.GenericDependecy, len(p.Dependecies))
 	for i, dependency := range p.Dependecies {
-		dependencies[i] = GenericDependecy{
+		dependencies[i] = lp.GenericDependecy{
 			Name:  dependency.Name,
 			Alias: dependency.Alias,
 		}
 	}
 
-	return ImportStatementGenericDetails{
+	return lp.ImportStatementGenericDetails{
 		ModulePathParts: p.ModulePathParts,
 		ModuleAlias:     p.ModuleAlias,
 		Dependecies:     dependencies,

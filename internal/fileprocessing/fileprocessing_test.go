@@ -2,10 +2,12 @@ package fileprocessing_test
 
 import (
 	"errors"
+	"importcleaner/internal/config"
 	fileprocessing "importcleaner/internal/fileprocessing"
 	"importcleaner/internal/iowrappers"
+	lp "importcleaner/internal/languageprocessing"
+	"importcleaner/internal/languageprocessing/python"
 	"importcleaner/internal/organisation"
-	"importcleaner/internal/parsing"
 	"testing"
 )
 
@@ -54,20 +56,20 @@ class SomeClass:
 		iowrappers.CreateMockFSDir("internal", make([]*iowrappers.MockFSNode, 0)),
 	})
 
-	testOrganiser := organisation.ImportStatementOrganiserImpl{
-		GroupRules: []organisation.ImportStatementGroupRule{
-			{
-				DependencySourceType: organisation.DependencySourceTypeExternal,
-			},
+	testOrganiser := organisation.ImportStatementOrganiserImpl[lp.ImportStatement]{
+		GroupRules: []organisation.ImportStatementGroupRule[lp.ImportStatement]{
+			organisation.NewGenericGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
+				DependencySourceType: config.DependencySourceTypeExternal,
+			}),
 		},
 	}
 
-	parser := parsing.PythonImportStatementParser{
+	parser := python.PythonImportStatementParser{
 		WorkingDir:  "",
 		FileManager: fileManager,
 	}
 
-	testFileProcessor := fileprocessing.FileProcessorImpl{
+	testFileProcessor := fileprocessing.FileProcessorImpl[lp.ImportStatement]{
 		Parser:      parser,
 		FileManager: fileManager,
 		Organiser:   testOrganiser,
@@ -101,20 +103,20 @@ class SomeClass:
 		iowrappers.CreateMockFSDir("internal", make([]*iowrappers.MockFSNode, 0)),
 	})
 
-	testOrganiser := organisation.ImportStatementOrganiserImpl{
-		GroupRules: []organisation.ImportStatementGroupRule{
-			{
-				DependencySourceType: organisation.DependencySourceTypeExternal,
-			},
+	testOrganiser := organisation.ImportStatementOrganiserImpl[lp.ImportStatement]{
+		GroupRules: []organisation.ImportStatementGroupRule[lp.ImportStatement]{
+			organisation.NewGenericGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
+				DependencySourceType: config.DependencySourceTypeExternal,
+			}),
 		},
 	}
 
-	parser := parsing.PythonImportStatementParser{
+	parser := python.PythonImportStatementParser{
 		WorkingDir:  "",
 		FileManager: fileManager,
 	}
 
-	testFileProcessor := fileprocessing.FileProcessorImpl{
+	testFileProcessor := fileprocessing.FileProcessorImpl[lp.ImportStatement]{
 		Parser:      parser,
 		FileManager: fileManager,
 		Organiser:   testOrganiser,
@@ -154,7 +156,7 @@ class SomeClass:
 from submod import SUBVALUE
 `
 
-	expectedError := parsing.ImportStatementParseError{
+	expectedError := lp.ImportStatementParseError{
 		Statement: "import datetime as\n",
 		Detail:    "Module alias expected",
 	}
@@ -165,20 +167,20 @@ from submod import SUBVALUE
 		iowrappers.CreateMockFSDir("internal", make([]*iowrappers.MockFSNode, 0)),
 	})
 
-	testOrganiser := organisation.ImportStatementOrganiserImpl{
-		GroupRules: []organisation.ImportStatementGroupRule{
-			{
-				DependencySourceType: organisation.DependencySourceTypeExternal,
-			},
+	testOrganiser := organisation.ImportStatementOrganiserImpl[lp.ImportStatement]{
+		GroupRules: []organisation.ImportStatementGroupRule[lp.ImportStatement]{
+			organisation.NewGenericGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
+				DependencySourceType: config.DependencySourceTypeExternal,
+			}),
 		},
 	}
 
-	parser := parsing.PythonImportStatementParser{
+	parser := python.PythonImportStatementParser{
 		WorkingDir:  "",
 		FileManager: fileManager,
 	}
 
-	testFileProcessor := fileprocessing.FileProcessorImpl{
+	testFileProcessor := fileprocessing.FileProcessorImpl[lp.ImportStatement]{
 		Parser:      parser,
 		FileManager: fileManager,
 		Organiser:   testOrganiser,
