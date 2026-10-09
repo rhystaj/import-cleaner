@@ -7,9 +7,13 @@ import (
 	"importcleaner/internal/organisation"
 )
 
+type TypescriptRules struct {
+	IsTypeImport types.OptionalBool
+}
+
 type TypescriptImportStatementGroupRule struct {
-	base         organisation.ImportStatementGroupRule[lp.ImportStatement]
-	isTypeImport types.OptionalBool
+	base       organisation.ImportStatementGroupRule[lp.ImportStatement]
+	typescript TypescriptRules
 }
 
 func (r TypescriptImportStatementGroupRule) AppliesTo(statement TypescriptImportStatement) bool {
@@ -17,16 +21,27 @@ func (r TypescriptImportStatementGroupRule) AppliesTo(statement TypescriptImport
 		return false
 	}
 
-	if r.isTypeImport != types.OBNil {
-		return r.isTypeImport.EqualsBool(statement.IsTypeImport)
+	if r.typescript.IsTypeImport != types.OBNil {
+		return r.typescript.IsTypeImport.EqualsBool(statement.IsTypeImport)
 	}
 
 	return true
 }
 
+func NewTypeScriptImportStatementGroupRule(
+	base organisation.ImportStatementGroupRule[lp.ImportStatement],
+	typescript TypescriptRules) organisation.ImportStatementGroupRule[TypescriptImportStatement] {
+	return TypescriptImportStatementGroupRule{
+		base:       base,
+		typescript: typescript,
+	}
+}
+
 func NewTypescriptImportStatementFromDefinition(definition config.ImportStatementGroupRuleDefinition) organisation.ImportStatementGroupRule[TypescriptImportStatement] {
 	return TypescriptImportStatementGroupRule{
-		base:         organisation.NewGenericGroupingRuleFromDefinition(definition),
-		isTypeImport: definition.IsTypeImport,
+		base: organisation.NewGenericGroupingRuleFromDefinition(definition),
+		typescript: TypescriptRules{
+			IsTypeImport: definition.IsTypeImport,
+		},
 	}
 }

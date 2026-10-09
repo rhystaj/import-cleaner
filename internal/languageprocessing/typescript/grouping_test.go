@@ -4,68 +4,142 @@ import (
 	types "importcleaner/internal"
 	"importcleaner/internal/config"
 	"importcleaner/internal/languageprocessing/typescript"
+	"importcleaner/internal/organisation"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-type appliesToCase struct {
-	description    string
-	statement      typescript.TypescriptImportStatement
-	ruleDefinition config.ImportStatementGroupRuleDefinition
-	applies        bool
+type typscriptImportStatementDetails struct {
+	IsTypeImport bool
 }
 
-func TestAppliesTo(t *testing.T) {
-	cases := []appliesToCase{
+type typescriptRulesCase struct {
+	description            string
+	importStatementDetails typscriptImportStatementDetails
+	typescriptRules        typescript.TypescriptRules
+}
+
+func buildTrueTypescriptRulesCases() []typescriptRulesCase {
+	return []typescriptRulesCase{
 		{
 			description: "Type import explicitly expected, statement is a type import",
-			statement: typescript.TypescriptImportStatement{
+			importStatementDetails: typscriptImportStatementDetails{
 				IsTypeImport: true,
 			},
-			ruleDefinition: config.ImportStatementGroupRuleDefinition{
+			typescriptRules: typescript.TypescriptRules{
 				IsTypeImport: types.OBTrue,
 			},
-			applies: true,
 		},
 		{
 			description: "Type import explicitly not expected, statement is not a type import",
-			statement: typescript.TypescriptImportStatement{
+			importStatementDetails: typscriptImportStatementDetails{
 				IsTypeImport: false,
 			},
-			ruleDefinition: config.ImportStatementGroupRuleDefinition{
+			typescriptRules: typescript.TypescriptRules{
 				IsTypeImport: types.OBFalse,
 			},
-			applies: true,
 		},
 		{
 			description: "Type import expectation not specified, statement is a type import",
-			statement: typescript.TypescriptImportStatement{
+			importStatementDetails: typscriptImportStatementDetails{
 				IsTypeImport: true,
 			},
-			ruleDefinition: config.ImportStatementGroupRuleDefinition{
+			typescriptRules: typescript.TypescriptRules{
 				IsTypeImport: types.OBNil,
 			},
-			applies: true,
 		},
 		{
 			description: "Type import expectation not specified, statement is not a type import",
-			statement: typescript.TypescriptImportStatement{
+			importStatementDetails: typscriptImportStatementDetails{
 				IsTypeImport: false,
 			},
-			ruleDefinition: config.ImportStatementGroupRuleDefinition{
+			typescriptRules: typescript.TypescriptRules{
 				IsTypeImport: types.OBNil,
 			},
-			applies: true,
+		},
+	}
+}
+
+func buildFalseTypescriptRulesCases() []typescriptRulesCase {
+	return []typescriptRulesCase{
+		{
+			description: "Type import explicitly expected, statement is not a type import",
+			importStatementDetails: typscriptImportStatementDetails{
+				IsTypeImport: true,
+			},
+			typescriptRules: typescript.TypescriptRules{
+				IsTypeImport: types.OBFalse,
+			},
+		},
+		{
+			description: "Type import explicitly not expected, statement is a type import",
+			importStatementDetails: typscriptImportStatementDetails{
+				IsTypeImport: false,
+			},
+			typescriptRules: typescript.TypescriptRules{
+				IsTypeImport: types.OBTrue,
+			},
+		},
+	}
+}
+
+func Test_AppliesTo_BaseMatches_TypescriptRulesMatch(t *testing.T) {
+	baseRule := organisation.NewGenericGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{})
+
+	for _, c := range buildTrueTypescriptRulesCases() {
+		testRule := typescript.NewTypeScriptImportStatementGroupRule(baseRule, c.typescriptRules)
+		statement := typescript.TypescriptImportStatement{
+			IsTypeImport: c.importStatementDetails.IsTypeImport,
+		}
+
+		t.Run(c.description, func(t *testing.T) {
+			assert.True(t, testRule.AppliesTo(statement))
+		})
+	}
+}
+
+func Test_AppliesTo_BaseMatches_TypescriptRulesDoNotMatch(t *testing.T) {
+	baseRule := organisation.NewGenericGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{})
+
+	for _, c := range buildFalseTypescriptRulesCases() {
+		testRule := typescript.NewTypeScriptImportStatementGroupRule(baseRule, c.typescriptRules)
+		statement := typescript.TypescriptImportStatement{
+			IsTypeImport: c.importStatementDetails.IsTypeImport,
+		}
+
+		t.Run(c.description, func(t *testing.T) {
+			assert.False(t, testRule.AppliesTo(statement))
+		})
+	}
+}
+
+func Test_AppliesTo_BaseDoesNotMatch(t *testing.T) {
+	baseRuleDefinitions := []config.ImportStatementGroupRuleDefinition{
+		{
+			DependencySourceType: config.DependencySourceTypeInternal,
+			ModulePaths:          [][]string{{"someothermodule"}},
+		},
+		{
+			DependencySourceType: config.DependencySourceTypeExternal,
+			ModulePaths:          [][]string{{"target"}},
 		},
 	}
 
-	for _, c := range cases {
+	for _, c := range buildTrueTypescriptRulesCases() {
 		t.Run(c.description, func(t *testing.T) {
-			rule := typescript.NewTypescriptImportStatementFromDefinition(c.ruleDefinition)
+			for _, baseRuleDefinition := range baseRuleDefinitions {
+				baseRule := organisation.NewGenericGroupingRuleFromDefinition(baseRuleDefinition)
+				testRule := typescript.NewTypeScriptImportStatementGroupRule(baseRule, c.typescriptRules)
 
-			applies := rule.AppliesTo(c.statement)
-			assert.Equal(t, c.applies, applies)
+				statement := typescript.TypescriptImportStatement{
+					ModulePathParts: []string{"target"},
+					External:        false,
+					IsTypeImport:    c.importStatementDetails.IsTypeImport,
+				}
+
+				assert.False(t, testRule.AppliesTo(statement))
+			}
 		})
 	}
 }
