@@ -13,7 +13,15 @@ type TypescriptImportStatementGroupRule struct {
 }
 
 func (r TypescriptImportStatementGroupRule) AppliesTo(statement TypescriptImportStatement) bool {
-	return r.base.AppliesTo(statement) && r.isTypeImport.EqualsBool(statement.IsTypeImport)
+	if !r.base.AppliesTo(statement) {
+		return false
+	}
+
+	if r.isTypeImport != types.OBNil {
+		return r.isTypeImport.EqualsBool(statement.IsTypeImport)
+	}
+
+	return true
 }
 
 func NewTypescriptImportStatementFromDefinition(definition config.ImportStatementGroupRuleDefinition) organisation.ImportStatementGroupRule[TypescriptImportStatement] {

@@ -3,7 +3,7 @@ package types
 type OptionalBool int
 
 const (
-	OBNil OptionalBool = iota - 1
+	OBNil OptionalBool = iota
 	OBFalse
 	OBTrue
 )
