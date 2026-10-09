@@ -1,6 +1,7 @@
 package typescript
 
 import (
+	types "importcleaner/internal"
 	"importcleaner/internal/config"
 	lp "importcleaner/internal/languageprocessing"
 	"importcleaner/internal/organisation"
@@ -8,11 +9,11 @@ import (
 
 type TypescriptImportStatementGroupRule struct {
 	base         organisation.ImportStatementGroupRule[lp.ImportStatement]
-	isTypeImport bool
+	isTypeImport types.OptionalBool
 }
 
 func (r TypescriptImportStatementGroupRule) AppliesTo(statement TypescriptImportStatement) bool {
-	return r.base.AppliesTo(statement) && r.isTypeImport == statement.IsTypeImport
+	return r.base.AppliesTo(statement) && r.isTypeImport.EqualsBool(statement.IsTypeImport)
 }
 
 func NewTypescriptImportStatementFromDefinition(definition config.ImportStatementGroupRuleDefinition) organisation.ImportStatementGroupRule[TypescriptImportStatement] {

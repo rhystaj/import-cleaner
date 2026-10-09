@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	types "importcleaner/internal"
 	"strings"
 )
 
@@ -16,7 +17,7 @@ const (
 type ImportStatementGroupRuleDefinition struct {
 	DependencySourceType DependencySourceType
 	ModulePaths          [][]string
-	IsTypeImport         bool
+	IsTypeImport         types.OptionalBool
 }
 
 type Config struct {
@@ -63,6 +64,19 @@ func parseDependencySourceType(str string) (valid bool, result DependencySourceT
 	}
 }
 
+func parseOptionalBool(str string) (valid bool, result types.OptionalBool) {
+	switch str {
+	case "":
+		return true, types.OBNil
+	case "false":
+		return true, types.OBFalse
+	case "true":
+		return true, types.OBTrue
+	default:
+		return false, types.OBNil
+	}
+}
+
 func processAndValidateGroupingRule(rawGroupingRule RawGroupingRuleDefinition) (ImportStatementGroupRuleDefinition, []InvalidPath) {
 	invalidPaths := make([]InvalidPath, 0)
 
@@ -79,10 +93,18 @@ func processAndValidateGroupingRule(rawGroupingRule RawGroupingRuleDefinition) (
 		processedModulePaths[i] = strings.Split(rawModulePath, ".")
 	}
 
+	isTypeImportValid, isTypeImport := parseOptionalBool(rawGroupingRule.IsTypeImport)
+	if !isTypeImportValid {
+		invalidPaths = append(invalidPaths, InvalidPath{
+			Path:             "groupingRules.isTypeImport",
+			ErrorDescription: fmt.Sprintf("Must be 'true', or 'false', but was '%s'", rawGroupingRule.IsTypeImport),
+		})
+	}
+
 	return ImportStatementGroupRuleDefinition{
 		DependencySourceType: dependencySourceType,
 		ModulePaths:          processedModulePaths,
-		IsTypeImport:         rawGroupingRule.IsTypeImport,
+		IsTypeImport:         isTypeImport,
 	}, invalidPaths
 }
 

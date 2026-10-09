@@ -1,6 +1,7 @@
 package config_test
 
 import (
+	types "importcleaner/internal"
 	"importcleaner/internal/config"
 	"testing"
 
@@ -24,12 +25,14 @@ func TestProcessAndValidationConfig_ValidConfig(t *testing.T) {
 			},
 			{
 				DependencySourceType: "external",
+				IsTypeImport:         "true",
 			},
 			{
 				ModulePaths: []string{
 					"pydantic.types",
 					"argparse",
 				},
+				IsTypeImport: "false",
 			},
 		},
 	}
@@ -40,6 +43,7 @@ func TestProcessAndValidationConfig_ValidConfig(t *testing.T) {
 			{
 				DependencySourceType: config.DependencySourceTypeNone,
 				ModulePaths:          [][]string{},
+				IsTypeImport:         types.OBNil,
 			},
 			{
 				DependencySourceType: config.DependencySourceTypeInternal,
@@ -47,10 +51,12 @@ func TestProcessAndValidationConfig_ValidConfig(t *testing.T) {
 					{"somecoolmodule"},
 					{"helpers", "database"},
 				},
+				IsTypeImport: types.OBNil,
 			},
 			{
 				DependencySourceType: config.DependencySourceTypeExternal,
 				ModulePaths:          [][]string{},
+				IsTypeImport:         types.OBTrue,
 			},
 			{
 				DependencySourceType: config.DependencySourceTypeNone,
@@ -58,6 +64,7 @@ func TestProcessAndValidationConfig_ValidConfig(t *testing.T) {
 					{"pydantic", "types"},
 					{"argparse"},
 				},
+				IsTypeImport: types.OBFalse,
 			},
 		},
 	}
@@ -81,6 +88,7 @@ func TestProcessAndValidationConfig_InvalidConfig(t *testing.T) {
 			},
 			{
 				DependencySourceType: "external",
+				IsTypeImport:         "notvalid",
 			},
 			{
 				DependencySourceType: "notvalideither",
@@ -93,6 +101,10 @@ func TestProcessAndValidationConfig_InvalidConfig(t *testing.T) {
 			{
 				Path:             "groupingRules.dependencySourceType",
 				ErrorDescription: "Must be 'internal', or 'external', but was 'notvalid'",
+			},
+			{
+				Path:             "groupingRules.isTypeImport",
+				ErrorDescription: "Must be 'true', or 'false', but was 'notvalid'",
 			},
 			{
 				Path:             "groupingRules.dependencySourceType",

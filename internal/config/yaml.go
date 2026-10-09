@@ -10,7 +10,7 @@ import (
 type RawGroupingRuleDefinition struct {
 	DependencySourceType string   `yaml:"dependencySourceType"`
 	ModulePaths          []string `yaml:"modulePaths"`
-	IsTypeImport         bool     `yaml:"isTypeImport"`
+	IsTypeImport         string   `yaml:"isTypeImport"`
 }
 
 type RawConfig struct {
