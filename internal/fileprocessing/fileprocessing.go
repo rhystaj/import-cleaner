@@ -12,14 +12,14 @@ type FileProcessor interface {
 	ProcessFile(filePath string) error
 }
 
-type FileProcessorImpl struct {
+type FileProcessorImpl[S lp.ImportStatement] struct {
 	Parser      lp.ImportStatementParser
 	FileManager iowrappers.FileManager
-	Organiser   organisation.ImportStatementOrganiser
+	Organiser   organisation.ImportStatementOrganiser[S]
 }
 
-func (fp FileProcessorImpl) extractStatements(text string) ([]lp.ImportStatement, []string, error) {
-	importStatements := make([]lp.ImportStatement, 0)
+func (fp FileProcessorImpl[S]) extractStatements(text string) ([]S, []string, error) {
+	importStatements := make([]S, 0)
 	otherStatements := make([]string, 0)
 
 	var ignoreEmptyStatement bool
@@ -27,9 +27,9 @@ func (fp FileProcessorImpl) extractStatements(text string) ([]lp.ImportStatement
 		if fp.Parser.IsIntendedImportStatement(statement) {
 			importStatement, err := fp.Parser.ParseImportStatement(statement)
 			if err != nil {
-				return make([]lp.ImportStatement, 0), make([]string, 0), err
+				return make([]S, 0), make([]string, 0), err
 			}
-			importStatements = append(importStatements, importStatement)
+			importStatements = append(importStatements, importStatement.(S))
 			ignoreEmptyStatement = true
 			continue
 		}
@@ -44,7 +44,7 @@ func (fp FileProcessorImpl) extractStatements(text string) ([]lp.ImportStatement
 	return importStatements, otherStatements, nil
 }
 
-func (fp FileProcessorImpl) ProcessFile(filePath string) error {
+func (fp FileProcessorImpl[S]) ProcessFile(filePath string) error {
 	fileContents, fileReadError := fp.FileManager.ReadStringFromFile(filePath)
 	if fileReadError != nil {
 		return fileReadError

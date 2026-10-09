@@ -16,6 +16,7 @@ const (
 type ImportStatementGroupRuleDefinition struct {
 	DependencySourceType DependencySourceType
 	ModulePaths          [][]string
+	IsTypeImport         bool
 }
 
 type Config struct {
@@ -81,6 +82,7 @@ func processAndValidateGroupingRule(rawGroupingRule RawGroupingRuleDefinition) (
 	return ImportStatementGroupRuleDefinition{
 		DependencySourceType: dependencySourceType,
 		ModulePaths:          processedModulePaths,
+		IsTypeImport:         rawGroupingRule.IsTypeImport,
 	}, invalidPaths
 }
 

@@ -6,17 +6,17 @@ import (
 	"strings"
 )
 
-type ImportStatementOrganiser interface {
-	OrganiseImportStatements(statements []lp.ImportStatement) [][]lp.ImportStatement
+type ImportStatementOrganiser[S lp.ImportStatement] interface {
+	OrganiseImportStatements(statements []S) [][]S
 }
 
-type ImportStatementOrganiserImpl struct {
-	GroupRules []ImportStatementGroupRule
+type ImportStatementOrganiserImpl[S lp.ImportStatement] struct {
+	GroupRules []ImportStatementGroupRule[S]
 }
 
-func (o ImportStatementOrganiserImpl) OrganiseImportStatements(statements []lp.ImportStatement) [][]lp.ImportStatement {
+func (o ImportStatementOrganiserImpl[S]) OrganiseImportStatements(statements []S) [][]S {
 
-	groups := make([][]lp.ImportStatement, len(o.GroupRules)+1)
+	groups := make([][]S, len(o.GroupRules)+1)
 	for _, statement := range statements {
 		statementGrouped := false
 		for groupIndex, groupRule := range o.GroupRules {
@@ -31,24 +31,24 @@ func (o ImportStatementOrganiserImpl) OrganiseImportStatements(statements []lp.I
 		}
 	}
 
-	nonEmptyGroups := make([][]lp.ImportStatement, 0)
+	nonEmptyGroups := make([][]S, 0)
 	for _, group := range groups {
 		if len(group) > 0 {
 			nonEmptyGroups = append(nonEmptyGroups, group)
 		}
 	}
 
-	var sortedGroups [][]lp.ImportStatement = make([][]lp.ImportStatement, len(nonEmptyGroups))
+	var sortedGroups [][]S = make([][]S, len(nonEmptyGroups))
 	for i, group := range nonEmptyGroups {
 		sortedGroups[i] = slices.SortedFunc(
-			func(yield func(lp.ImportStatement) bool) {
+			func(yield func(S) bool) {
 				for _, item := range group {
 					if !(yield(item)) {
 						return
 					}
 				}
 			},
-			func(a lp.ImportStatement, b lp.ImportStatement) int {
+			func(a S, b S) int {
 				aDetails := a.GetGenericDetails()
 				bDetails := b.GetGenericDetails()
 

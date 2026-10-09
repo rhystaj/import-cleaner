@@ -56,9 +56,9 @@ class SomeClass:
 		iowrappers.CreateMockFSDir("internal", make([]*iowrappers.MockFSNode, 0)),
 	})
 
-	testOrganiser := organisation.ImportStatementOrganiserImpl{
-		GroupRules: []organisation.ImportStatementGroupRule{
-			organisation.NewGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
+	testOrganiser := organisation.ImportStatementOrganiserImpl[lp.ImportStatement]{
+		GroupRules: []organisation.ImportStatementGroupRule[lp.ImportStatement]{
+			organisation.NewGenericGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
 				DependencySourceType: config.DependencySourceTypeExternal,
 			}),
 		},
@@ -69,7 +69,7 @@ class SomeClass:
 		FileManager: fileManager,
 	}
 
-	testFileProcessor := fileprocessing.FileProcessorImpl{
+	testFileProcessor := fileprocessing.FileProcessorImpl[lp.ImportStatement]{
 		Parser:      parser,
 		FileManager: fileManager,
 		Organiser:   testOrganiser,
@@ -103,9 +103,9 @@ class SomeClass:
 		iowrappers.CreateMockFSDir("internal", make([]*iowrappers.MockFSNode, 0)),
 	})
 
-	testOrganiser := organisation.ImportStatementOrganiserImpl{
-		GroupRules: []organisation.ImportStatementGroupRule{
-			organisation.NewGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
+	testOrganiser := organisation.ImportStatementOrganiserImpl[lp.ImportStatement]{
+		GroupRules: []organisation.ImportStatementGroupRule[lp.ImportStatement]{
+			organisation.NewGenericGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
 				DependencySourceType: config.DependencySourceTypeExternal,
 			}),
 		},
@@ -116,7 +116,7 @@ class SomeClass:
 		FileManager: fileManager,
 	}
 
-	testFileProcessor := fileprocessing.FileProcessorImpl{
+	testFileProcessor := fileprocessing.FileProcessorImpl[lp.ImportStatement]{
 		Parser:      parser,
 		FileManager: fileManager,
 		Organiser:   testOrganiser,
@@ -167,9 +167,9 @@ from submod import SUBVALUE
 		iowrappers.CreateMockFSDir("internal", make([]*iowrappers.MockFSNode, 0)),
 	})
 
-	testOrganiser := organisation.ImportStatementOrganiserImpl{
-		GroupRules: []organisation.ImportStatementGroupRule{
-			organisation.NewGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
+	testOrganiser := organisation.ImportStatementOrganiserImpl[lp.ImportStatement]{
+		GroupRules: []organisation.ImportStatementGroupRule[lp.ImportStatement]{
+			organisation.NewGenericGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
 				DependencySourceType: config.DependencySourceTypeExternal,
 			}),
 		},
@@ -180,7 +180,7 @@ from submod import SUBVALUE
 		FileManager: fileManager,
 	}
 
-	testFileProcessor := fileprocessing.FileProcessorImpl{
+	testFileProcessor := fileprocessing.FileProcessorImpl[lp.ImportStatement]{
 		Parser:      parser,
 		FileManager: fileManager,
 		Organiser:   testOrganiser,

@@ -5,8 +5,8 @@ import (
 	lp "importcleaner/internal/languageprocessing"
 )
 
-type ImportStatementGroupRule interface {
-	AppliesTo(statement lp.ImportStatement) bool
+type ImportStatementGroupRule[S lp.ImportStatement] interface {
+	AppliesTo(statement S) bool
 }
 
 type GenericImportStatementGroupRule struct {
@@ -14,7 +14,7 @@ type GenericImportStatementGroupRule struct {
 	modulePaths          [][]string
 }
 
-func NewGroupingRuleFromDefinition(definition config.ImportStatementGroupRuleDefinition) ImportStatementGroupRule {
+func NewGenericGroupingRuleFromDefinition(definition config.ImportStatementGroupRuleDefinition) ImportStatementGroupRule[lp.ImportStatement] {
 	return GenericImportStatementGroupRule{
 		dependencySourceType: definition.DependencySourceType,
 		modulePaths:          definition.ModulePaths,

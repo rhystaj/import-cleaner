@@ -134,8 +134,8 @@ func generateTestImports() []lp.ImportStatement {
 
 func TestOrganiseImports_NoGroupsConfigured(t *testing.T) {
 
-	testOrganiser := organisation.ImportStatementOrganiserImpl{
-		GroupRules: []organisation.ImportStatementGroupRule{},
+	testOrganiser := organisation.ImportStatementOrganiserImpl[lp.ImportStatement]{
+		GroupRules: []organisation.ImportStatementGroupRule[lp.ImportStatement]{},
 	}
 	testImports := generateTestImports()
 
@@ -257,9 +257,9 @@ func TestOrganiseImports_NoGroupsConfigured(t *testing.T) {
 
 func TestOrganiseImports_ExternalGroup(t *testing.T) {
 
-	testOrganiser := organisation.ImportStatementOrganiserImpl{
-		GroupRules: []organisation.ImportStatementGroupRule{
-			organisation.NewGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
+	testOrganiser := organisation.ImportStatementOrganiserImpl[lp.ImportStatement]{
+		GroupRules: []organisation.ImportStatementGroupRule[lp.ImportStatement]{
+			organisation.NewGenericGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
 				DependencySourceType: config.DependencySourceTypeExternal,
 			}),
 		},
@@ -386,9 +386,9 @@ func TestOrganiseImports_ExternalGroup(t *testing.T) {
 
 func TestOrganiseImports_InternalGroup(t *testing.T) {
 
-	testOrganiser := organisation.ImportStatementOrganiserImpl{
-		GroupRules: []organisation.ImportStatementGroupRule{
-			organisation.NewGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
+	testOrganiser := organisation.ImportStatementOrganiserImpl[lp.ImportStatement]{
+		GroupRules: []organisation.ImportStatementGroupRule[lp.ImportStatement]{
+			organisation.NewGenericGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
 				DependencySourceType: config.DependencySourceTypeInternal,
 			}),
 		},
@@ -516,15 +516,15 @@ func TestOrganiseImports_InternalGroup(t *testing.T) {
 
 func TestOrganiseImports_GroupByModulePaths(t *testing.T) {
 
-	testOrganiser := organisation.ImportStatementOrganiserImpl{
-		GroupRules: []organisation.ImportStatementGroupRule{
-			organisation.NewGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
+	testOrganiser := organisation.ImportStatementOrganiserImpl[lp.ImportStatement]{
+		GroupRules: []organisation.ImportStatementGroupRule[lp.ImportStatement]{
+			organisation.NewGenericGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
 				ModulePaths: [][]string{{"dataclasses"}, {"somecoolmodule"}, {"abc"}},
 			}),
-			organisation.NewGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
+			organisation.NewGenericGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
 				ModulePaths: [][]string{{"tools"}, {"helpers", "database"}, {"argparse"}},
 			}),
-			organisation.NewGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
+			organisation.NewGenericGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
 				ModulePaths: [][]string{{"tools", "hammer"}, {"pydantic", "types"}},
 			}),
 		},
@@ -657,16 +657,16 @@ func TestOrganiseImports_GroupByModulePaths(t *testing.T) {
 
 func TestOrganiseImports_CompositeGroups(t *testing.T) {
 
-	testOrganiser := organisation.ImportStatementOrganiserImpl{
-		GroupRules: []organisation.ImportStatementGroupRule{
-			organisation.NewGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
+	testOrganiser := organisation.ImportStatementOrganiserImpl[lp.ImportStatement]{
+		GroupRules: []organisation.ImportStatementGroupRule[lp.ImportStatement]{
+			organisation.NewGenericGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
 				DependencySourceType: config.DependencySourceTypeExternal,
 				ModulePaths:          [][]string{{"helpers"}, {"anokdependencyiguess"}, {"argparse"}},
 			}),
-			organisation.NewGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
+			organisation.NewGenericGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
 				ModulePaths: [][]string{{"helpers"}, {"dataclasses"}, {"somecoolmodule"}},
 			}),
-			organisation.NewGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
+			organisation.NewGenericGroupingRuleFromDefinition(config.ImportStatementGroupRuleDefinition{
 				DependencySourceType: config.DependencySourceTypeInternal,
 			}),
 		},
