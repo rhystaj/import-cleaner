@@ -2,3 +2,6 @@ language: typescript
 ignoredPaths: []
 groupingRules:
   - dependencySourceType: external
+    isTypeImport: true
+  - dependencySourceType: external
+  - isTypeImport: true
