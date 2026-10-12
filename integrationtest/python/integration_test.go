@@ -30,7 +30,7 @@ func TestPythonIntegration(t *testing.T) {
 	testScenarioManager := integrationtest.NewTestScenarioManager(wd)
 
 	testScenarioManager.PrepareFilesForTestScenario("grouping")
-	testScenarioManager.TestScenario("grouping", func(testOperationDir string) {
+	testScenarioManager.TestScenario("grouping", func(testOperationDir string, expectedResultDir string) {
 		runArgs := run.RunArgs{
 			WorkingDir:    testOperationDir,
 			TargetRootDir: ".",
@@ -40,5 +40,7 @@ func TestPythonIntegration(t *testing.T) {
 		if runError != nil {
 			t.Fatalf("Failed to run import cleaner: %v", runError)
 		}
+
+		integrationtest.AssertDirectoriesEqual(t, expectedResultDir, testOperationDir, []string{".py"})
 	})
 }

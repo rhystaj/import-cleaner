@@ -3,50 +3,16 @@
 package integrationtest
 
 import (
-	"io/fs"
-	"os"
 	"path/filepath"
 )
 
 const TEST_OPERATION_DIR = "./_testop"
 
-func copyDir(src, dst string) error {
-	return filepath.WalkDir(src, func(path string, entry fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-
-		rel, err := filepath.Rel(src, path)
-		if err != nil {
-			return err
-		}
-
-		target := filepath.Join(dst, rel)
-		if entry.IsDir() {
-			return os.MkdirAll(target, 0o755)
-		}
-
-		info, err := entry.Info()
-		if err != nil {
-			return err
-		}
-
-		return copyFile(path, target, info.Mode().Perm())
-	})
-}
-
-func copyFile(src, dst string, mode os.FileMode) error {
-	contents, err := os.ReadFile(src)
-	if err != nil {
-		return err
-	}
-
-	return os.WriteFile(dst, contents, mode)
-}
+type testOperation = func(testOperationDir string, expectedResultDir string)
 
 type TestScenarioManager interface {
 	PrepareFilesForTestScenario(scenarioName string) error
-	TestScenario(scenarioName string, testOperarion func(testOperationDir string))
+	TestScenario(scenarioName string, testOperarion testOperation)
 }
 
 type testScenarioManagerImpl struct {
@@ -69,9 +35,10 @@ func (m testScenarioManagerImpl) PrepareFilesForTestScenario(scenarioName string
 	return nil
 }
 
-func (m testScenarioManagerImpl) TestScenario(scenarioName string, testOperarion func(testOperationDir string)) {
+func (m testScenarioManagerImpl) TestScenario(scenarioName string, testOperarion testOperation) {
 	operationDir := filepath.Join(m.baseOperationDir, scenarioName)
-	testOperarion(operationDir)
+	expectedResultDir := filepath.Join(m.scenariosDir, scenarioName, "expected_result")
+	testOperarion(operationDir, expectedResultDir)
 }
 
 func NewTestScenarioManager(workingDir string) TestScenarioManager {
