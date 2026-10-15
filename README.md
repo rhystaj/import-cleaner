@@ -58,12 +58,7 @@ groupingRules:
 
 Each group definition defines one or more conditions an import must meet to be considered part of the group. Imports are considered to be part of the *first* group they meet all conditions for, based on the order in which the groups are defined (so it is recommended to define more specific rules first). If an import doesn't meet any conditions for a group it will applied to a 'miscellaneous' group automatically written last.
 
-The rules that can be defined for a group are:
-
-- `modulePaths` - the paths of the module from which dependencies are being imported. An import will be considered part of the group if it containes *any* of the listed modules
-- `dependencySourceType` - can be:
-  - 'internal' - the import defines dependencies which are part of the same codebase
-  - 'external' - the import defines dependencies imported externally (e.g. via a package manager such as npm or pip)
+Available grouping rules documented [here](./docs/grouping_rules.md).
 
 ## Future Plans
 
