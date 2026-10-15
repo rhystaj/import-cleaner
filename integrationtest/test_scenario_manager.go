@@ -11,8 +11,7 @@ const TEST_OPERATION_DIR = "./_testop"
 type testOperation = func(testOperationDir string, expectedResultDir string)
 
 type TestScenarioManager interface {
-	PrepareFilesForTestScenario(scenarioName string) error
-	TestScenario(scenarioName string, testOperarion testOperation)
+	TestScenario(scenarioName string, testOperation testOperation) error
 }
 
 type testScenarioManagerImpl struct {
@@ -21,7 +20,7 @@ type testScenarioManagerImpl struct {
 	baseOperationDir string
 }
 
-func (m testScenarioManagerImpl) PrepareFilesForTestScenario(scenarioName string) error {
+func (m testScenarioManagerImpl) TestScenario(scenarioName string, testOperation testOperation) error {
 	sourceConfigFile := filepath.Join(m.scenariosDir, scenarioName, "imports-config.yml")
 	operationDir := filepath.Join(m.baseOperationDir, scenarioName)
 
@@ -32,13 +31,10 @@ func (m testScenarioManagerImpl) PrepareFilesForTestScenario(scenarioName string
 		return err
 	}
 
-	return nil
-}
-
-func (m testScenarioManagerImpl) TestScenario(scenarioName string, testOperarion testOperation) {
-	operationDir := filepath.Join(m.baseOperationDir, scenarioName)
 	expectedResultDir := filepath.Join(m.scenariosDir, scenarioName, "expected_result")
-	testOperarion(operationDir, expectedResultDir)
+	testOperation(operationDir, expectedResultDir)
+
+	return nil
 }
 
 func NewTestScenarioManager(workingDir string) TestScenarioManager {

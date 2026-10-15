@@ -29,7 +29,6 @@ func TestPythonIntegration(t *testing.T) {
 	wd, _ := os.Getwd()
 	testScenarioManager := integrationtest.NewTestScenarioManager(wd)
 
-	testScenarioManager.PrepareFilesForTestScenario("grouping")
 	testScenarioManager.TestScenario("grouping", func(testOperationDir string, expectedResultDir string) {
 		runArgs := run.RunArgs{
 			WorkingDir:    testOperationDir,
