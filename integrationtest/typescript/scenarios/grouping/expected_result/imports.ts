@@ -11,9 +11,8 @@ import { AvailabilityStatus, Availability, AvailabilityDatetime } from './lib/ty
 
 
 
-
-
 const x = 1;
+
 
 function foo() {
 	return 1;

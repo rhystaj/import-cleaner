@@ -42,7 +42,7 @@ func (m testScenarioManagerImpl) TestScenario(scenarioName string, testOperation
 	return nil
 }
 
-func NewTestScenarioManager(workingDir string) TestScenarioManager {
+func NewTestScenarioManagerForWorkingDir(workingDir string) TestScenarioManager {
 	filesSourceDir := filepath.Join(workingDir, "test_files")
 	scenariosDir := filepath.Join(workingDir, "scenarios")
 	baseOperationDir := filepath.Join(workingDir, TEST_OPERATION_DIR)
