@@ -65,11 +65,7 @@ Available grouping rules documented [here](./docs/grouping_rules.md).
 ### Features
 
 In rough precedence:
-1) Further grouping rules, including language specific rules (such as grouping type imports in typescript)
-2) Supporting further languages
-3) Futher cleanup transformations beyond simple grouping (e.g. consolidating imports from the same module)
-4) Automatic generation and use of index files
-
-### Workflow
-- Implement CI pipeline with unit tests
-- Automated tests that run executable against test files in filesystem
+1) Futher cleanup transformations beyond simple grouping (e.g. consolidating imports from the same module)
+2) Automatic generation and use of index files
+3) Further grouping rules, including language specific rules
+4) Supporting further languages
