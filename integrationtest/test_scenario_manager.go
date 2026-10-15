@@ -3,6 +3,7 @@
 package integrationtest
 
 import (
+	"os"
 	"path/filepath"
 )
 
@@ -33,6 +34,10 @@ func (m testScenarioManagerImpl) TestScenario(scenarioName string, testOperation
 
 	expectedResultDir := filepath.Join(m.scenariosDir, scenarioName, "expected_result")
 	testOperation(operationDir, expectedResultDir)
+
+	if err := os.RemoveAll(operationDir); err != nil {
+		return err
+	}
 
 	return nil
 }

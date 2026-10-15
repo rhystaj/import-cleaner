@@ -3,27 +3,11 @@
 package main_test
 
 import (
-	"fmt"
 	"importcleaner/integrationtest"
 	"importcleaner/run"
 	"os"
-	"path/filepath"
 	"testing"
 )
-
-const TEST_OPERATION_DIR = "./_testop"
-
-func TestMain(m *testing.M) {
-	wd, _ := os.Getwd()
-
-	code := m.Run()
-
-	if err := os.RemoveAll(filepath.Join(wd, TEST_OPERATION_DIR)); err != nil {
-		fmt.Println("Failed to remove test operation directory:", err)
-		os.Exit(1)
-	}
-	os.Exit(code)
-}
 
 func TestPythonIntegration(t *testing.T) {
 	wd, _ := os.Getwd()
