@@ -1,6 +1,6 @@
 # Import Cleaner
 
-A configurable tool for automatically cleaning organising imports.
+A configurable tool for automatically cleaning and organising imports.
 **Still in early development - use at own risk!**
 
 ## Features
@@ -8,6 +8,7 @@ A configurable tool for automatically cleaning organising imports.
 - Group group imports based on
     - Module Path
     - Whether they are internal/external
+    - Whether they are a type import (Typescript only)
 
 **Supported Languages:**
 - Python
@@ -58,23 +59,14 @@ groupingRules:
 
 Each group definition defines one or more conditions an import must meet to be considered part of the group. Imports are considered to be part of the *first* group they meet all conditions for, based on the order in which the groups are defined (so it is recommended to define more specific rules first). If an import doesn't meet any conditions for a group it will applied to a 'miscellaneous' group automatically written last.
 
-The rules that can be defined for a group are:
-
-- `modulePaths` - the paths of the module from which dependencies are being imported. An import will be considered part of the group if it containes *any* of the listed modules
-- `dependencySourceType` - can be:
-  - 'internal' - the import defines dependencies which are part of the same codebase
-  - 'external' - the import defines dependencies imported externally (e.g. via a package manager such as npm or pip)
+Available grouping rules documented [here](./docs/grouping_rules.md).
 
 ## Future Plans
 
 ### Features
 
 In rough precedence:
-1) Further grouping rules, including language specific rules (such as grouping type imports in typescript)
-2) Supporting further languages
-3) Futher cleanup transformations beyond simple grouping (e.g. consolidating imports from the same module)
-4) Automatic generation and use of index files
-
-### Workflow
-- Implement CI pipeline with unit tests
-- Automated tests that run executable against test files in filesystem
+1) Futher cleanup transformations beyond simple grouping (e.g. consolidating imports from the same module)
+2) Automatic generation and use of index files
+3) Further grouping rules, including language specific rules
+4) Supporting further languages
