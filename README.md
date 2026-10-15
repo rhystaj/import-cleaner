@@ -1,6 +1,6 @@
 # Import Cleaner
 
-A configurable tool for automatically cleaning organising imports.
+A configurable tool for automatically cleaning and organising imports.
 **Still in early development - use at own risk!**
 
 ## Features
@@ -8,6 +8,7 @@ A configurable tool for automatically cleaning organising imports.
 - Group group imports based on
     - Module Path
     - Whether they are internal/external
+    - Whether they are a type import (Typescript only)
 
 **Supported Languages:**
 - Python
