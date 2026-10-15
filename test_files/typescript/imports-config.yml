@@ -1,4 +1,0 @@
-language: typescript
-ignoredPaths: []
-groupingRules:
-  - dependencySourceType: external
