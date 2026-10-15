@@ -2,8 +2,6 @@
 
 ## All Languages
 
----
-
 ### `modulePaths`
 The paths of the module from which dependencies are being imported. An import will be considered part of the group if it containes *any* of the listed modules
 
@@ -29,7 +27,6 @@ dependencySourceType: internal
 
 ## Typescript
 
----
 ### `isImportType`
 Whether the import is a type import, e.g.
 ```typescript
