@@ -21,7 +21,7 @@ func TestPythonIntegration(t *testing.T) {
 		runError := run.Run(runArgs)
 
 		if runError != nil {
-			t.Fatalf("Failed to run import cleaner: %v", runError)
+			t.Errorf("Failed to run import cleaner: %v", runError)
 		}
 
 		integrationtest.AssertDirectoriesEqual(t, expectedResultDir, testOperationDir, []string{".py"})
