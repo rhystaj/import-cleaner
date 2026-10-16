@@ -4,9 +4,9 @@ import { redirect } from '@sveltejs/kit';
 import * as R from 'ramda';
 import Rand from 'rand-seed';
 
-import type { Colour } from '../helpers/rendering';
-import { randomCoordinates } from '../helpers/random';
 import { add } from '../helpers/maths';
+import { randomCoordinates } from '../helpers/random';
+import type { Colour } from '../helpers/rendering';
 
 import type { Y } from './but';
 
