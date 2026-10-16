@@ -163,11 +163,19 @@ import anotherThing from 'anothercoolmodule
 	expectedStatements := []string{
 		"import something from 'somecoolmodule';\n",
 		"import {\n\tthis,\n\tandthis,\n\tandalsothis\n} from \"bigimport\";\n",
-		"\nconst VAL = 1\n",
+		"\n",
+		"const VAL = 1\n",
 		"import {aValue} from 'tricky/case'\n",
-		"\nif(something === 1) {\n\taFunction(value)\n",
+		"\n",
+		"if(something === 1) {\n",
+		"\taFunction(value)\n",
 		"\timport * from 'zzz'\n",
-		"\n\tlet x = new Thing().make();\n}\n\nwhile(true) { console.log() }\n\n",
+		"\n",
+		"\tlet x = new Thing().make();\n",
+		"}\n",
+		"\n",
+		"while(true) { console.log() }\n",
+		"\n",
 		"import anotherThing from 'anothercoolmodule\n",
 	}
 

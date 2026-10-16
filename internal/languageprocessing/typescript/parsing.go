@@ -2,7 +2,6 @@ package typescript
 
 import (
 	"bytes"
-	"importcleaner/internal/datastructures"
 	lp "importcleaner/internal/languageprocessing"
 	"iter"
 	"slices"
@@ -17,53 +16,40 @@ const (
 	TextStateImportEnd
 )
 
-func (p TypescriptImportStatementParser) StatementsInText(text string) iter.Seq[string] {
+func stringAsRuneSequence(text string) iter.Seq[rune] {
+	return func(yield func(rune) bool) {
+		for _, rune := range text {
+			if !yield(rune) {
+				return
+			}
+		}
+	}
+}
 
+func (p TypescriptImportStatementParser) StatementsInText(text string) iter.Seq[string] {
 	return func(yield func(string) bool) {
 		var stringBuffer bytes.Buffer
 
-		lookahead, _ := datastructures.CreateNewLookahead[string](2)
+		processingImportStatement := false
+		for frag := range fragmentByTypescriptStatementTerminators(text) {
+			stringBuffer.WriteString(frag)
 
-		textState := TextStateStandard
-		for lah := range lookahead.ProcessSequence(lp.DelimitedStringSequence(text, []rune{' ', ';', '\n'})) {
-			if textState == TextStateStandard && strings.TrimSpace(*lah.PeekStart()) == "import" {
-				if stringBuffer.Len() > 0 {
-					if !yield(stringBuffer.String()) {
-						return
-					}
-				}
-				stringBuffer.Reset()
+			if strings.HasPrefix(frag, "import") {
+				processingImportStatement = true
+			}
 
-				stringBuffer.WriteString(*lah.PeekStart())
-				textState = TextStateImportStart
+			if strings.Contains(frag, "from") {
+				processingImportStatement = false
+			}
+
+			if processingImportStatement {
 				continue
 			}
 
-			if textState == TextStateImportStart && strings.TrimSpace(*lah.PeekStart()) == "from" {
-				stringBuffer.WriteString(*lah.PeekStart())
-				textState = TextStateImportEnd
-				continue
+			if !yield(stringBuffer.String()) {
+				return
 			}
-
-			if textState == TextStateImportEnd {
-				stringBuffer.WriteString(*lah.PeekStart())
-
-				if lah.PeekEnd() != nil && *lah.PeekEnd() == "\n" && strings.HasSuffix(*lah.PeekStart(), ";") {
-					// New lines directly after semicolons should be included as part of the import statement,
-					// so don't yield or transition state yet.
-					continue
-				}
-
-				if !yield(stringBuffer.String()) {
-					return
-				}
-				stringBuffer.Reset()
-
-				textState = TextStateStandard
-				continue
-			}
-
-			stringBuffer.WriteString(*lah.PeekStart())
+			stringBuffer.Reset()
 		}
 
 		if stringBuffer.Len() > 0 {

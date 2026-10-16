@@ -12,9 +12,6 @@ import type { Y } from './but';
 
 import { AvailabilityStatus, Availability, AvailabilityDatetime } from './lib/types/availability';
 
-
-
-
 const x = 1;
 
 
