@@ -22,7 +22,6 @@ func (fp FileProcessorImpl[S]) extractStatements(text string) ([]S, []string, er
 	importStatements := make([]S, 0)
 	otherStatements := make([]string, 0)
 
-	var ignoreEmptyStatement bool
 	for statement := range fp.Parser.StatementsInText(text) {
 		if fp.Parser.IsIntendedImportStatement(statement) {
 			importStatement, err := fp.Parser.ParseImportStatement(statement)
@@ -30,15 +29,10 @@ func (fp FileProcessorImpl[S]) extractStatements(text string) ([]S, []string, er
 				return make([]S, 0), make([]string, 0), err
 			}
 			importStatements = append(importStatements, importStatement.(S))
-			ignoreEmptyStatement = true
 			continue
 		}
 
-		if len(statement) > 0 || !ignoreEmptyStatement {
-			otherStatements = append(otherStatements, statement)
-		}
-
-		ignoreEmptyStatement = false
+		otherStatements = append(otherStatements, statement)
 	}
 
 	return importStatements, otherStatements, nil
