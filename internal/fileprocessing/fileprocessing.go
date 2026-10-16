@@ -22,17 +22,24 @@ func (fp FileProcessorImpl[S]) extractStatements(text string) ([]S, []string, er
 	importStatements := make([]S, 0)
 	otherStatements := make([]string, 0)
 
+	passedImportsAtTop := false
 	for statement := range fp.Parser.StatementsInText(text) {
-		if fp.Parser.IsIntendedImportStatement(statement) {
-			importStatement, err := fp.Parser.ParseImportStatement(statement)
-			if err != nil {
-				return make([]S, 0), make([]string, 0), err
-			}
-			importStatements = append(importStatements, importStatement.(S))
+		if strings.TrimSpace(statement) == "" && !passedImportsAtTop {
+			//Whitespace between imports at the top of the file should be ignored
 			continue
 		}
 
-		otherStatements = append(otherStatements, statement)
+		if !fp.Parser.IsIntendedImportStatement(statement) {
+			otherStatements = append(otherStatements, statement)
+			passedImportsAtTop = true // Reached first non-whitespace, non-import statement
+			continue
+		}
+
+		importStatement, err := fp.Parser.ParseImportStatement(statement)
+		if err != nil {
+			return make([]S, 0), make([]string, 0), err
+		}
+		importStatements = append(importStatements, importStatement.(S))
 	}
 
 	return importStatements, otherStatements, nil
