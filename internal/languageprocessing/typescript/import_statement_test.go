@@ -153,3 +153,63 @@ func Test_TypescriptImportStatement_AsText_MultipleDefaultDependencies_Error(t *
 		AssertCorrectErrorHandlingForInvalidTypescriotImportStatementWrite(t, description, testStatement, EXPECTED_ERROR_DETAIL)
 	}
 }
+
+func Test_TypescriptImportStatement_GetGenericDetails(t *testing.T) {
+	modulePathCases := []struct {
+		input    []string
+		expected []string
+	}{
+		{
+			input:    []string{"some", "module", "path"},
+			expected: []string{"some", "module", "path"},
+		},
+		{
+			input:    []string{"..", "some", "module", "path"},
+			expected: []string{"some", "module", "path"},
+		},
+		{
+			input:    []string{".", "some", "module", "path"},
+			expected: []string{"some", "module", "path"},
+		},
+		{
+			input:    []string{"..", ".", "some", "module", "path"},
+			expected: []string{"some", "module", "path"},
+		},
+		{
+			input:    []string{"..", ".", "..", "some", "module", "path"},
+			expected: []string{"some", "module", "path"},
+		},
+		{
+			input:    []string{"..", "..", "."},
+			expected: []string{},
+		},
+	}
+
+	for _, modulePathCase := range modulePathCases {
+
+		testStatement := typescript.TypescriptImportStatement{
+			External:        false,
+			ModulePathParts: modulePathCase.input,
+			Dependecies: []typescript.TypescriptDependecy{
+				{
+					Name:         "dependency",
+					Alias:        "dep",
+					IsTypeImport: true,
+				},
+			},
+		}
+
+		expectedGenericDetails := lp.ImportStatementGenericDetails{
+			External:        false,
+			ModulePathParts: modulePathCase.expected,
+			Dependecies: []lp.GenericDependecy{
+				{
+					Name:  "dependency",
+					Alias: "dep",
+				},
+			},
+		}
+
+		assert.Equal(t, expectedGenericDetails, testStatement.GetGenericDetails())
+	}
+}

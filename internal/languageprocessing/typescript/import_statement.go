@@ -106,7 +106,7 @@ func (p TypescriptImportStatement) GetGenericDetails() lp.ImportStatementGeneric
 	}
 
 	return lp.ImportStatementGenericDetails{
-		ModulePathParts: p.ModulePathParts,
+		ModulePathParts: stripRelativePrefixFromModulePath(p.ModulePathParts),
 		ModuleAlias:     p.ModuleAlias,
 		Dependecies:     dependencies,
 		External:        p.External,
