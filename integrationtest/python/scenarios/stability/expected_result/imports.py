@@ -5,9 +5,7 @@ from internal import VALUE
 
 import datetime
 
-
 x = VALUE
-
 
 class SomeClass:
     def __init__(self) -> None:
