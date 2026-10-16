@@ -4,6 +4,10 @@ import { redirect } from '@sveltejs/kit';
 import * as R from 'ramda';
 import Rand from 'rand-seed';
 
+import { add } from '../helpers/maths';
+import { randomCoordinates } from '../helpers/random';
+import type { Colour } from '../helpers/rendering';
+
 import type { Y } from './but';
 
 import { AvailabilityStatus, Availability, AvailabilityDatetime } from './lib/types/availability';

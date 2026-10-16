@@ -4,4 +4,5 @@ groupingRules:
   - dependencySourceType: external
     isTypeImport: true
   - dependencySourceType: external
+  - modulePaths: ['helpers']
   - isTypeImport: true
