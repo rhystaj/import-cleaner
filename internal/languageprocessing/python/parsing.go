@@ -10,19 +10,6 @@ import (
 	"strings"
 )
 
-type PythonDependecy struct {
-	Name  string
-	Alias string
-}
-
-type PythonImportStatement struct {
-	RawText         string
-	ModulePathParts []string
-	ModuleAlias     string
-	Dependecies     []PythonDependecy
-	External        bool
-}
-
 type PythonImportStatementParser struct {
 	WorkingDir  string
 	FileManager iowrappers.FileManager
@@ -105,23 +92,30 @@ func (p PythonImportStatementParser) isExternalModule(modulePathParts []string) 
 	return true
 }
 
-func (p PythonImportStatementParser) parseModuleInfo(moduleInfoText string) (modulePathParts []string, moduleAlias string, errorMessage string) {
-	parts := strings.Split(moduleInfoText, " ")
+func (p PythonImportStatementParser) parseModuleInfo(moduleInfoText string) (ancestoryLevels int, modulePathParts []string, moduleAlias string, errorMessage string) {
+	ancestoryLevels = 0
+	for ancestoryLevels = range moduleInfoText {
+		if moduleInfoText[ancestoryLevels] != '.' {
+			break
+		}
+	}
+
+	parts := strings.Split(moduleInfoText[ancestoryLevels:], " ")
 
 	if len(parts) == 0 {
-		return []string{}, "", "No module"
+		return 0, []string{}, "", "No module"
 	}
 
 	modulePathParts = strings.Split(parts[0], ".")
 	if len(parts) <= 1 {
-		return modulePathParts, "", ""
+		return ancestoryLevels, modulePathParts, "", ""
 	}
 
 	if len(parts) != 3 || parts[1] != "as" {
-		return []string{}, "", "Module alias expected"
+		return ancestoryLevels, modulePathParts, "", "Module alias expected"
 	}
 
-	return modulePathParts, parts[2], ""
+	return ancestoryLevels, modulePathParts, parts[2], ""
 }
 
 func (p PythonImportStatementParser) parseDependency(dependecyText string) (dependency PythonDependecy, errorMessage string) {
@@ -182,7 +176,7 @@ func (p PythonImportStatementParser) generateErrorResultForStatement(statement s
 		Detail:    detail,
 	}
 
-	return PythonImportStatement{"", []string{}, "", []PythonDependecy{}, false}, error
+	return PythonImportStatement{0, []string{}, "", []PythonDependecy{}, false}, error
 }
 
 func (p PythonImportStatementParser) ParseImportStatement(statementText string) (lp.ImportStatement, error) {
@@ -199,13 +193,13 @@ func (p PythonImportStatementParser) ParseImportStatement(statementText string) 
 			return p.generateErrorResultForStatement(statementText, "No module")
 		}
 
-		modulePathParts, moduleAlias, moduleParseErrorMessage := p.parseModuleInfo(statementRemaining)
+		ancestoryLevels, modulePathParts, moduleAlias, moduleParseErrorMessage := p.parseModuleInfo(statementRemaining)
 		if moduleParseErrorMessage != "" {
 			return p.generateErrorResultForStatement(statementText, moduleParseErrorMessage)
 		}
 
 		return PythonImportStatement{
-			RawText:         statementText,
+			AncestoryLevels: ancestoryLevels,
 			ModulePathParts: modulePathParts,
 			ModuleAlias:     moduleAlias,
 			Dependecies:     []PythonDependecy{},
@@ -214,7 +208,7 @@ func (p PythonImportStatementParser) ParseImportStatement(statementText string) 
 	}
 
 	currentStatementPart, statementRemaining, _ = strings.Cut(statementRemaining, " ")
-	modulePathParts, _, moduleParseErrorMessage := p.parseModuleInfo(currentStatementPart)
+	ancestoryLevels, modulePathParts, _, moduleParseErrorMessage := p.parseModuleInfo(currentStatementPart)
 	if moduleParseErrorMessage != "" {
 		return p.generateErrorResultForStatement(statementText, moduleParseErrorMessage)
 	}
@@ -235,49 +229,5 @@ func (p PythonImportStatementParser) ParseImportStatement(statementText string) 
 
 	external := p.isExternalModule(modulePathParts)
 
-	return PythonImportStatement{statementText, modulePathParts, "", dependencies, external}, nil
-}
-
-func (p PythonImportStatement) dependecyAsString(dependecy PythonDependecy) string {
-	result := dependecy.Name
-
-	if dependecy.Alias != "" {
-		result += " as " + dependecy.Alias
-	}
-
-	return result
-}
-
-func (p PythonImportStatement) AsText() (string, error) {
-	modulePath := strings.Join(p.ModulePathParts, ".")
-
-	if len(p.Dependecies) > 0 {
-		dependencyNames := make([]string, 0)
-		for _, dep := range p.Dependecies {
-			dependencyNames = append(dependencyNames, p.dependecyAsString(dep))
-		}
-
-		result := fmt.Sprintf("from %s import %s", modulePath, strings.Join(dependencyNames, ", "))
-		return result, nil
-	} else {
-		result := fmt.Sprintf("import %s", modulePath)
-		return result, nil
-	}
-}
-
-func (p PythonImportStatement) GetGenericDetails() lp.ImportStatementGenericDetails {
-	dependencies := make([]lp.GenericDependecy, len(p.Dependecies))
-	for i, dependency := range p.Dependecies {
-		dependencies[i] = lp.GenericDependecy{
-			Name:  dependency.Name,
-			Alias: dependency.Alias,
-		}
-	}
-
-	return lp.ImportStatementGenericDetails{
-		ModulePathParts: p.ModulePathParts,
-		ModuleAlias:     p.ModuleAlias,
-		Dependecies:     dependencies,
-		External:        p.External,
-	}
+	return PythonImportStatement{ancestoryLevels, modulePathParts, "", dependencies, external}, nil
 }

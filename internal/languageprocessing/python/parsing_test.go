@@ -6,7 +6,10 @@ import (
 	lp "importcleaner/internal/languageprocessing"
 	"importcleaner/internal/languageprocessing/python"
 	"reflect"
+	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestStatementsInText_Python(t *testing.T) {
@@ -76,238 +79,271 @@ func TestIsImportStatement(t *testing.T) {
 	}
 }
 
-func AssertPythonImportStatementParsedCorrectly(t *testing.T, statement string, directoryReader iowrappers.FileManager, expectedResult python.PythonImportStatement) {
+type parseCase struct {
+	statement      string
+	expectedResult python.PythonImportStatement
+}
+
+func TestParseImportStatement(t *testing.T) {
+	testDirectoryReader := iowrappers.InitialiseMockFileManager([]*iowrappers.MockFSNode{
+		iowrappers.CreateMockFSFile("modulefile.py", ""),
+		iowrappers.CreateMockFSDir("moduledir", make([]*iowrappers.MockFSNode, 0)),
+	})
+
 	testParser := python.PythonImportStatementParser{
 		WorkingDir:  "", //Doesn't matter for tesing purposes
-		FileManager: directoryReader,
+		FileManager: testDirectoryReader,
 	}
 
-	resultingStatement, resultingError := testParser.ParseImportStatement(statement)
-
-	if resultingError != nil {
-		t.Errorf("Statement '%s' produced error '%s'", statement, resultingError.Error())
+	externalParseCases := []parseCase{
+		{
+			statement: "import acoopythonackage",
+			expectedResult: python.PythonImportStatement{
+				ModulePathParts: []string{"acoopythonackage"},
+				Dependecies:     []python.PythonDependecy{},
+				External:        true,
+			},
+		},
+		{
+			statement: "import acoopythonackage as acp",
+			expectedResult: python.PythonImportStatement{
+				ModulePathParts: []string{"acoopythonackage"},
+				ModuleAlias:     "acp",
+				Dependecies:     []python.PythonDependecy{},
+				External:        true,
+			},
+		},
+		{
+			statement: "from acoopythonackage import somedependency",
+			expectedResult: python.PythonImportStatement{
+				ModulePathParts: []string{"acoopythonackage"},
+				ModuleAlias:     "",
+				Dependecies: []python.PythonDependecy{
+					{Name: "somedependency", Alias: ""},
+				},
+				External: true,
+			},
+		},
+		{
+			statement: "from acoopythonackage import somedependency as sd",
+			expectedResult: python.PythonImportStatement{
+				ModulePathParts: []string{"acoopythonackage"},
+				ModuleAlias:     "",
+				Dependecies: []python.PythonDependecy{
+					{Name: "somedependency", Alias: "sd"},
+				},
+				External: true,
+			},
+		},
+		{
+			statement: "from acoopythonackage import somedependency, anotherthing as at, somethingelse",
+			expectedResult: python.PythonImportStatement{
+				ModulePathParts: []string{"acoopythonackage"},
+				ModuleAlias:     "",
+				Dependecies: []python.PythonDependecy{
+					{Name: "somedependency", Alias: ""},
+					{Name: "anotherthing", Alias: "at"},
+					{Name: "somethingelse", Alias: ""},
+				},
+				External: true,
+			},
+		},
+		{
+			statement: "from acoopythonackage import (\n\tthis as t,\n\tandthis,\n\tandalsothis\n)",
+			expectedResult: python.PythonImportStatement{
+				ModulePathParts: []string{"acoopythonackage"},
+				ModuleAlias:     "",
+				Dependecies: []python.PythonDependecy{
+					{Name: "this", Alias: "t"},
+					{Name: "andthis", Alias: ""},
+					{Name: "andalsothis", Alias: ""},
+				},
+				External: true,
+			},
+		},
+		{
+			statement: "from acoopythonackage import (\n   this as t,\n   andthis,\n   andalsothis\n)",
+			expectedResult: python.PythonImportStatement{
+				ModulePathParts: []string{"acoopythonackage"},
+				ModuleAlias:     "",
+				Dependecies: []python.PythonDependecy{
+					{Name: "this", Alias: "t"},
+					{Name: "andthis", Alias: ""},
+					{Name: "andalsothis", Alias: ""},
+				},
+				External: true,
+			},
+		},
 	}
 
-	if !reflect.DeepEqual(resultingStatement, expectedResult) {
-		t.Errorf("Statement '%s' produced result %+v, but %+v was expected", statement, resultingStatement, expectedResult)
+	baseInternalParseCases := []parseCase{
+		{
+			statement: "import modulefile",
+			expectedResult: python.PythonImportStatement{
+				ModulePathParts: []string{"modulefile"},
+				Dependecies:     []python.PythonDependecy{},
+				External:        false,
+			},
+		},
+		{
+			statement: "import moduledir.subdep",
+			expectedResult: python.PythonImportStatement{
+				ModulePathParts: []string{"moduledir", "subdep"},
+				Dependecies:     []python.PythonDependecy{},
+				External:        false,
+			},
+		},
+		{
+			statement: "import modulefile as mf",
+			expectedResult: python.PythonImportStatement{
+				ModulePathParts: []string{"modulefile"},
+				ModuleAlias:     "mf",
+				Dependecies:     []python.PythonDependecy{},
+				External:        false,
+			},
+		},
+		{
+			statement: "import moduledir.subdep as md",
+			expectedResult: python.PythonImportStatement{
+				ModulePathParts: []string{"moduledir", "subdep"},
+				ModuleAlias:     "md",
+				Dependecies:     []python.PythonDependecy{},
+				External:        false,
+			},
+		},
+		{
+			statement: "from modulefile import somedependency",
+			expectedResult: python.PythonImportStatement{
+				ModulePathParts: []string{"modulefile"},
+				ModuleAlias:     "",
+				Dependecies: []python.PythonDependecy{
+					{Name: "somedependency", Alias: ""},
+				},
+				External: false,
+			},
+		},
+		{
+			statement: "from moduledir.subdep import somedependency",
+			expectedResult: python.PythonImportStatement{
+				ModulePathParts: []string{"moduledir", "subdep"},
+				ModuleAlias:     "",
+				Dependecies: []python.PythonDependecy{
+					{Name: "somedependency", Alias: ""},
+				},
+				External: false,
+			},
+		},
+		{
+			statement: "from modulefile import somedependency as sd",
+			expectedResult: python.PythonImportStatement{
+				ModulePathParts: []string{"modulefile"},
+				ModuleAlias:     "",
+				Dependecies: []python.PythonDependecy{
+					{Name: "somedependency", Alias: "sd"},
+				},
+				External: false,
+			},
+		},
+		{
+			statement: "from moduledir.subdep import somedependency as sd",
+			expectedResult: python.PythonImportStatement{
+				ModulePathParts: []string{"moduledir", "subdep"},
+				ModuleAlias:     "",
+				Dependecies: []python.PythonDependecy{
+					{Name: "somedependency", Alias: "sd"},
+				},
+				External: false,
+			},
+		},
+		{
+			statement: "from modulefile import (\n\tthis,\n\tandthis as at,\n\tandalsothis\n)",
+			expectedResult: python.PythonImportStatement{
+				ModulePathParts: []string{"modulefile"},
+				ModuleAlias:     "",
+				Dependecies: []python.PythonDependecy{
+					{Name: "this", Alias: ""},
+					{Name: "andthis", Alias: "at"},
+					{Name: "andalsothis", Alias: ""},
+				},
+				External: false,
+			},
+		},
+		{
+			statement: "from moduledir import (\n   this,\n   andthis,\n   andalsothis as aat\n)",
+			expectedResult: python.PythonImportStatement{
+				ModulePathParts: []string{"moduledir"},
+				ModuleAlias:     "",
+				Dependecies: []python.PythonDependecy{
+					{Name: "this", Alias: ""},
+					{Name: "andthis", Alias: ""},
+					{Name: "andalsothis", Alias: "aat"},
+				},
+				External: false,
+			},
+		},
+		{
+			statement: "from modulefile import (\n   this,\n   andthis as at,\n   andalsothis\n)",
+			expectedResult: python.PythonImportStatement{
+				ModulePathParts: []string{"modulefile"},
+				ModuleAlias:     "",
+				Dependecies: []python.PythonDependecy{
+					{Name: "this", Alias: ""},
+					{Name: "andthis", Alias: "at"},
+					{Name: "andalsothis", Alias: ""},
+				},
+				External: false,
+			},
+		},
+		{
+			statement: "from moduledir import (\n\tthis,\n\tandthis,\n\tandalsothis as aat\n)",
+			expectedResult: python.PythonImportStatement{
+				ModulePathParts: []string{"moduledir"},
+				ModuleAlias:     "",
+				Dependecies: []python.PythonDependecy{
+					{Name: "this", Alias: ""},
+					{Name: "andthis", Alias: ""},
+					{Name: "andalsothis", Alias: "aat"},
+				},
+				External: false,
+			},
+		},
 	}
-}
 
-func TestParseImportStatement_ValidRootImports_NoAliases(t *testing.T) {
-	testDirectoryReader := iowrappers.InitialiseMockFileManager([]*iowrappers.MockFSNode{
-		iowrappers.CreateMockFSFile("modulefile.py", ""),
-		iowrappers.CreateMockFSDir("moduledir", make([]*iowrappers.MockFSNode, 0)),
-	})
+	internalParseCases := make([]parseCase, 0)
+	for level := 0; level < 5; level++ {
+		for _, c := range baseInternalParseCases {
+			statementParts := strings.Split(c.statement, " ")
+			statementParts[1] = strings.Repeat(".", level) + statementParts[1]
+			statement := strings.Join(statementParts, " ")
 
-	AssertPythonImportStatementParsedCorrectly(t, "import acoopythonackage", testDirectoryReader, python.PythonImportStatement{
-		RawText:         "import acoopythonackage",
-		ModulePathParts: []string{"acoopythonackage"},
-		Dependecies:     []python.PythonDependecy{},
-		External:        true,
-	})
+			internalParseCases = append(internalParseCases, parseCase{
+				statement: statement,
+				expectedResult: python.PythonImportStatement{
+					AncestoryLevels: level,
+					ModulePathParts: c.expectedResult.ModulePathParts,
+					ModuleAlias:     c.expectedResult.ModuleAlias,
+					Dependecies:     c.expectedResult.Dependecies,
+					External:        c.expectedResult.External,
+				},
+			})
+		}
+	}
 
-	AssertPythonImportStatementParsedCorrectly(t, "import modulefile", testDirectoryReader, python.PythonImportStatement{
-		RawText:         "import modulefile",
-		ModulePathParts: []string{"modulefile"},
-		Dependecies:     []python.PythonDependecy{},
-		External:        false,
-	})
+	for _, parseCase := range externalParseCases {
+		t.Run(parseCase.statement, func(t *testing.T) {
+			resultingStatement, resultingError := testParser.ParseImportStatement(parseCase.statement)
+			assert.NoError(t, resultingError)
+			assert.Equal(t, parseCase.expectedResult, resultingStatement)
+		})
+	}
 
-	AssertPythonImportStatementParsedCorrectly(t, "import moduledir.subdep", testDirectoryReader, python.PythonImportStatement{
-		RawText:         "import moduledir.subdep",
-		ModulePathParts: []string{"moduledir", "subdep"},
-		Dependecies:     []python.PythonDependecy{},
-		External:        false,
-	})
-}
-
-func TestParseImportStatement_ValidRootImports_Aliases(t *testing.T) {
-	testDirectoryReader := iowrappers.InitialiseMockFileManager([]*iowrappers.MockFSNode{
-		iowrappers.CreateMockFSFile("modulefile.py", ""),
-		iowrappers.CreateMockFSDir("moduledir", make([]*iowrappers.MockFSNode, 0)),
-	})
-
-	AssertPythonImportStatementParsedCorrectly(t, "import acoopythonackage as acp", testDirectoryReader, python.PythonImportStatement{
-		RawText:         "import acoopythonackage as acp",
-		ModulePathParts: []string{"acoopythonackage"},
-		ModuleAlias:     "acp",
-		Dependecies:     []python.PythonDependecy{},
-		External:        true,
-	})
-
-	AssertPythonImportStatementParsedCorrectly(t, "import modulefile as mf", testDirectoryReader, python.PythonImportStatement{
-		RawText:         "import modulefile as mf",
-		ModulePathParts: []string{"modulefile"},
-		ModuleAlias:     "mf",
-		Dependecies:     []python.PythonDependecy{},
-		External:        false,
-	})
-
-	AssertPythonImportStatementParsedCorrectly(t, "import moduledir.subdep as md", testDirectoryReader, python.PythonImportStatement{
-		RawText:         "import moduledir.subdep as md",
-		ModulePathParts: []string{"moduledir", "subdep"},
-		ModuleAlias:     "md",
-		Dependecies:     []python.PythonDependecy{},
-		External:        false,
-	})
-}
-
-func TestParseImportStatement_ValidSelectiveImports_SingleLine(t *testing.T) {
-	testDirectoryReader := iowrappers.InitialiseMockFileManager([]*iowrappers.MockFSNode{
-		iowrappers.CreateMockFSFile("modulefile.py", ""),
-		iowrappers.CreateMockFSDir("moduledir", make([]*iowrappers.MockFSNode, 0)),
-	})
-
-	AssertPythonImportStatementParsedCorrectly(t, "from acoopythonackage import somedependency", testDirectoryReader, python.PythonImportStatement{
-		RawText:         "from acoopythonackage import somedependency",
-		ModulePathParts: []string{"acoopythonackage"},
-		ModuleAlias:     "",
-		Dependecies: []python.PythonDependecy{
-			{Name: "somedependency", Alias: ""},
-		},
-		External: true,
-	})
-
-	AssertPythonImportStatementParsedCorrectly(t, "from modulefile import somedependency", testDirectoryReader, python.PythonImportStatement{
-		RawText:         "from modulefile import somedependency",
-		ModulePathParts: []string{"modulefile"},
-		ModuleAlias:     "",
-		Dependecies: []python.PythonDependecy{
-			{Name: "somedependency", Alias: ""},
-		},
-		External: false,
-	})
-
-	AssertPythonImportStatementParsedCorrectly(t, "from moduledir.subdep import somedependency", testDirectoryReader, python.PythonImportStatement{
-		RawText:         "from moduledir.subdep import somedependency",
-		ModulePathParts: []string{"moduledir", "subdep"},
-		ModuleAlias:     "",
-		Dependecies: []python.PythonDependecy{
-			{Name: "somedependency", Alias: ""},
-		},
-		External: false,
-	})
-
-	AssertPythonImportStatementParsedCorrectly(t, "from acoopythonackage import somedependency as sd", testDirectoryReader, python.PythonImportStatement{
-		RawText:         "from acoopythonackage import somedependency as sd",
-		ModulePathParts: []string{"acoopythonackage"},
-		ModuleAlias:     "",
-		Dependecies: []python.PythonDependecy{
-			{Name: "somedependency", Alias: "sd"},
-		},
-		External: true,
-	})
-
-	AssertPythonImportStatementParsedCorrectly(t, "from modulefile import somedependency as sd", testDirectoryReader, python.PythonImportStatement{
-		RawText:         "from modulefile import somedependency as sd",
-		ModulePathParts: []string{"modulefile"},
-		ModuleAlias:     "",
-		Dependecies: []python.PythonDependecy{
-			{Name: "somedependency", Alias: "sd"},
-		},
-		External: false,
-	})
-
-	AssertPythonImportStatementParsedCorrectly(t, "from moduledir.subdep import somedependency as sd", testDirectoryReader, python.PythonImportStatement{
-		RawText:         "from moduledir.subdep import somedependency as sd",
-		ModulePathParts: []string{"moduledir", "subdep"},
-		ModuleAlias:     "",
-		Dependecies: []python.PythonDependecy{
-			{Name: "somedependency", Alias: "sd"},
-		},
-		External: false,
-	})
-
-	AssertPythonImportStatementParsedCorrectly(t, "from acoopythonackage import somedependency, anotherthing as at, somethingelse", testDirectoryReader, python.PythonImportStatement{
-		RawText:         "from acoopythonackage import somedependency, anotherthing as at, somethingelse",
-		ModulePathParts: []string{"acoopythonackage"},
-		ModuleAlias:     "",
-		Dependecies: []python.PythonDependecy{
-			{Name: "somedependency", Alias: ""},
-			{Name: "anotherthing", Alias: "at"},
-			{Name: "somethingelse", Alias: ""},
-		},
-		External: true,
-	})
-}
-
-func TestParseImportStatement_ValidSelectiveImports_MultipleLines(t *testing.T) {
-	testDirectoryReader := iowrappers.InitialiseMockFileManager([]*iowrappers.MockFSNode{
-		iowrappers.CreateMockFSFile("modulefile.py", ""),
-		iowrappers.CreateMockFSDir("moduledir", make([]*iowrappers.MockFSNode, 0)),
-	})
-
-	AssertPythonImportStatementParsedCorrectly(t, "from acoopythonackage import (\n\tthis as t,\n\tandthis,\n\tandalsothis\n)", testDirectoryReader, python.PythonImportStatement{
-		RawText:         "from acoopythonackage import (\n\tthis as t,\n\tandthis,\n\tandalsothis\n)",
-		ModulePathParts: []string{"acoopythonackage"},
-		ModuleAlias:     "",
-		Dependecies: []python.PythonDependecy{
-			{Name: "this", Alias: "t"},
-			{Name: "andthis", Alias: ""},
-			{Name: "andalsothis", Alias: ""},
-		},
-		External: true,
-	})
-
-	AssertPythonImportStatementParsedCorrectly(t, "from modulefile import (\n\tthis,\n\tandthis as at,\n\tandalsothis\n)", testDirectoryReader, python.PythonImportStatement{
-		RawText:         "from modulefile import (\n\tthis,\n\tandthis as at,\n\tandalsothis\n)",
-		ModulePathParts: []string{"modulefile"},
-		ModuleAlias:     "",
-		Dependecies: []python.PythonDependecy{
-			{Name: "this", Alias: ""},
-			{Name: "andthis", Alias: "at"},
-			{Name: "andalsothis", Alias: ""},
-		},
-		External: false,
-	})
-
-	AssertPythonImportStatementParsedCorrectly(t, "from moduledir import (\n   this,\n   andthis,\n   andalsothis as aat\n)", testDirectoryReader, python.PythonImportStatement{
-		RawText:         "from moduledir import (\n   this,\n   andthis,\n   andalsothis as aat\n)",
-		ModulePathParts: []string{"moduledir"},
-		ModuleAlias:     "",
-		Dependecies: []python.PythonDependecy{
-			{Name: "this", Alias: ""},
-			{Name: "andthis", Alias: ""},
-			{Name: "andalsothis", Alias: "aat"},
-		},
-		External: false,
-	})
-
-	AssertPythonImportStatementParsedCorrectly(t, "from acoopythonackage import (\n   this as t,\n   andthis,\n   andalsothis\n)", testDirectoryReader, python.PythonImportStatement{
-		RawText:         "from acoopythonackage import (\n   this as t,\n   andthis,\n   andalsothis\n)",
-		ModulePathParts: []string{"acoopythonackage"},
-		ModuleAlias:     "",
-		Dependecies: []python.PythonDependecy{
-			{Name: "this", Alias: "t"},
-			{Name: "andthis", Alias: ""},
-			{Name: "andalsothis", Alias: ""},
-		},
-		External: true,
-	})
-
-	AssertPythonImportStatementParsedCorrectly(t, "from modulefile import (\n   this,\n   andthis as at,\n   andalsothis\n)", testDirectoryReader, python.PythonImportStatement{
-		RawText:         "from modulefile import (\n   this,\n   andthis as at,\n   andalsothis\n)",
-		ModulePathParts: []string{"modulefile"},
-		ModuleAlias:     "",
-		Dependecies: []python.PythonDependecy{
-			{Name: "this", Alias: ""},
-			{Name: "andthis", Alias: "at"},
-			{Name: "andalsothis", Alias: ""},
-		},
-		External: false,
-	})
-
-	AssertPythonImportStatementParsedCorrectly(t, "from moduledir import (\n\tthis,\n\tandthis,\n\tandalsothis as aat\n)", testDirectoryReader, python.PythonImportStatement{
-		RawText:         "from moduledir import (\n\tthis,\n\tandthis,\n\tandalsothis as aat\n)",
-		ModulePathParts: []string{"moduledir"},
-		ModuleAlias:     "",
-		Dependecies: []python.PythonDependecy{
-			{Name: "this", Alias: ""},
-			{Name: "andthis", Alias: ""},
-			{Name: "andalsothis", Alias: "aat"},
-		},
-		External: false,
-	})
+	for _, parseCase := range internalParseCases {
+		t.Run(parseCase.statement, func(t *testing.T) {
+			resultingStatement, resultingError := testParser.ParseImportStatement(parseCase.statement)
+			assert.NoError(t, resultingError)
+			assert.Equal(t, parseCase.expectedResult, resultingStatement)
+		})
+	}
 }
 
 func AssertParseErrorHandledCorrectly(t *testing.T, statement string, expectedError error, parser python.PythonImportStatementParser) {
@@ -370,43 +406,4 @@ func TestParseImportStatement_MalformedAliases(t *testing.T) {
 	AssertParseErrorHandledCorrectly(t, "import mod as", &lp.ImportStatementParseError{Statement: "import mod as", Detail: "Module alias expected"}, testParser)
 	AssertParseErrorHandledCorrectly(t, "from something import dependency, baddep as", &lp.ImportStatementParseError{Statement: "from something import dependency, baddep as", Detail: "Dependency alias expected"}, testParser)
 	AssertParseErrorHandledCorrectly(t, "from something import dependency, bad dep", &lp.ImportStatementParseError{Statement: "from something import dependency, bad dep", Detail: "Malformed dependecy 'bad dep'"}, testParser)
-}
-
-func AssertStatementCorrectlyConvertedToText(t *testing.T, statement python.PythonImportStatement, expectedString string) {
-	result, _ := statement.AsText()
-
-	if result != expectedString {
-		t.Errorf("Failure to convert statement %+v to string: Expected '%s', but retrieved '%s'", statement, expectedString, result)
-	}
-}
-
-func Test_PythonImportStatement_AsText(t *testing.T) {
-	AssertStatementCorrectlyConvertedToText(t, python.PythonImportStatement{
-		ModulePathParts: []string{"somemod"},
-		ModuleAlias:     "",
-		Dependecies:     []python.PythonDependecy{},
-		External:        true,
-	}, "import somemod")
-
-	AssertStatementCorrectlyConvertedToText(t, python.PythonImportStatement{
-		ModulePathParts: []string{"bigmod"},
-		ModuleAlias:     "",
-		Dependecies: []python.PythonDependecy{
-			{Name: "something", Alias: ""},
-			{Name: "thingwithalias", Alias: "twa"},
-			{Name: "anotherthing", Alias: ""},
-		},
-		External: true,
-	}, "from bigmod import something, thingwithalias as twa, anotherthing")
-
-	AssertStatementCorrectlyConvertedToText(t, python.PythonImportStatement{
-		ModulePathParts: []string{"mod", "with", "multiple", "parts"},
-		ModuleAlias:     "",
-		Dependecies: []python.PythonDependecy{
-			{Name: "something", Alias: "s"},
-			{Name: "thingwithalias", Alias: ""},
-			{Name: "anotherthing", Alias: "at"},
-		},
-		External: true,
-	}, "from mod.with.multiple.parts import something as s, thingwithalias, anotherthing as at")
 }

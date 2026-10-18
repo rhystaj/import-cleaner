@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from submod import SUBVALUE
+from .submod import SUBVALUE
 
 from internal import VALUE
 

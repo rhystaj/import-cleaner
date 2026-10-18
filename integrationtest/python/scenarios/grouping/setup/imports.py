@@ -9,4 +9,4 @@ class SomeClass:
     def __init__(self) -> None:
         pass
 
-from submod import SUBVALUE
+from .submod import SUBVALUE
