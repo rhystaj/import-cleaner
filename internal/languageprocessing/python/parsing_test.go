@@ -407,11 +407,3 @@ func TestParseImportStatement_MalformedAliases(t *testing.T) {
 	AssertParseErrorHandledCorrectly(t, "from something import dependency, baddep as", &lp.ImportStatementParseError{Statement: "from something import dependency, baddep as", Detail: "Dependency alias expected"}, testParser)
 	AssertParseErrorHandledCorrectly(t, "from something import dependency, bad dep", &lp.ImportStatementParseError{Statement: "from something import dependency, bad dep", Detail: "Malformed dependecy 'bad dep'"}, testParser)
 }
-
-func AssertStatementCorrectlyConvertedToText(t *testing.T, statement python.PythonImportStatement, expectedString string) {
-	result, _ := statement.AsText()
-
-	if result != expectedString {
-		t.Errorf("Failure to convert statement %+v to string: Expected '%s', but retrieved '%s'", statement, expectedString, result)
-	}
-}
