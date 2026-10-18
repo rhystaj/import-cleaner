@@ -12,6 +12,7 @@ type PythonDependecy struct {
 }
 
 type PythonImportStatement struct {
+	AncestoryLevels int
 	ModulePathParts []string
 	ModuleAlias     string
 	Dependecies     []PythonDependecy

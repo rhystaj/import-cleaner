@@ -6,6 +6,7 @@ import (
 	lp "importcleaner/internal/languageprocessing"
 	"importcleaner/internal/languageprocessing/python"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -175,7 +176,7 @@ func TestParseImportStatement(t *testing.T) {
 		},
 	}
 
-	internalParseCases := []parseCase{
+	baseInternalParseCases := []parseCase{
 		{
 			statement: "import modulefile",
 			expectedResult: python.PythonImportStatement{
@@ -306,6 +307,26 @@ func TestParseImportStatement(t *testing.T) {
 				External: false,
 			},
 		},
+	}
+
+	internalParseCases := make([]parseCase, 0)
+	for level := 0; level < 5; level++ {
+		for _, c := range baseInternalParseCases {
+			statementParts := strings.Split(c.statement, " ")
+			statementParts[1] = strings.Repeat(".", level) + statementParts[1]
+			statement := strings.Join(statementParts, " ")
+
+			internalParseCases = append(internalParseCases, parseCase{
+				statement: statement,
+				expectedResult: python.PythonImportStatement{
+					AncestoryLevels: level,
+					ModulePathParts: c.expectedResult.ModulePathParts,
+					ModuleAlias:     c.expectedResult.ModuleAlias,
+					Dependecies:     c.expectedResult.Dependecies,
+					External:        c.expectedResult.External,
+				},
+			})
+		}
 	}
 
 	for _, parseCase := range externalParseCases {

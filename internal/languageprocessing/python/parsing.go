@@ -169,7 +169,7 @@ func (p PythonImportStatementParser) generateErrorResultForStatement(statement s
 		Detail:    detail,
 	}
 
-	return PythonImportStatement{[]string{}, "", []PythonDependecy{}, false}, error
+	return PythonImportStatement{0, []string{}, "", []PythonDependecy{}, false}, error
 }
 
 func (p PythonImportStatementParser) ParseImportStatement(statementText string) (lp.ImportStatement, error) {
@@ -221,5 +221,5 @@ func (p PythonImportStatementParser) ParseImportStatement(statementText string) 
 
 	external := p.isExternalModule(modulePathParts)
 
-	return PythonImportStatement{modulePathParts, "", dependencies, external}, nil
+	return PythonImportStatement{0, modulePathParts, "", dependencies, external}, nil
 }
