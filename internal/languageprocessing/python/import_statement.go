@@ -12,7 +12,6 @@ type PythonDependecy struct {
 }
 
 type PythonImportStatement struct {
-	RawText         string
 	ModulePathParts []string
 	ModuleAlias     string
 	Dependecies     []PythonDependecy

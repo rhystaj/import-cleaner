@@ -98,7 +98,6 @@ func TestParseImportStatement(t *testing.T) {
 		{
 			statement: "import acoopythonackage",
 			expectedResult: python.PythonImportStatement{
-				RawText:         "import acoopythonackage",
 				ModulePathParts: []string{"acoopythonackage"},
 				Dependecies:     []python.PythonDependecy{},
 				External:        true,
@@ -107,7 +106,6 @@ func TestParseImportStatement(t *testing.T) {
 		{
 			statement: "import acoopythonackage as acp",
 			expectedResult: python.PythonImportStatement{
-				RawText:         "import acoopythonackage as acp",
 				ModulePathParts: []string{"acoopythonackage"},
 				ModuleAlias:     "acp",
 				Dependecies:     []python.PythonDependecy{},
@@ -117,7 +115,6 @@ func TestParseImportStatement(t *testing.T) {
 		{
 			statement: "from acoopythonackage import somedependency",
 			expectedResult: python.PythonImportStatement{
-				RawText:         "from acoopythonackage import somedependency",
 				ModulePathParts: []string{"acoopythonackage"},
 				ModuleAlias:     "",
 				Dependecies: []python.PythonDependecy{
@@ -129,7 +126,6 @@ func TestParseImportStatement(t *testing.T) {
 		{
 			statement: "from acoopythonackage import somedependency as sd",
 			expectedResult: python.PythonImportStatement{
-				RawText:         "from acoopythonackage import somedependency as sd",
 				ModulePathParts: []string{"acoopythonackage"},
 				ModuleAlias:     "",
 				Dependecies: []python.PythonDependecy{
@@ -141,7 +137,6 @@ func TestParseImportStatement(t *testing.T) {
 		{
 			statement: "from acoopythonackage import somedependency, anotherthing as at, somethingelse",
 			expectedResult: python.PythonImportStatement{
-				RawText:         "from acoopythonackage import somedependency, anotherthing as at, somethingelse",
 				ModulePathParts: []string{"acoopythonackage"},
 				ModuleAlias:     "",
 				Dependecies: []python.PythonDependecy{
@@ -155,7 +150,6 @@ func TestParseImportStatement(t *testing.T) {
 		{
 			statement: "from acoopythonackage import (\n\tthis as t,\n\tandthis,\n\tandalsothis\n)",
 			expectedResult: python.PythonImportStatement{
-				RawText:         "from acoopythonackage import (\n\tthis as t,\n\tandthis,\n\tandalsothis\n)",
 				ModulePathParts: []string{"acoopythonackage"},
 				ModuleAlias:     "",
 				Dependecies: []python.PythonDependecy{
@@ -169,7 +163,6 @@ func TestParseImportStatement(t *testing.T) {
 		{
 			statement: "from acoopythonackage import (\n   this as t,\n   andthis,\n   andalsothis\n)",
 			expectedResult: python.PythonImportStatement{
-				RawText:         "from acoopythonackage import (\n   this as t,\n   andthis,\n   andalsothis\n)",
 				ModulePathParts: []string{"acoopythonackage"},
 				ModuleAlias:     "",
 				Dependecies: []python.PythonDependecy{
@@ -186,7 +179,6 @@ func TestParseImportStatement(t *testing.T) {
 		{
 			statement: "import modulefile",
 			expectedResult: python.PythonImportStatement{
-				RawText:         "import modulefile",
 				ModulePathParts: []string{"modulefile"},
 				Dependecies:     []python.PythonDependecy{},
 				External:        false,
@@ -195,7 +187,6 @@ func TestParseImportStatement(t *testing.T) {
 		{
 			statement: "import moduledir.subdep",
 			expectedResult: python.PythonImportStatement{
-				RawText:         "import moduledir.subdep",
 				ModulePathParts: []string{"moduledir", "subdep"},
 				Dependecies:     []python.PythonDependecy{},
 				External:        false,
@@ -204,7 +195,6 @@ func TestParseImportStatement(t *testing.T) {
 		{
 			statement: "import modulefile as mf",
 			expectedResult: python.PythonImportStatement{
-				RawText:         "import modulefile as mf",
 				ModulePathParts: []string{"modulefile"},
 				ModuleAlias:     "mf",
 				Dependecies:     []python.PythonDependecy{},
@@ -214,7 +204,6 @@ func TestParseImportStatement(t *testing.T) {
 		{
 			statement: "import moduledir.subdep as md",
 			expectedResult: python.PythonImportStatement{
-				RawText:         "import moduledir.subdep as md",
 				ModulePathParts: []string{"moduledir", "subdep"},
 				ModuleAlias:     "md",
 				Dependecies:     []python.PythonDependecy{},
@@ -224,7 +213,6 @@ func TestParseImportStatement(t *testing.T) {
 		{
 			statement: "from modulefile import somedependency",
 			expectedResult: python.PythonImportStatement{
-				RawText:         "from modulefile import somedependency",
 				ModulePathParts: []string{"modulefile"},
 				ModuleAlias:     "",
 				Dependecies: []python.PythonDependecy{
@@ -236,7 +224,6 @@ func TestParseImportStatement(t *testing.T) {
 		{
 			statement: "from moduledir.subdep import somedependency",
 			expectedResult: python.PythonImportStatement{
-				RawText:         "from moduledir.subdep import somedependency",
 				ModulePathParts: []string{"moduledir", "subdep"},
 				ModuleAlias:     "",
 				Dependecies: []python.PythonDependecy{
@@ -248,7 +235,6 @@ func TestParseImportStatement(t *testing.T) {
 		{
 			statement: "from modulefile import somedependency as sd",
 			expectedResult: python.PythonImportStatement{
-				RawText:         "from modulefile import somedependency as sd",
 				ModulePathParts: []string{"modulefile"},
 				ModuleAlias:     "",
 				Dependecies: []python.PythonDependecy{
@@ -260,7 +246,6 @@ func TestParseImportStatement(t *testing.T) {
 		{
 			statement: "from moduledir.subdep import somedependency as sd",
 			expectedResult: python.PythonImportStatement{
-				RawText:         "from moduledir.subdep import somedependency as sd",
 				ModulePathParts: []string{"moduledir", "subdep"},
 				ModuleAlias:     "",
 				Dependecies: []python.PythonDependecy{
@@ -272,7 +257,6 @@ func TestParseImportStatement(t *testing.T) {
 		{
 			statement: "from modulefile import (\n\tthis,\n\tandthis as at,\n\tandalsothis\n)",
 			expectedResult: python.PythonImportStatement{
-				RawText:         "from modulefile import (\n\tthis,\n\tandthis as at,\n\tandalsothis\n)",
 				ModulePathParts: []string{"modulefile"},
 				ModuleAlias:     "",
 				Dependecies: []python.PythonDependecy{
@@ -286,7 +270,6 @@ func TestParseImportStatement(t *testing.T) {
 		{
 			statement: "from moduledir import (\n   this,\n   andthis,\n   andalsothis as aat\n)",
 			expectedResult: python.PythonImportStatement{
-				RawText:         "from moduledir import (\n   this,\n   andthis,\n   andalsothis as aat\n)",
 				ModulePathParts: []string{"moduledir"},
 				ModuleAlias:     "",
 				Dependecies: []python.PythonDependecy{
@@ -300,7 +283,6 @@ func TestParseImportStatement(t *testing.T) {
 		{
 			statement: "from modulefile import (\n   this,\n   andthis as at,\n   andalsothis\n)",
 			expectedResult: python.PythonImportStatement{
-				RawText:         "from modulefile import (\n   this,\n   andthis as at,\n   andalsothis\n)",
 				ModulePathParts: []string{"modulefile"},
 				ModuleAlias:     "",
 				Dependecies: []python.PythonDependecy{
@@ -314,7 +296,6 @@ func TestParseImportStatement(t *testing.T) {
 		{
 			statement: "from moduledir import (\n\tthis,\n\tandthis,\n\tandalsothis as aat\n)",
 			expectedResult: python.PythonImportStatement{
-				RawText:         "from moduledir import (\n\tthis,\n\tandthis,\n\tandalsothis as aat\n)",
 				ModulePathParts: []string{"moduledir"},
 				ModuleAlias:     "",
 				Dependecies: []python.PythonDependecy{
