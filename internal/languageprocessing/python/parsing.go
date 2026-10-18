@@ -92,23 +92,30 @@ func (p PythonImportStatementParser) isExternalModule(modulePathParts []string) 
 	return true
 }
 
-func (p PythonImportStatementParser) parseModuleInfo(moduleInfoText string) (modulePathParts []string, moduleAlias string, errorMessage string) {
-	parts := strings.Split(moduleInfoText, " ")
+func (p PythonImportStatementParser) parseModuleInfo(moduleInfoText string) (ancestoryLevels int, modulePathParts []string, moduleAlias string, errorMessage string) {
+	ancestoryLevels = 0
+	for ancestoryLevels = range moduleInfoText {
+		if moduleInfoText[ancestoryLevels] != '.' {
+			break
+		}
+	}
+
+	parts := strings.Split(moduleInfoText[ancestoryLevels:], " ")
 
 	if len(parts) == 0 {
-		return []string{}, "", "No module"
+		return 0, []string{}, "", "No module"
 	}
 
 	modulePathParts = strings.Split(parts[0], ".")
 	if len(parts) <= 1 {
-		return modulePathParts, "", ""
+		return ancestoryLevels, modulePathParts, "", ""
 	}
 
 	if len(parts) != 3 || parts[1] != "as" {
-		return []string{}, "", "Module alias expected"
+		return ancestoryLevels, modulePathParts, "", "Module alias expected"
 	}
 
-	return modulePathParts, parts[2], ""
+	return ancestoryLevels, modulePathParts, parts[2], ""
 }
 
 func (p PythonImportStatementParser) parseDependency(dependecyText string) (dependency PythonDependecy, errorMessage string) {
@@ -186,12 +193,13 @@ func (p PythonImportStatementParser) ParseImportStatement(statementText string) 
 			return p.generateErrorResultForStatement(statementText, "No module")
 		}
 
-		modulePathParts, moduleAlias, moduleParseErrorMessage := p.parseModuleInfo(statementRemaining)
+		ancestoryLevels, modulePathParts, moduleAlias, moduleParseErrorMessage := p.parseModuleInfo(statementRemaining)
 		if moduleParseErrorMessage != "" {
 			return p.generateErrorResultForStatement(statementText, moduleParseErrorMessage)
 		}
 
 		return PythonImportStatement{
+			AncestoryLevels: ancestoryLevels,
 			ModulePathParts: modulePathParts,
 			ModuleAlias:     moduleAlias,
 			Dependecies:     []PythonDependecy{},
@@ -200,7 +208,7 @@ func (p PythonImportStatementParser) ParseImportStatement(statementText string) 
 	}
 
 	currentStatementPart, statementRemaining, _ = strings.Cut(statementRemaining, " ")
-	modulePathParts, _, moduleParseErrorMessage := p.parseModuleInfo(currentStatementPart)
+	ancestoryLevels, modulePathParts, _, moduleParseErrorMessage := p.parseModuleInfo(currentStatementPart)
 	if moduleParseErrorMessage != "" {
 		return p.generateErrorResultForStatement(statementText, moduleParseErrorMessage)
 	}
@@ -221,5 +229,5 @@ func (p PythonImportStatementParser) ParseImportStatement(statementText string) 
 
 	external := p.isExternalModule(modulePathParts)
 
-	return PythonImportStatement{0, modulePathParts, "", dependencies, external}, nil
+	return PythonImportStatement{ancestoryLevels, modulePathParts, "", dependencies, external}, nil
 }
