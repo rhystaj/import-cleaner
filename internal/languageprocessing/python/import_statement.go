@@ -30,7 +30,7 @@ func (p PythonImportStatement) dependecyAsString(dependecy PythonDependecy) stri
 }
 
 func (p PythonImportStatement) AsText() (string, error) {
-	modulePath := strings.Join(p.ModulePathParts, ".")
+	modulePath := strings.Repeat(".", p.AncestoryLevels) + strings.Join(p.ModulePathParts, ".")
 
 	if len(p.Dependecies) > 0 {
 		dependencyNames := make([]string, 0)
