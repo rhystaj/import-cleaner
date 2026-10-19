@@ -10,7 +10,6 @@ type GenericDependecy struct {
 }
 
 type ImportStatementGenericDetails struct {
-	RawText         string
 	ModulePathParts []string
 	ModuleAlias     string
 	Dependecies     []GenericDependecy

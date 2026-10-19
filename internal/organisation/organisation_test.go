@@ -4,6 +4,7 @@ import (
 	"importcleaner/internal/config"
 	lp "importcleaner/internal/languageprocessing"
 	"importcleaner/internal/organisation"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -22,11 +23,18 @@ func (s testImportStatement) GetGenericDetails() lp.ImportStatementGenericDetail
 }
 
 func (s testImportStatement) ConsolidationKey() string {
-	panic("not implemented")
+	return strings.Join(s.details.ModulePathParts, ".") + "|" + s.details.ModuleAlias
 }
 
 func (s testImportStatement) ConsolidateWith(other lp.ImportStatement) (lp.ImportStatement, error) {
-	panic("not implemented")
+	return testImportStatement{
+		details: lp.ImportStatementGenericDetails{
+			ModulePathParts: s.details.ModulePathParts,
+			ModuleAlias:     s.details.ModuleAlias,
+			Dependecies:     append(s.details.Dependecies, other.GetGenericDetails().Dependecies...),
+			External:        s.details.External,
+		},
+	}, nil
 }
 
 func generateTestImports() []lp.ImportStatement {

@@ -2,6 +2,7 @@ package organisation
 
 import (
 	lp "importcleaner/internal/languageprocessing"
+	"iter"
 	"slices"
 	"strings"
 )
@@ -11,11 +12,35 @@ type ImportStatementOrganiser[S lp.ImportStatement] interface {
 }
 
 type ImportStatementOrganiserImpl[S lp.ImportStatement] struct {
-	GroupRules []ImportStatementGroupRule[S]
+	GroupRules                  []ImportStatementGroupRule[S]
+	ConsolidateImportStatements bool
 }
 
-func (o ImportStatementOrganiserImpl[S]) OrganiseImportStatements(statements []S) [][]S {
+func asSeq[T any](slice []T) iter.Seq[T] {
+	return func(yield func(T) bool) {
+		for _, item := range slice {
+			if !(yield(item)) {
+				return
+			}
+		}
+	}
+}
 
+func byModulePath[S lp.ImportStatement](a S, b S) int {
+	aDetails := a.GetGenericDetails()
+	bDetails := b.GetGenericDetails()
+
+	return strings.Compare(
+		strings.Join(aDetails.ModulePathParts, ""),
+		strings.Join(bDetails.ModulePathParts, ""),
+	)
+}
+
+func (o ImportStatementOrganiserImpl[S]) consolidateStatements(statements []S) []S {
+	panic("not implemented")
+}
+
+func (o ImportStatementOrganiserImpl[S]) groupStatements(statements []S) [][]S {
 	groups := make([][]S, len(o.GroupRules)+1)
 	for _, statement := range statements {
 		statementGrouped := false
@@ -38,25 +63,19 @@ func (o ImportStatementOrganiserImpl[S]) OrganiseImportStatements(statements []S
 		}
 	}
 
-	var sortedGroups [][]S = make([][]S, len(nonEmptyGroups))
-	for i, group := range nonEmptyGroups {
-		sortedGroups[i] = slices.SortedFunc(
-			func(yield func(S) bool) {
-				for _, item := range group {
-					if !(yield(item)) {
-						return
-					}
-				}
-			},
-			func(a S, b S) int {
-				aDetails := a.GetGenericDetails()
-				bDetails := b.GetGenericDetails()
+	return nonEmptyGroups
+}
 
-				return strings.Compare(
-					strings.Join(aDetails.ModulePathParts, ""),
-					strings.Join(bDetails.ModulePathParts, ""),
-				)
-			})
+func (o ImportStatementOrganiserImpl[S]) OrganiseImportStatements(statements []S) [][]S {
+	if o.ConsolidateImportStatements {
+		statements = o.consolidateStatements(statements)
+	}
+
+	groups := o.groupStatements(statements)
+
+	var sortedGroups [][]S = make([][]S, len(groups))
+	for i, group := range groups {
+		sortedGroups[i] = slices.SortedFunc(asSeq(group), byModulePath)
 	}
 
 	return sortedGroups
