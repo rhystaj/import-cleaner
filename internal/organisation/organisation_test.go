@@ -168,7 +168,7 @@ func generateTestImports() []lp.ImportStatement {
 	}
 }
 
-func TestOrganiseImports_NoGroupsConfigured(t *testing.T) {
+func TestOrganiseImports_NoGroupsConfigured_NoConsolidation(t *testing.T) {
 
 	testOrganiser := organisation.ImportStatementOrganiserImpl[lp.ImportStatement]{
 		GroupRules: []organisation.ImportStatementGroupRule[lp.ImportStatement]{},
@@ -279,6 +279,134 @@ func TestOrganiseImports_NoGroupsConfigured(t *testing.T) {
 				details: lp.ImportStatementGenericDetails{
 					ModulePathParts: []string{"tools"},
 					Dependecies: []lp.GenericDependecy{
+						{Name: "Hammer", Alias: ""},
+						{Name: "Screwdriver", Alias: "sd"},
+					},
+					External: false,
+				},
+			},
+			testImportStatement{
+				details: lp.ImportStatementGenericDetails{
+					ModulePathParts: []string{"tools", "power"},
+					Dependecies: []lp.GenericDependecy{
+						{Name: "Drill", Alias: ""},
+					},
+					External: false,
+				},
+			},
+			testImportStatement{
+				details: lp.ImportStatementGenericDetails{
+					ModulePathParts: []string{"zzz"},
+					Dependecies: []lp.GenericDependecy{
+						{Name: "zzzz", Alias: ""},
+					},
+					External: false,
+				},
+			},
+		},
+	}
+
+	result := testOrganiser.OrganiseImportStatements(testImports)
+
+	assert.Equal(t, expectedResult, result)
+}
+
+func TestOrganiseImports_NoGroupsConfigured_Consolidation(t *testing.T) {
+
+	testOrganiser := organisation.ImportStatementOrganiserImpl[lp.ImportStatement]{
+		GroupRules:                  []organisation.ImportStatementGroupRule[lp.ImportStatement]{},
+		ConsolidateImportStatements: true,
+	}
+	testImports := generateTestImports()
+
+	expectedResult := [][]lp.ImportStatement{
+		{
+			testImportStatement{
+				details: lp.ImportStatementGenericDetails{
+					ModulePathParts: []string{"abc"},
+					Dependecies:     []lp.GenericDependecy{},
+					External:        true,
+				},
+			},
+			testImportStatement{
+				details: lp.ImportStatementGenericDetails{
+					ModulePathParts: []string{"anokdependencyiguess"},
+					Dependecies: []lp.GenericDependecy{
+						{Name: "thing", Alias: ""},
+						{Name: "doodad", Alias: ""},
+					},
+					External: false,
+				},
+			},
+			testImportStatement{
+				details: lp.ImportStatementGenericDetails{
+					ModulePathParts: []string{"argparse"},
+					Dependecies:     []lp.GenericDependecy{},
+					External:        true,
+				},
+			},
+			testImportStatement{
+				details: lp.ImportStatementGenericDetails{
+					ModulePathParts: []string{"dataclasses"},
+					Dependecies: []lp.GenericDependecy{
+						{Name: "dataclass", Alias: ""},
+						{Name: "field", Alias: ""},
+					},
+					External: true,
+				},
+			},
+			testImportStatement{
+				details: lp.ImportStatementGenericDetails{
+					ModulePathParts: []string{"helpers", "commandline"},
+					Dependecies:     []lp.GenericDependecy{},
+					External:        false,
+				},
+			},
+			testImportStatement{
+				details: lp.ImportStatementGenericDetails{
+					ModulePathParts: []string{"helpers", "database"},
+					Dependecies:     []lp.GenericDependecy{},
+					External:        false,
+				},
+			},
+			testImportStatement{
+				details: lp.ImportStatementGenericDetails{
+					ModulePathParts: []string{"helpers", "imported"},
+					Dependecies:     []lp.GenericDependecy{},
+					External:        true,
+				},
+			},
+			testImportStatement{
+				details: lp.ImportStatementGenericDetails{
+					ModulePathParts: []string{"pydantic", "types"},
+					Dependecies: []lp.GenericDependecy{
+						{Name: "Boolean", Alias: ""},
+						{Name: "Float", Alias: ""},
+						{Name: "String", Alias: ""},
+						{Name: "Integer", Alias: ""},
+					},
+					External: true,
+				},
+			},
+			testImportStatement{
+				details: lp.ImportStatementGenericDetails{
+					ModulePathParts: []string{"pydantic", "validators"},
+					Dependecies:     []lp.GenericDependecy{},
+					External:        true,
+				},
+			},
+			testImportStatement{
+				details: lp.ImportStatementGenericDetails{
+					ModulePathParts: []string{"somecoolmodule"},
+					Dependecies:     []lp.GenericDependecy{},
+					External:        false,
+				},
+			},
+			testImportStatement{
+				details: lp.ImportStatementGenericDetails{
+					ModulePathParts: []string{"tools"},
+					Dependecies: []lp.GenericDependecy{
+						{Name: "Saw", Alias: ""},
 						{Name: "Hammer", Alias: ""},
 						{Name: "Screwdriver", Alias: "sd"},
 					},
