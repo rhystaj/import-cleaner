@@ -21,6 +21,14 @@ func (s testImportStatement) GetGenericDetails() lp.ImportStatementGenericDetail
 	return s.details
 }
 
+func (s testImportStatement) ConsolidationKey() string {
+	panic("not implemented")
+}
+
+func (s testImportStatement) ConsolidateWith(other lp.ImportStatement) (lp.ImportStatement, error) {
+	panic("not implemented")
+}
+
 func generateTestImports() []lp.ImportStatement {
 	return []lp.ImportStatement{
 		testImportStatement{

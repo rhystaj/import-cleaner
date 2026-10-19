@@ -112,3 +112,11 @@ func (p TypescriptImportStatement) GetGenericDetails() lp.ImportStatementGeneric
 		External:        p.External,
 	}
 }
+
+func (p TypescriptImportStatement) ConsolidationKey() string {
+	panic("Not implemented")
+}
+
+func (p TypescriptImportStatement) ConsolidateWith(other lp.ImportStatement) (lp.ImportStatement, error) {
+	panic("Not implemented")
+}

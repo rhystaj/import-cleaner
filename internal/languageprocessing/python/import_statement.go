@@ -62,3 +62,11 @@ func (p PythonImportStatement) GetGenericDetails() lp.ImportStatementGenericDeta
 		External:        p.External,
 	}
 }
+
+func (p PythonImportStatement) ConsolidationKey() string {
+	panic("Not implemented")
+}
+
+func (p PythonImportStatement) ConsolidateWith(other lp.ImportStatement) (lp.ImportStatement, error) {
+	panic("Not implemented")
+}
