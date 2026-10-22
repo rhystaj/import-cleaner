@@ -64,7 +64,13 @@ func (p PythonImportStatement) GetGenericDetails() lp.ImportStatementGenericDeta
 }
 
 func (p PythonImportStatement) ConsolidationKey() string {
-	panic("Not implemented")
+	result := strings.Join(p.ModulePathParts, ".")
+
+	if p.ModuleAlias != "" {
+		result += "(" + p.ModuleAlias + ")"
+	}
+
+	return result
 }
 
 func (p PythonImportStatement) ConsolidateWith(other lp.ImportStatement) (lp.ImportStatement, error) {

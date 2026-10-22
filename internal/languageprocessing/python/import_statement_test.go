@@ -77,3 +77,47 @@ func Test_PythonImportStatement_AsText(t *testing.T) {
 		External: false,
 	}, "from ...mod.with.multiple.parts import something as s, thingwithalias, anotherthing as at")
 }
+
+func Test_PythonImportStatement_ConsolidationKey(t *testing.T) {
+
+	cases := []struct {
+		statement   python.PythonImportStatement
+		expectedKey string
+	}{
+		{
+			statement: python.PythonImportStatement{
+				ModulePathParts: []string{"somemod"},
+			},
+			expectedKey: "somemod",
+		},
+		{
+			statement: python.PythonImportStatement{
+				ModulePathParts: []string{"somemod"},
+				ModuleAlias:     "sm",
+			},
+			expectedKey: "somemod(sm)",
+		},
+		{
+			statement: python.PythonImportStatement{
+				ModulePathParts: []string{"some", "mod", "with", "multiple", "parts"},
+			},
+			expectedKey: "some.mod.with.multiple.parts",
+		},
+		{
+			statement: python.PythonImportStatement{
+				ModulePathParts: []string{"some", "mod", "with", "multiple", "parts"},
+				ModuleAlias:     "smwmp",
+			},
+			expectedKey: "some.mod.with.multiple.parts(smwmp)",
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.expectedKey, func(t *testing.T) {
+			key := c.statement.ConsolidationKey()
+			if key != c.expectedKey {
+				t.Errorf("Expected key '%s', but got '%s'", c.expectedKey, key)
+			}
+		})
+	}
+}
