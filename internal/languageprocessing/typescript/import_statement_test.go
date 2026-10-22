@@ -1,6 +1,7 @@
 package typescript_test
 
 import (
+	"fmt"
 	lp "importcleaner/internal/languageprocessing"
 	"importcleaner/internal/languageprocessing/typescript"
 	"testing"
@@ -323,6 +324,77 @@ func Test_TypescriptImportStatement_ConsolidateWith_Success(t *testing.T) {
 			resultingImportStatement, resultingError := c.statementA.ConsolidateWith(c.statementB)
 			assert.Nil(t, resultingError)
 			assert.Equal(t, c.expected, resultingImportStatement)
+		})
+	}
+}
+
+type dummyImportStatement struct{}
+
+func (d dummyImportStatement) AsText() (string, error) {
+	return "dummy", nil
+}
+
+func (d dummyImportStatement) GetGenericDetails() lp.ImportStatementGenericDetails {
+	return lp.ImportStatementGenericDetails{
+		ModulePathParts: []string{"dummy"},
+		ModuleAlias:     "d",
+		Dependecies:     []lp.GenericDependecy{},
+		External:        true,
+	}
+}
+
+func (d dummyImportStatement) ConsolidationKey() string {
+	return "dummy"
+}
+
+func (d dummyImportStatement) ConsolidateWith(other lp.ImportStatement) (lp.ImportStatement, error) {
+	return d, nil
+}
+
+func Test_TypescriptImportStatement_ConsolidateWith_Error(t *testing.T) {
+	cases := []struct {
+		statementA    typescript.TypescriptImportStatement
+		statementB    lp.ImportStatement
+		expectedError error
+	}{
+		{
+			statementA: typescript.TypescriptImportStatement{
+				ModulePathParts: []string{"some", "module", "path"},
+				Dependecies:     []typescript.TypescriptDependecy{{Name: "depA"}},
+			},
+			statementB: typescript.TypescriptImportStatement{
+				ModulePathParts: []string{"some", "other", "module", "path"},
+				Dependecies:     []typescript.TypescriptDependecy{{Name: "depB"}},
+			},
+			expectedError: fmt.Errorf("statements have different consolidation keys"),
+		},
+		{
+			statementA: typescript.TypescriptImportStatement{
+				ModulePathParts: []string{"some", "module", "path"},
+				Dependecies:     []typescript.TypescriptDependecy{{Name: "depA"}},
+			},
+			statementB: typescript.TypescriptImportStatement{
+				ModulePathParts: []string{"some", "module", "path"},
+				Dependecies:     []typescript.TypescriptDependecy{{Name: "depB"}},
+				IsTypeImport:    true,
+			},
+			expectedError: fmt.Errorf("statements have different consolidation keys"),
+		},
+		{
+			statementA: typescript.TypescriptImportStatement{
+				ModulePathParts: []string{"some", "module", "path"},
+				Dependecies:     []typescript.TypescriptDependecy{{Name: "depA"}},
+			},
+			statementB:    dummyImportStatement{},
+			expectedError: fmt.Errorf("other statement is not a TypescriptImportStatement"),
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.expectedError.Error(), func(t *testing.T) {
+			_, resultingError := c.statementA.ConsolidateWith(c.statementB)
+			assert.NotNil(t, resultingError)
+			assert.Equal(t, c.expectedError, resultingError)
 		})
 	}
 }
