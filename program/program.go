@@ -26,14 +26,14 @@ func isFileForLanguage(filePath string, language string) bool {
 	}
 }
 
-func getFileProcessorForLanguage(language string, fileProcessorFactory fileprocessing.FileProcessorFactory) (fileprocessing.FileProcessor, error) {
-	switch language {
+func getFileProcessorForLanguage(config config.Config, fileProcessorFactory fileprocessing.FileProcessorFactory) (fileprocessing.FileProcessor, error) {
+	switch config.Language {
 	case "python":
-		return fileProcessorFactory.CreatePythonFileProcessor()
+		return fileProcessorFactory.CreatePythonFileProcessor(config)
 	case "typescript":
 		return fileProcessorFactory.CreateTypescriptFileProcessor()
 	default:
-		return nil, fmt.Errorf("Language %s not supported", language)
+		return nil, fmt.Errorf("Language %s not supported", config.Language)
 	}
 }
 
@@ -46,7 +46,7 @@ func CleanImports(
 	directoryStack := datastructures.CreateNewStack[string]()
 	directoryStack.Push(&targetDirPath)
 
-	fileProcessor, fileProcessorError := getFileProcessorForLanguage(config.Language, fileProcessorFactory)
+	fileProcessor, fileProcessorError := getFileProcessorForLanguage(config, fileProcessorFactory)
 	if fileProcessorError != nil {
 		return fileProcessorError
 	}

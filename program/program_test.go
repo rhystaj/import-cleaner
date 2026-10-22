@@ -42,7 +42,7 @@ func TestCleanImports_NoFilesIgnored(t *testing.T) {
 	mockFileProcessorFactory := mock.Mock[fileprocessing.FileProcessorFactory](mockController)
 
 	mock.When(mockFileProcessor.ProcessFile(mock.AnyString())).ThenReturn(nil)
-	mock.When(mockFileProcessorFactory.CreatePythonFileProcessor()).ThenReturn(mockFileProcessor, nil)
+	mock.When(mockFileProcessorFactory.CreatePythonFileProcessor(config)).ThenReturn(mockFileProcessor, nil)
 
 	expectedFilesProcessed := []string{
 		"test/main.py",
@@ -97,7 +97,7 @@ func TestCleanImports_FilesIgnored(t *testing.T) {
 	mockFileProcessorFactory := mock.Mock[fileprocessing.FileProcessorFactory](mockController)
 
 	mock.When(mockFileProcessor.ProcessFile(mock.AnyString())).ThenReturn(nil)
-	mock.When(mockFileProcessorFactory.CreatePythonFileProcessor()).ThenReturn(mockFileProcessor, nil)
+	mock.When(mockFileProcessorFactory.CreatePythonFileProcessor(config)).ThenReturn(mockFileProcessor, nil)
 
 	expectedFilesProcessed := []string{
 		"test/main.py",
