@@ -31,7 +31,7 @@ func getFileProcessorForLanguage(config config.Config, fileProcessorFactory file
 	case "python":
 		return fileProcessorFactory.CreatePythonFileProcessor(config)
 	case "typescript":
-		return fileProcessorFactory.CreateTypescriptFileProcessor()
+		return fileProcessorFactory.CreateTypescriptFileProcessor(config)
 	default:
 		return nil, fmt.Errorf("Language %s not supported", config.Language)
 	}

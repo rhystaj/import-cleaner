@@ -14,7 +14,7 @@ type TypescriptFileProcessor = FileProcessorImpl[typescript.TypescriptImportStat
 
 type FileProcessorFactory interface {
 	CreatePythonFileProcessor(config config.Config) (FileProcessor, error)
-	CreateTypescriptFileProcessor() (FileProcessor, error)
+	CreateTypescriptFileProcessor(config config.Config) (FileProcessor, error)
 }
 
 type FileProcessorFactoryImpl struct {
@@ -42,7 +42,7 @@ func (f FileProcessorFactoryImpl) CreatePythonFileProcessor(config config.Config
 	}, nil
 }
 
-func (f FileProcessorFactoryImpl) CreateTypescriptFileProcessor() (FileProcessor, error) {
+func (f FileProcessorFactoryImpl) CreateTypescriptFileProcessor(config config.Config) (FileProcessor, error) {
 	groupingRules := make([]organisation.ImportStatementGroupRule[typescript.TypescriptImportStatement], len(f.Config.GroupingRules))
 	for i, rule := range f.Config.GroupingRules {
 		groupingRules[i] = typescript.NewTypescriptImportStatementFromDefinition(rule)
@@ -52,7 +52,8 @@ func (f FileProcessorFactoryImpl) CreateTypescriptFileProcessor() (FileProcessor
 		Parser:      typescript.TypescriptImportStatementParser{},
 		FileManager: f.FileManager,
 		Organiser: organisation.ImportStatementOrganiserImpl[typescript.TypescriptImportStatement]{
-			GroupRules: groupingRules,
+			GroupRules:                  groupingRules,
+			ConsolidateImportStatements: config.FormattingRules.ConsolidateImports,
 		},
 	}, nil
 }
