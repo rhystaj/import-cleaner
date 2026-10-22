@@ -264,3 +264,65 @@ func Test_TypescriptImportStatement_ConsolidationKey(t *testing.T) {
 		assert.Equal(t, c.expected, c.input.ConsolidationKey())
 	}
 }
+
+func Test_TypescriptImportStatement_ConsolidateWith_Success(t *testing.T) {
+	cases := []struct {
+		statementA typescript.TypescriptImportStatement
+		statementB typescript.TypescriptImportStatement
+		expected   typescript.TypescriptImportStatement
+	}{
+		{
+			statementA: typescript.TypescriptImportStatement{
+				ModulePathParts: []string{"some", "module", "path"},
+				Dependecies:     []typescript.TypescriptDependecy{{Name: "depA"}},
+			},
+			statementB: typescript.TypescriptImportStatement{
+				ModulePathParts: []string{"some", "module", "path"},
+				Dependecies: []typescript.TypescriptDependecy{
+					{Name: "depB", IsTypeImport: true},
+					{Name: "depC"},
+				},
+			},
+			expected: typescript.TypescriptImportStatement{
+				ModulePathParts: []string{"some", "module", "path"},
+				Dependecies: []typescript.TypescriptDependecy{
+					{Name: "depA"},
+					{Name: "depB", IsTypeImport: true},
+					{Name: "depC"},
+				},
+			},
+		},
+		{
+			statementA: typescript.TypescriptImportStatement{
+				ModulePathParts: []string{"some", "module", "path"},
+				Dependecies:     []typescript.TypescriptDependecy{{Name: "depA"}},
+				IsTypeImport:    true,
+			},
+			statementB: typescript.TypescriptImportStatement{
+				ModulePathParts: []string{"some", "module", "path"},
+				Dependecies: []typescript.TypescriptDependecy{
+					{Name: "depB", IsTypeImport: true},
+					{Name: "depC"},
+				},
+				IsTypeImport: true,
+			},
+			expected: typescript.TypescriptImportStatement{
+				ModulePathParts: []string{"some", "module", "path"},
+				Dependecies: []typescript.TypescriptDependecy{
+					{Name: "depA"},
+					{Name: "depB", IsTypeImport: true},
+					{Name: "depC"},
+				},
+				IsTypeImport: true,
+			},
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.expected.ConsolidationKey(), func(t *testing.T) {
+			resultingImportStatement, resultingError := c.statementA.ConsolidateWith(c.statementB)
+			assert.Nil(t, resultingError)
+			assert.Equal(t, c.expected, resultingImportStatement)
+		})
+	}
+}

@@ -1,6 +1,7 @@
 package typescript
 
 import (
+	"fmt"
 	lp "importcleaner/internal/languageprocessing"
 	"strings"
 )
@@ -124,5 +125,17 @@ func (p TypescriptImportStatement) ConsolidationKey() string {
 }
 
 func (p TypescriptImportStatement) ConsolidateWith(other lp.ImportStatement) (lp.ImportStatement, error) {
-	panic("Not implemented")
+	otherTypescriptStatement, ok := other.(TypescriptImportStatement)
+	if !ok {
+		return p, fmt.Errorf("other statement is not a TypescriptImportStatement")
+	}
+
+	if p.ConsolidationKey() != otherTypescriptStatement.ConsolidationKey() {
+		return p, fmt.Errorf("statements have different consolidation keys")
+	}
+
+	newStatement := p
+	newStatement.Dependecies = append(newStatement.Dependecies, otherTypescriptStatement.Dependecies...)
+
+	return newStatement, nil
 }
