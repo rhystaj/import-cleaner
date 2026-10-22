@@ -5,3 +5,5 @@ ignoredPaths:
 groupingRules:
   - modulePaths: ["dataclasses", "submod"]
   - dependencySourceType: internal
+formattingRules:
+  consolidateImports: true
