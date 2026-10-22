@@ -6,7 +6,8 @@ import Rand from 'rand-seed';
 
 import { add } from '../helpers/maths';
 import { randomCoordinates } from '../helpers/random';
-import type { Colour } from '../helpers/rendering';
+import type { Colour, Line, Square } from '../helpers/rendering';
+import { blur } from '../helpers/rendering';
 
 import type { Y } from './but';
 

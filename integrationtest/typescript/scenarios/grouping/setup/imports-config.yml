@@ -6,3 +6,5 @@ groupingRules:
   - dependencySourceType: external
   - modulePaths: ['helpers']
   - isTypeImport: true
+formattingRules:
+  consolidateImports: true
