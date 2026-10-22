@@ -162,3 +162,50 @@ func Test_PythonImportStatement_ConsolidationKey(t *testing.T) {
 		})
 	}
 }
+
+func Test_PythonImportStatement_ConsolidateWith_Success(t *testing.T) {
+	cases := []struct {
+		statementA     python.PythonImportStatement
+		statementB     python.PythonImportStatement
+		expectedResult python.PythonImportStatement
+	}{
+		{
+			statementA: python.PythonImportStatement{
+				ModulePathParts: []string{"some", "mod", "with", "multiple", "parts"},
+				ModuleAlias:     "smwmp",
+				Dependecies: []python.PythonDependecy{
+					{Name: "something", Alias: "s"},
+					{Name: "anotherthing", Alias: "at"},
+				},
+				External: true,
+			},
+			statementB: python.PythonImportStatement{
+				ModulePathParts: []string{"some", "mod", "with", "multiple", "parts"},
+				ModuleAlias:     "smwmp",
+				Dependecies: []python.PythonDependecy{
+					{Name: "extrathing", Alias: "et"},
+					{Name: "onelastthingiswear", Alias: "oltwis"},
+				},
+				External: true,
+			},
+			expectedResult: python.PythonImportStatement{
+				ModulePathParts: []string{"some", "mod", "with", "multiple", "parts"},
+				ModuleAlias:     "smwmp",
+				Dependecies: []python.PythonDependecy{
+					{Name: "something", Alias: "s"},
+					{Name: "anotherthing", Alias: "at"},
+					{Name: "extrathing", Alias: "et"},
+					{Name: "onelastthingiswear", Alias: "oltwis"},
+				},
+				External: true,
+			},
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.expectedResult.ConsolidationKey(), func(t *testing.T) {
+			result, _ := c.statementA.ConsolidateWith(c.statementB)
+			assert.Equal(t, c.expectedResult, result)
+		})
+	}
+}
