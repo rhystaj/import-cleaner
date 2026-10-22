@@ -213,3 +213,54 @@ func Test_TypescriptImportStatement_GetGenericDetails(t *testing.T) {
 		assert.Equal(t, expectedGenericDetails, testStatement.GetGenericDetails())
 	}
 }
+
+func Test_TypescriptImportStatement_ConsolidationKey(t *testing.T) {
+	cases := []struct {
+		input    typescript.TypescriptImportStatement
+		expected string
+	}{
+		{
+			input: typescript.TypescriptImportStatement{
+				ModulePathParts: []string{"some", "module", "path"},
+			},
+			expected: "some.module.path",
+		},
+		{
+			input: typescript.TypescriptImportStatement{
+				ModulePathParts: []string{".", "some", "module", "path"},
+			},
+			expected: "some.module.path",
+		},
+		{
+			input: typescript.TypescriptImportStatement{
+				ModulePathParts: []string{"..", "..", "some", "module", "path"},
+			},
+			expected: "some.module.path",
+		},
+		{
+			input: typescript.TypescriptImportStatement{
+				ModulePathParts: []string{"some", "module", "path"},
+				IsTypeImport:    true,
+			},
+			expected: "*some.module.path",
+		},
+		{
+			input: typescript.TypescriptImportStatement{
+				ModulePathParts: []string{".", "some", "module", "path"},
+				IsTypeImport:    true,
+			},
+			expected: "*some.module.path",
+		},
+		{
+			input: typescript.TypescriptImportStatement{
+				ModulePathParts: []string{"..", "..", "some", "module", "path"},
+				IsTypeImport:    true,
+			},
+			expected: "*some.module.path",
+		},
+	}
+
+	for _, c := range cases {
+		assert.Equal(t, c.expected, c.input.ConsolidationKey())
+	}
+}

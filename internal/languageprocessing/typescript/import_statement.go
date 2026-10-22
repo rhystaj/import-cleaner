@@ -114,7 +114,13 @@ func (p TypescriptImportStatement) GetGenericDetails() lp.ImportStatementGeneric
 }
 
 func (p TypescriptImportStatement) ConsolidationKey() string {
-	panic("Not implemented")
+	modulePath := strings.Join(stripRelativePrefixFromModulePath(p.ModulePathParts), ".")
+
+	if p.IsTypeImport {
+		modulePath = "*" + modulePath
+	}
+
+	return modulePath
 }
 
 func (p TypescriptImportStatement) ConsolidateWith(other lp.ImportStatement) (lp.ImportStatement, error) {
