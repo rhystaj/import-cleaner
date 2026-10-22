@@ -64,13 +64,23 @@ func (p PythonImportStatement) GetGenericDetails() lp.ImportStatementGenericDeta
 }
 
 func (p PythonImportStatement) ConsolidationKey() string {
-	result := strings.Join(p.ModulePathParts, ".")
+	var stringBuilder strings.Builder
 
-	if p.ModuleAlias != "" {
-		result += "(" + p.ModuleAlias + ")"
+	if len(p.Dependecies) == 0 {
+		stringBuilder.WriteString("$")
 	}
 
-	return result
+	if len(p.ModulePathParts) > 0 {
+		stringBuilder.WriteString(strings.Join(p.ModulePathParts, "."))
+	}
+
+	if p.ModuleAlias != "" {
+		stringBuilder.WriteString("(")
+		stringBuilder.WriteString(p.ModuleAlias)
+		stringBuilder.WriteString(")")
+	}
+
+	return stringBuilder.String()
 }
 
 func (p PythonImportStatement) ConsolidateWith(other lp.ImportStatement) (lp.ImportStatement, error) {

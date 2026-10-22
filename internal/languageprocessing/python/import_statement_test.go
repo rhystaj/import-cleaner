@@ -3,6 +3,8 @@ package python_test
 import (
 	"importcleaner/internal/languageprocessing/python"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func AssertStatementCorrectlyConvertedToText(t *testing.T, statement python.PythonImportStatement, expectedString string) {
@@ -87,6 +89,9 @@ func Test_PythonImportStatement_ConsolidationKey(t *testing.T) {
 		{
 			statement: python.PythonImportStatement{
 				ModulePathParts: []string{"somemod"},
+				Dependecies: []python.PythonDependecy{
+					{Name: "something", Alias: "s"},
+				},
 			},
 			expectedKey: "somemod",
 		},
@@ -94,12 +99,18 @@ func Test_PythonImportStatement_ConsolidationKey(t *testing.T) {
 			statement: python.PythonImportStatement{
 				ModulePathParts: []string{"somemod"},
 				ModuleAlias:     "sm",
+				Dependecies: []python.PythonDependecy{
+					{Name: "something", Alias: "s"},
+				},
 			},
 			expectedKey: "somemod(sm)",
 		},
 		{
 			statement: python.PythonImportStatement{
 				ModulePathParts: []string{"some", "mod", "with", "multiple", "parts"},
+				Dependecies: []python.PythonDependecy{
+					{Name: "something", Alias: "s"},
+				},
 			},
 			expectedKey: "some.mod.with.multiple.parts",
 		},
@@ -107,17 +118,47 @@ func Test_PythonImportStatement_ConsolidationKey(t *testing.T) {
 			statement: python.PythonImportStatement{
 				ModulePathParts: []string{"some", "mod", "with", "multiple", "parts"},
 				ModuleAlias:     "smwmp",
+				Dependecies: []python.PythonDependecy{
+					{Name: "something", Alias: "s"},
+				},
 			},
 			expectedKey: "some.mod.with.multiple.parts(smwmp)",
+		},
+
+		// For python we need to distiguish between imports with and without dependencies as these are
+		// distict cases.
+		{
+			statement: python.PythonImportStatement{
+				ModulePathParts: []string{"somemod"},
+			},
+			expectedKey: "$somemod",
+		},
+		{
+			statement: python.PythonImportStatement{
+				ModulePathParts: []string{"somemod"},
+				ModuleAlias:     "sm",
+			},
+			expectedKey: "$somemod(sm)",
+		},
+		{
+			statement: python.PythonImportStatement{
+				ModulePathParts: []string{"some", "mod", "with", "multiple", "parts"},
+			},
+			expectedKey: "$some.mod.with.multiple.parts",
+		},
+		{
+			statement: python.PythonImportStatement{
+				ModulePathParts: []string{"some", "mod", "with", "multiple", "parts"},
+				ModuleAlias:     "smwmp",
+			},
+			expectedKey: "$some.mod.with.multiple.parts(smwmp)",
 		},
 	}
 
 	for _, c := range cases {
 		t.Run(c.expectedKey, func(t *testing.T) {
 			key := c.statement.ConsolidationKey()
-			if key != c.expectedKey {
-				t.Errorf("Expected key '%s', but got '%s'", c.expectedKey, key)
-			}
+			assert.Equal(t, c.expectedKey, key)
 		})
 	}
 }
