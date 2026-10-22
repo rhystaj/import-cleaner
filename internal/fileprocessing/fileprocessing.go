@@ -56,7 +56,10 @@ func (fp FileProcessorImpl[S]) ProcessFile(filePath string) error {
 		return extractionError
 	}
 
-	statementGroups := fp.Organiser.OrganiseImportStatements(importStatements)
+	statementGroups, organisationError := fp.Organiser.OrganiseImportStatements(importStatements)
+	if organisationError != nil {
+		return organisationError
+	}
 
 	var outputContentsBuffer bytes.Buffer
 	for _, group := range statementGroups {

@@ -306,8 +306,9 @@ func TestOrganiseImports_NoGroupsConfigured_NoConsolidation(t *testing.T) {
 		},
 	}
 
-	result := testOrganiser.OrganiseImportStatements(testImports)
+	result, err := testOrganiser.OrganiseImportStatements(testImports)
 
+	assert.NoError(t, err)
 	assert.Equal(t, expectedResult, result)
 }
 
@@ -434,8 +435,9 @@ func TestOrganiseImports_NoGroupsConfigured_Consolidation(t *testing.T) {
 		},
 	}
 
-	result := testOrganiser.OrganiseImportStatements(testImports)
+	result, err := testOrganiser.OrganiseImportStatements(testImports)
 
+	assert.NoError(t, err)
 	assert.Equal(t, expectedResult, result)
 }
 
@@ -583,8 +585,9 @@ func TestOrganiseImports_ExternalGroup(t *testing.T) {
 		},
 	}
 
-	result := testOrganiser.OrganiseImportStatements(testImports)
+	result, err := testOrganiser.OrganiseImportStatements(testImports)
 
+	assert.NoError(t, err)
 	assert.Equal(t, expectedResult, result)
 }
 
@@ -733,8 +736,9 @@ func TestOrganiseImports_InternalGroup(t *testing.T) {
 		},
 	}
 
-	result := testOrganiser.OrganiseImportStatements(testImports)
+	result, err := testOrganiser.OrganiseImportStatements(testImports)
 
+	assert.NoError(t, err)
 	assert.Equal(t, expectedResult, result)
 }
 
@@ -894,8 +898,9 @@ func TestOrganiseImports_GroupByModulePaths(t *testing.T) {
 		},
 	}
 
-	result := testOrganiser.OrganiseImportStatements(testImports)
+	result, err := testOrganiser.OrganiseImportStatements(testImports)
 
+	assert.NoError(t, err)
 	assert.Equal(t, expectedResult, result)
 }
 
@@ -1055,8 +1060,8 @@ func TestOrganiseImports_CompositeGroups(t *testing.T) {
 		},
 	}
 
-	result := testOrganiser.OrganiseImportStatements(testImports)
+	result, err := testOrganiser.OrganiseImportStatements(testImports)
 
+	assert.NoError(t, err)
 	assert.Equal(t, expectedResult, result)
-
 }

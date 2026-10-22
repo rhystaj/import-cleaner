@@ -1,6 +1,7 @@
 package organisation
 
 import (
+	"fmt"
 	lp "importcleaner/internal/languageprocessing"
 	"iter"
 	"slices"
@@ -8,7 +9,7 @@ import (
 )
 
 type ImportStatementOrganiser[S lp.ImportStatement] interface {
-	OrganiseImportStatements(statements []S) [][]S
+	OrganiseImportStatements(statements []S) ([][]S, error)
 }
 
 type ImportStatementOrganiserImpl[S lp.ImportStatement] struct {
@@ -36,8 +37,40 @@ func byModulePath[S lp.ImportStatement](a S, b S) int {
 	)
 }
 
-func (o ImportStatementOrganiserImpl[S]) consolidateStatements(statements []S) []S {
-	panic("not implemented")
+func (o ImportStatementOrganiserImpl[S]) consolidateStatements(statements []S) ([]S, error) {
+	statementsByConsolidationKey := make(map[string][]S)
+	for _, statement := range statements {
+		consolidationKey := statement.ConsolidationKey()
+		statementsByConsolidationKey[consolidationKey] = append(statementsByConsolidationKey[consolidationKey], statement)
+	}
+
+	consolidatedStatements := make([]S, 0)
+	for _, statements := range statementsByConsolidationKey {
+		if len(statements) <= 0 {
+			// Defensive
+			continue
+		}
+
+		consolidatedStatement := statements[0]
+		if len(statements) > 1 {
+			for _, statement := range statements[1:] {
+				newStatement, consolidationError := consolidatedStatement.ConsolidateWith(statement)
+				if consolidationError != nil {
+					return make([]S, 0), consolidationError
+				}
+
+				var isCorrectType bool = false
+				consolidatedStatement, isCorrectType = newStatement.(S)
+				if !isCorrectType {
+					return make([]S, 0), fmt.Errorf("Consolidated statement is not of type %T", consolidatedStatement)
+				}
+			}
+		}
+
+		consolidatedStatements = append(consolidatedStatements, consolidatedStatement)
+	}
+
+	return consolidatedStatements, nil
 }
 
 func (o ImportStatementOrganiserImpl[S]) groupStatements(statements []S) [][]S {
@@ -66,9 +99,13 @@ func (o ImportStatementOrganiserImpl[S]) groupStatements(statements []S) [][]S {
 	return nonEmptyGroups
 }
 
-func (o ImportStatementOrganiserImpl[S]) OrganiseImportStatements(statements []S) [][]S {
+func (o ImportStatementOrganiserImpl[S]) OrganiseImportStatements(statements []S) ([][]S, error) {
 	if o.ConsolidateImportStatements {
-		statements = o.consolidateStatements(statements)
+		var consolidaionError error = nil
+		statements, consolidaionError = o.consolidateStatements(statements)
+		if consolidaionError != nil {
+			return make([][]S, 0), consolidaionError
+		}
 	}
 
 	groups := o.groupStatements(statements)
@@ -78,5 +115,5 @@ func (o ImportStatementOrganiserImpl[S]) OrganiseImportStatements(statements []S
 		sortedGroups[i] = slices.SortedFunc(asSeq(group), byModulePath)
 	}
 
-	return sortedGroups
+	return sortedGroups, nil
 }
