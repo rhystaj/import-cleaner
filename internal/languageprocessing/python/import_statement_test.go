@@ -1,6 +1,8 @@
 package python_test
 
 import (
+	"fmt"
+	lp "importcleaner/internal/languageprocessing"
 	"importcleaner/internal/languageprocessing/python"
 	"testing"
 
@@ -206,6 +208,99 @@ func Test_PythonImportStatement_ConsolidateWith_Success(t *testing.T) {
 		t.Run(c.expectedResult.ConsolidationKey(), func(t *testing.T) {
 			result, _ := c.statementA.ConsolidateWith(c.statementB)
 			assert.Equal(t, c.expectedResult, result)
+		})
+	}
+}
+
+type dummyImportStatement struct{}
+
+func (d dummyImportStatement) AsText() (string, error) {
+	return "dummy", nil
+}
+
+func (d dummyImportStatement) GetGenericDetails() lp.ImportStatementGenericDetails {
+	return lp.ImportStatementGenericDetails{
+		ModulePathParts: []string{"dummy"},
+		ModuleAlias:     "d",
+		Dependecies:     []lp.GenericDependecy{},
+		External:        true,
+	}
+}
+
+func (d dummyImportStatement) ConsolidationKey() string {
+	return "dummy"
+}
+
+func (d dummyImportStatement) ConsolidateWith(other lp.ImportStatement) (lp.ImportStatement, error) {
+	return d, nil
+}
+
+func Test_PythonImportStatement_ConsolidateWith_Failure(t *testing.T) {
+	cases := []struct {
+		statementA    python.PythonImportStatement
+		statementB    lp.ImportStatement
+		expectedError error
+	}{
+		{
+			statementA: python.PythonImportStatement{
+				ModulePathParts: []string{"some", "mod", "with", "multiple", "parts"},
+				ModuleAlias:     "smwmp",
+				Dependecies: []python.PythonDependecy{
+					{Name: "something", Alias: "s"},
+					{Name: "anotherthing", Alias: "at"},
+				},
+				External: true,
+			},
+			statementB: python.PythonImportStatement{
+				ModulePathParts: []string{"some", "mod", "with", "multiple", "parts"},
+				Dependecies: []python.PythonDependecy{
+					{Name: "extrathing", Alias: "et"},
+					{Name: "onelastthingiswear", Alias: "oltwis"},
+				},
+				External: true,
+			},
+			expectedError: fmt.Errorf("consolidation keys do not match"),
+		},
+		{
+			statementA: python.PythonImportStatement{
+				ModulePathParts: []string{"some", "mod", "with", "multiple", "parts"},
+				ModuleAlias:     "smwmp",
+				Dependecies: []python.PythonDependecy{
+					{Name: "something", Alias: "s"},
+					{Name: "anotherthing", Alias: "at"},
+				},
+				External: true,
+			},
+			statementB:    dummyImportStatement{},
+			expectedError: fmt.Errorf("other is not a Python import statement"),
+		},
+		{
+			statementA: python.PythonImportStatement{
+				ModulePathParts: []string{"some", "mod", "with", "multiple", "parts"},
+				ModuleAlias:     "smwmp",
+				Dependecies: []python.PythonDependecy{
+					{Name: "something", Alias: "s"},
+					{Name: "anotherthing", Alias: "at"},
+				},
+				External: true,
+			},
+			statementB: python.PythonImportStatement{
+				ModulePathParts: []string{"some", "mod", "with", "multiple", "parts"},
+				ModuleAlias:     "smwmp",
+				Dependecies: []python.PythonDependecy{
+					{Name: "extrathing", Alias: "et"},
+					{Name: "onelastthingiswear", Alias: "oltwis"},
+				},
+				External: false,
+			},
+			expectedError: fmt.Errorf("externalities do not match"),
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.expectedError.Error(), func(t *testing.T) {
+			_, err := c.statementA.ConsolidateWith(c.statementB)
+			assert.Equal(t, c.expectedError, err)
 		})
 	}
 }

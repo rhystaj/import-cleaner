@@ -86,11 +86,15 @@ func (p PythonImportStatement) ConsolidationKey() string {
 func (p PythonImportStatement) ConsolidateWith(other lp.ImportStatement) (lp.ImportStatement, error) {
 	otherPythonImportStatement, ok := other.(PythonImportStatement)
 	if !ok {
-		return nil, fmt.Errorf("other is not a PythonImportStatement")
+		return nil, fmt.Errorf("other is not a Python import statement")
 	}
 
 	if p.ConsolidationKey() != otherPythonImportStatement.ConsolidationKey() {
 		return nil, fmt.Errorf("consolidation keys do not match")
+	}
+
+	if p.External != otherPythonImportStatement.External {
+		return nil, fmt.Errorf("externalities do not match")
 	}
 
 	result := PythonImportStatement{
