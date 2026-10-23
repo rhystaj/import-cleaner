@@ -142,5 +142,15 @@ func (p TypescriptImportStatement) ConsolidateWith(other lp.ImportStatement) (lp
 }
 
 func (p TypescriptImportStatement) Compare(other lp.ImportStatement) int {
-	return organisation.CompareImportStatements(p, other)
+	genericComparison := organisation.CompareImportStatements(p, other)
+	if genericComparison != 0 {
+		return genericComparison
+	}
+
+	otherTypescriptStatement, otherIsTypescriptStatement := other.(TypescriptImportStatement)
+	if otherIsTypescriptStatement {
+		return organisation.CompareBooleanValues(p.IsTypeImport, otherTypescriptStatement.IsTypeImport)
+	}
+
+	return 0
 }

@@ -109,16 +109,21 @@ func (p PythonImportStatement) ConsolidateWith(other lp.ImportStatement) (lp.Imp
 }
 
 func (p PythonImportStatement) Compare(other lp.ImportStatement) int {
-	// Python imports without dependencies should always come before those with dependencies
+	genericComparison := organisation.CompareImportStatements(p, other)
+	if genericComparison != 0 {
+		return genericComparison
+	}
+
 	otherPythonImportStatement, otherIsPythonImportStatement := other.(PythonImportStatement)
-	if !otherIsPythonImportStatement {
-		if len(p.Dependecies) > 0 && len(otherPythonImportStatement.Dependecies) == 0 {
-			return -1
-		}
-		if len(p.Dependecies) == 0 && len(otherPythonImportStatement.Dependecies) > 0 {
-			return 1
+	if otherIsPythonImportStatement {
+		hasDependenciesComparison := organisation.CompareBooleanValues(
+			len(p.Dependecies) == 0,
+			len(otherPythonImportStatement.Dependecies) == 0,
+		)
+		if hasDependenciesComparison != 0 {
+			return hasDependenciesComparison
 		}
 	}
 
-	return organisation.CompareImportStatements(p, other)
+	return 0
 }

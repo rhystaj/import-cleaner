@@ -3,8 +3,8 @@ from .submod import SUBVALUE
 
 from internal import VALUE
 
-from datetime import datetime, date, time
 import datetime
+from datetime import datetime, date, time
 
 x = VALUE
 

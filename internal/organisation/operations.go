@@ -14,3 +14,13 @@ func CompareImportStatements(a lp.ImportStatement, b lp.ImportStatement) int {
 		strings.Join(bDetails.ModulePathParts, ""),
 	)
 }
+
+func CompareBooleanValues(a bool, b bool) int {
+	if a && !b {
+		return -1
+	}
+	if !a && b {
+		return 1
+	}
+	return 0
+}
