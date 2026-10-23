@@ -22,6 +22,7 @@ type ImportStatement interface {
 	// Statements are considered to be able to be consolidated if they have the same consolidation key
 	ConsolidationKey() string
 	ConsolidateWith(other ImportStatement) (ImportStatement, error)
+	Compare(other ImportStatement) int
 }
 
 type ImportStatementParser interface {

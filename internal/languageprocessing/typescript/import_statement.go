@@ -139,3 +139,10 @@ func (p TypescriptImportStatement) ConsolidateWith(other lp.ImportStatement) (lp
 
 	return newStatement, nil
 }
+
+func (p TypescriptImportStatement) Compare(other lp.ImportStatement) int {
+	return strings.Compare(
+		strings.Join(p.ModulePathParts, ""),
+		strings.Join(other.GetGenericDetails().ModulePathParts, ""),
+	)
+}

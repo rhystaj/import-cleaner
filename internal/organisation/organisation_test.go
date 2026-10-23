@@ -37,6 +37,13 @@ func (s testImportStatement) ConsolidateWith(other lp.ImportStatement) (lp.Impor
 	}, nil
 }
 
+func (s testImportStatement) Compare(other lp.ImportStatement) int {
+	return strings.Compare(
+		strings.Join(s.details.ModulePathParts, ""),
+		strings.Join(other.GetGenericDetails().ModulePathParts, ""),
+	)
+}
+
 func generateTestImports() []lp.ImportStatement {
 	return []lp.ImportStatement{
 		testImportStatement{

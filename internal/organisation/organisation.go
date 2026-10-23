@@ -5,7 +5,6 @@ import (
 	lp "importcleaner/internal/languageprocessing"
 	"iter"
 	"slices"
-	"strings"
 )
 
 type ImportStatementOrganiser[S lp.ImportStatement] interface {
@@ -25,16 +24,6 @@ func asSeq[T any](slice []T) iter.Seq[T] {
 			}
 		}
 	}
-}
-
-func byModulePath[S lp.ImportStatement](a S, b S) int {
-	aDetails := a.GetGenericDetails()
-	bDetails := b.GetGenericDetails()
-
-	return strings.Compare(
-		strings.Join(aDetails.ModulePathParts, ""),
-		strings.Join(bDetails.ModulePathParts, ""),
-	)
 }
 
 func (o ImportStatementOrganiserImpl[S]) consolidateStatements(statements []S) ([]S, error) {
@@ -112,7 +101,9 @@ func (o ImportStatementOrganiserImpl[S]) OrganiseImportStatements(statements []S
 
 	var sortedGroups [][]S = make([][]S, len(groups))
 	for i, group := range groups {
-		sortedGroups[i] = slices.SortedFunc(asSeq(group), byModulePath)
+		sortedGroups[i] = slices.SortedFunc(asSeq(group), func(a S, b S) int {
+			return a.Compare(b)
+		})
 	}
 
 	return sortedGroups, nil

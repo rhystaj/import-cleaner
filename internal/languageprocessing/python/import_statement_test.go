@@ -235,6 +235,10 @@ func (d dummyImportStatement) ConsolidateWith(other lp.ImportStatement) (lp.Impo
 	return d, nil
 }
 
+func (d dummyImportStatement) Compare(other lp.ImportStatement) int {
+	return 0
+}
+
 func Test_PythonImportStatement_ConsolidateWith_Failure(t *testing.T) {
 	cases := []struct {
 		statementA    python.PythonImportStatement
