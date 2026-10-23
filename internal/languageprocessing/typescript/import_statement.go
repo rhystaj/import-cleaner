@@ -3,6 +3,7 @@ package typescript
 import (
 	"fmt"
 	lp "importcleaner/internal/languageprocessing"
+	"importcleaner/internal/organisation"
 	"strings"
 )
 
@@ -141,8 +142,5 @@ func (p TypescriptImportStatement) ConsolidateWith(other lp.ImportStatement) (lp
 }
 
 func (p TypescriptImportStatement) Compare(other lp.ImportStatement) int {
-	return strings.Compare(
-		strings.Join(p.ModulePathParts, ""),
-		strings.Join(other.GetGenericDetails().ModulePathParts, ""),
-	)
+	return organisation.CompareImportStatements(p, other)
 }
