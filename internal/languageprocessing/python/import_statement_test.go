@@ -9,77 +9,123 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func AssertStatementCorrectlyConvertedToText(t *testing.T, statement python.PythonImportStatement, expectedString string) {
-	t.Run(expectedString, func(t *testing.T) {
-		result, _ := statement.AsText(lp.TextOutputOptions{BreakLinesAtNumChars: 50})
-
-		if result != expectedString {
-			t.Errorf("Failure to convert statement %+v to string: Expected '%s', but retrieved '%s'", statement, expectedString, result)
-		}
-	})
+type expectedOutput struct {
+	noFormatting   string
+	withLineBreaks string
 }
 
 func Test_PythonImportStatement_AsText(t *testing.T) {
-	AssertStatementCorrectlyConvertedToText(t, python.PythonImportStatement{
-		ModulePathParts: []string{"somemod"},
-		ModuleAlias:     "",
-		Dependecies:     []python.PythonDependecy{},
-		External:        true,
-	}, "import somemod")
+	lineBreakAtNumChars := 66
 
-	AssertStatementCorrectlyConvertedToText(t, python.PythonImportStatement{
-		ModulePathParts: []string{"bigmod"},
-		ModuleAlias:     "",
-		Dependecies: []python.PythonDependecy{
-			{Name: "something", Alias: ""},
-			{Name: "thingwithalias", Alias: "twa"},
-			{Name: "anotherthing", Alias: ""},
+	testCases := []struct {
+		statement      python.PythonImportStatement
+		expectedOutput expectedOutput
+	}{
+		{
+			statement: python.PythonImportStatement{
+				ModulePathParts: []string{"somemod"},
+				ModuleAlias:     "",
+				Dependecies:     []python.PythonDependecy{},
+				External:        true,
+			},
+			expectedOutput: expectedOutput{
+				noFormatting:   "import somemod",
+				withLineBreaks: "import somemod",
+			},
 		},
-		External: true,
-	}, "from bigmod import something, thingwithalias as twa, anotherthing")
-
-	AssertStatementCorrectlyConvertedToText(t, python.PythonImportStatement{
-		ModulePathParts: []string{"mod", "with", "multiple", "parts"},
-		ModuleAlias:     "",
-		Dependecies: []python.PythonDependecy{
-			{Name: "something", Alias: "s"},
-			{Name: "thingwithalias", Alias: ""},
-			{Name: "anotherthing", Alias: "at"},
+		{
+			statement: python.PythonImportStatement{
+				ModulePathParts: []string{"bigmod"},
+				ModuleAlias:     "",
+				Dependecies: []python.PythonDependecy{
+					{Name: "something", Alias: ""},
+					{Name: "thingwithalias", Alias: "twa"},
+					{Name: "anotherthing", Alias: ""},
+				},
+				External: true,
+			},
+			expectedOutput: expectedOutput{
+				noFormatting:   "from bigmod import something, thingwithalias as twa, anotherthing",
+				withLineBreaks: "from bigmod import something, thingwithalias as twa, anotherthing",
+			},
 		},
-		External: true,
-	}, "from mod.with.multiple.parts import something as s, thingwithalias, anotherthing as at")
-
-	AssertStatementCorrectlyConvertedToText(t, python.PythonImportStatement{
-		AncestoryLevels: 1,
-		ModulePathParts: []string{"somemod"},
-		ModuleAlias:     "",
-		Dependecies:     []python.PythonDependecy{},
-		External:        false,
-	}, "import .somemod")
-
-	AssertStatementCorrectlyConvertedToText(t, python.PythonImportStatement{
-		AncestoryLevels: 2,
-		ModulePathParts: []string{"bigmod"},
-		ModuleAlias:     "",
-		Dependecies: []python.PythonDependecy{
-			{Name: "something", Alias: ""},
-			{Name: "thingwithalias", Alias: "twa"},
-			{Name: "anotherthing", Alias: ""},
+		{
+			statement: python.PythonImportStatement{
+				ModulePathParts: []string{"mod", "with", "multiple", "parts"},
+				ModuleAlias:     "",
+				Dependecies: []python.PythonDependecy{
+					{Name: "something", Alias: "s"},
+					{Name: "thingwithalias", Alias: ""},
+					{Name: "anotherthing", Alias: "at"},
+				},
+				External: true,
+			},
+			expectedOutput: expectedOutput{
+				noFormatting:   "from mod.with.multiple.parts import something as s, thingwithalias, anotherthing as at",
+				withLineBreaks: "from mod.with.multiple.parts import (\n\tsomething as s,\n\tthingwithalias,\n\tanotherthing as at\n)",
+			},
 		},
-		External: false,
-	}, "from ..bigmod import something, thingwithalias as twa, anotherthing")
-
-	AssertStatementCorrectlyConvertedToText(t, python.PythonImportStatement{
-		AncestoryLevels: 3,
-		ModulePathParts: []string{"mod", "with", "multiple", "parts"},
-		ModuleAlias:     "",
-		Dependecies: []python.PythonDependecy{
-			{Name: "something", Alias: "s"},
-			{Name: "thingwithalias", Alias: ""},
-			{Name: "anotherthing", Alias: "at"},
+		{
+			statement: python.PythonImportStatement{
+				AncestoryLevels: 1,
+				ModulePathParts: []string{"somemod"},
+				ModuleAlias:     "",
+				Dependecies:     []python.PythonDependecy{},
+				External:        false,
+			},
+			expectedOutput: expectedOutput{
+				noFormatting:   "import .somemod",
+				withLineBreaks: "import .somemod",
+			},
 		},
-		External: false,
-	}, "from ...mod.with.multiple.parts import something as s, thingwithalias, anotherthing as at")
+		{
+			statement: python.PythonImportStatement{
+				AncestoryLevels: 2,
+				ModulePathParts: []string{"bigmod"},
+				ModuleAlias:     "",
+				Dependecies: []python.PythonDependecy{
+					{Name: "something", Alias: ""},
+					{Name: "thingwithalias", Alias: "twa"},
+					{Name: "anotherthing", Alias: ""},
+				},
+				External: false,
+			},
+			expectedOutput: expectedOutput{
+				noFormatting:   "from ..bigmod import something, thingwithalias as twa, anotherthing",
+				withLineBreaks: "from ..bigmod import (\n\tsomething,\n\tthingwithalias as twa,\n\tanotherthing\n)",
+			},
+		},
+		{
+			statement: python.PythonImportStatement{
+				AncestoryLevels: 3,
+				ModulePathParts: []string{"mod", "with", "multiple", "parts"},
+				ModuleAlias:     "",
+				Dependecies: []python.PythonDependecy{
+					{Name: "something", Alias: "s"},
+					{Name: "thingwithalias", Alias: ""},
+					{Name: "anotherthing", Alias: "at"},
+				},
+				External: false,
+			},
+			expectedOutput: expectedOutput{
+				noFormatting:   "from ...mod.with.multiple.parts import something as s, thingwithalias, anotherthing as at",
+				withLineBreaks: "from ...mod.with.multiple.parts import (\n\tsomething as s,\n\tthingwithalias,\n\tanotherthing as at\n)",
+			},
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.expectedOutput.noFormatting+" - No formatting", func(t *testing.T) {
+			result, _ := testCase.statement.AsText(lp.TextOutputOptions{})
+			assert.Equal(t, testCase.expectedOutput.noFormatting, result)
+		})
+		t.Run(testCase.expectedOutput.noFormatting+" - Line breaks after num chars", func(t *testing.T) {
+			result, _ := testCase.statement.AsText(lp.TextOutputOptions{
+				BreakLinesAtNumChars: lineBreakAtNumChars,
+			})
+			assert.Equal(t, testCase.expectedOutput.withLineBreaks, result)
+		})
+	}
 }
 
 func Test_PythonImportStatement_ConsolidationKey(t *testing.T) {
