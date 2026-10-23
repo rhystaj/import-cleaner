@@ -10,7 +10,6 @@ type GenericDependecy struct {
 }
 
 type ImportStatementGenericDetails struct {
-	RawText         string
 	ModulePathParts []string
 	ModuleAlias     string
 	Dependecies     []GenericDependecy
@@ -20,6 +19,10 @@ type ImportStatementGenericDetails struct {
 type ImportStatement interface {
 	AsText() (string, error)
 	GetGenericDetails() ImportStatementGenericDetails
+	// Statements are considered to be able to be consolidated if they have the same consolidation key
+	ConsolidationKey() string
+	ConsolidateWith(other ImportStatement) (ImportStatement, error)
+	Compare(other ImportStatement) int
 }
 
 type ImportStatementParser interface {

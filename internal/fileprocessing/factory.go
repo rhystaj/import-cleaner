@@ -13,8 +13,8 @@ type PythonFileProcessor = FileProcessorImpl[lp.ImportStatement]
 type TypescriptFileProcessor = FileProcessorImpl[typescript.TypescriptImportStatement]
 
 type FileProcessorFactory interface {
-	CreatePythonFileProcessor() (FileProcessor, error)
-	CreateTypescriptFileProcessor() (FileProcessor, error)
+	CreatePythonFileProcessor(config config.Config) (FileProcessor, error)
+	CreateTypescriptFileProcessor(config config.Config) (FileProcessor, error)
 }
 
 type FileProcessorFactoryImpl struct {
@@ -23,7 +23,7 @@ type FileProcessorFactoryImpl struct {
 	FileManager iowrappers.FileManager
 }
 
-func (f FileProcessorFactoryImpl) CreatePythonFileProcessor() (FileProcessor, error) {
+func (f FileProcessorFactoryImpl) CreatePythonFileProcessor(config config.Config) (FileProcessor, error) {
 	groupingRules := make([]organisation.ImportStatementGroupRule[lp.ImportStatement], len(f.Config.GroupingRules))
 	for i, rule := range f.Config.GroupingRules {
 		groupingRules[i] = organisation.NewGenericGroupingRuleFromDefinition(rule)
@@ -36,12 +36,13 @@ func (f FileProcessorFactoryImpl) CreatePythonFileProcessor() (FileProcessor, er
 		},
 		FileManager: f.FileManager,
 		Organiser: organisation.ImportStatementOrganiserImpl[lp.ImportStatement]{
-			GroupRules: groupingRules,
+			GroupRules:                  groupingRules,
+			ConsolidateImportStatements: config.FormattingRules.ConsolidateImports,
 		},
 	}, nil
 }
 
-func (f FileProcessorFactoryImpl) CreateTypescriptFileProcessor() (FileProcessor, error) {
+func (f FileProcessorFactoryImpl) CreateTypescriptFileProcessor(config config.Config) (FileProcessor, error) {
 	groupingRules := make([]organisation.ImportStatementGroupRule[typescript.TypescriptImportStatement], len(f.Config.GroupingRules))
 	for i, rule := range f.Config.GroupingRules {
 		groupingRules[i] = typescript.NewTypescriptImportStatementFromDefinition(rule)
@@ -51,7 +52,8 @@ func (f FileProcessorFactoryImpl) CreateTypescriptFileProcessor() (FileProcessor
 		Parser:      typescript.TypescriptImportStatementParser{},
 		FileManager: f.FileManager,
 		Organiser: organisation.ImportStatementOrganiserImpl[typescript.TypescriptImportStatement]{
-			GroupRules: groupingRules,
+			GroupRules:                  groupingRules,
+			ConsolidateImportStatements: config.FormattingRules.ConsolidateImports,
 		},
 	}, nil
 }

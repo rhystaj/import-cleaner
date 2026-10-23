@@ -13,17 +13,22 @@ type RawGroupingRuleDefinition struct {
 	IsTypeImport         string   `yaml:"isTypeImport"`
 }
 
+type RawFormattingRules struct {
+	ConsolidateImports bool `yaml:"consolidateImports"`
+}
+
 type RawConfig struct {
-	Language      string                      `yaml:"language"`
-	IgnoredPaths  []string                    `yaml:"ignoredPaths"`
-	GroupingRules []RawGroupingRuleDefinition `yaml:"groupingRules"`
+	Language        string                      `yaml:"language"`
+	IgnoredPaths    []string                    `yaml:"ignoredPaths"`
+	GroupingRules   []RawGroupingRuleDefinition `yaml:"groupingRules"`
+	FormattingRules RawFormattingRules          `yaml:"formattingRules"`
 }
 
 type ConfigLoadError struct {
 	SourceDescription string
 }
 
-func (e ConfigLoadError) Error() string {
+func (e *ConfigLoadError) Error() string {
 	return fmt.Sprintf("Could not load config as source '%s' is invalid.", e.SourceDescription)
 }
 

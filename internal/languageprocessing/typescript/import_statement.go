@@ -1,7 +1,9 @@
 package typescript
 
 import (
+	"fmt"
 	lp "importcleaner/internal/languageprocessing"
+	"importcleaner/internal/organisation"
 	"strings"
 )
 
@@ -111,4 +113,44 @@ func (p TypescriptImportStatement) GetGenericDetails() lp.ImportStatementGeneric
 		Dependecies:     dependencies,
 		External:        p.External,
 	}
+}
+
+func (p TypescriptImportStatement) ConsolidationKey() string {
+	modulePath := strings.Join(stripRelativePrefixFromModulePath(p.ModulePathParts), ".")
+
+	if p.IsTypeImport {
+		modulePath = "*" + modulePath
+	}
+
+	return modulePath
+}
+
+func (p TypescriptImportStatement) ConsolidateWith(other lp.ImportStatement) (lp.ImportStatement, error) {
+	otherTypescriptStatement, ok := other.(TypescriptImportStatement)
+	if !ok {
+		return p, fmt.Errorf("other statement is not a TypescriptImportStatement")
+	}
+
+	if p.ConsolidationKey() != otherTypescriptStatement.ConsolidationKey() {
+		return p, fmt.Errorf("statements have different consolidation keys")
+	}
+
+	newStatement := p
+	newStatement.Dependecies = append(newStatement.Dependecies, otherTypescriptStatement.Dependecies...)
+
+	return newStatement, nil
+}
+
+func (p TypescriptImportStatement) Compare(other lp.ImportStatement) int {
+	genericComparison := organisation.CompareImportStatements(p, other)
+	if genericComparison != 0 {
+		return genericComparison
+	}
+
+	otherTypescriptStatement, otherIsTypescriptStatement := other.(TypescriptImportStatement)
+	if otherIsTypescriptStatement {
+		return organisation.CompareBooleanValues(p.IsTypeImport, otherTypescriptStatement.IsTypeImport)
+	}
+
+	return 0
 }

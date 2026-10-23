@@ -3,6 +3,7 @@ package python
 import (
 	"fmt"
 	lp "importcleaner/internal/languageprocessing"
+	"importcleaner/internal/organisation"
 	"strings"
 )
 
@@ -61,4 +62,68 @@ func (p PythonImportStatement) GetGenericDetails() lp.ImportStatementGenericDeta
 		Dependecies:     dependencies,
 		External:        p.External,
 	}
+}
+
+func (p PythonImportStatement) ConsolidationKey() string {
+	var stringBuilder strings.Builder
+
+	if len(p.Dependecies) == 0 {
+		stringBuilder.WriteString("$")
+	}
+
+	if len(p.ModulePathParts) > 0 {
+		stringBuilder.WriteString(strings.Join(p.ModulePathParts, "."))
+	}
+
+	if p.ModuleAlias != "" {
+		stringBuilder.WriteString("(")
+		stringBuilder.WriteString(p.ModuleAlias)
+		stringBuilder.WriteString(")")
+	}
+
+	return stringBuilder.String()
+}
+
+func (p PythonImportStatement) ConsolidateWith(other lp.ImportStatement) (lp.ImportStatement, error) {
+	otherPythonImportStatement, ok := other.(PythonImportStatement)
+	if !ok {
+		return nil, fmt.Errorf("other is not a Python import statement")
+	}
+
+	if p.ConsolidationKey() != otherPythonImportStatement.ConsolidationKey() {
+		return nil, fmt.Errorf("consolidation keys do not match")
+	}
+
+	if p.External != otherPythonImportStatement.External {
+		return nil, fmt.Errorf("externalities do not match")
+	}
+
+	result := PythonImportStatement{
+		ModulePathParts: p.ModulePathParts,
+		ModuleAlias:     p.ModuleAlias,
+		Dependecies:     append(p.Dependecies, otherPythonImportStatement.Dependecies...),
+		External:        p.External,
+	}
+
+	return result, nil
+}
+
+func (p PythonImportStatement) Compare(other lp.ImportStatement) int {
+	genericComparison := organisation.CompareImportStatements(p, other)
+	if genericComparison != 0 {
+		return genericComparison
+	}
+
+	otherPythonImportStatement, otherIsPythonImportStatement := other.(PythonImportStatement)
+	if otherIsPythonImportStatement {
+		hasDependenciesComparison := organisation.CompareBooleanValues(
+			len(p.Dependecies) == 0,
+			len(otherPythonImportStatement.Dependecies) == 0,
+		)
+		if hasDependenciesComparison != 0 {
+			return hasDependenciesComparison
+		}
+	}
+
+	return 0
 }

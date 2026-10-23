@@ -4,6 +4,7 @@ from .submod import SUBVALUE
 from internal import VALUE
 
 import datetime
+from datetime import datetime, date, time
 
 x = VALUE
 

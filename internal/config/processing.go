@@ -20,10 +20,15 @@ type ImportStatementGroupRuleDefinition struct {
 	IsTypeImport         types.OptionalBool
 }
 
+type FormattingRules struct {
+	ConsolidateImports bool
+}
+
 type Config struct {
-	Language      string
-	IgnoredPaths  []string
-	GroupingRules []ImportStatementGroupRuleDefinition
+	Language        string
+	IgnoredPaths    []string
+	GroupingRules   []ImportStatementGroupRuleDefinition
+	FormattingRules FormattingRules
 }
 
 type InvalidPath struct {
@@ -35,7 +40,7 @@ type ConfigValidationError struct {
 	InvalidPaths []InvalidPath
 }
 
-func (e ConfigValidationError) Error() string {
+func (e *ConfigValidationError) Error() string {
 	if len(e.InvalidPaths) == 0 {
 		return "Config load error returned, but no invalid paths were specified."
 	}
@@ -108,6 +113,12 @@ func processAndValidateGroupingRule(rawGroupingRule RawGroupingRuleDefinition) (
 	}, invalidPaths
 }
 
+func processAndValidateFormattingRules(rawFormattingRules RawFormattingRules) (FormattingRules, []InvalidPath) {
+	return FormattingRules{
+		ConsolidateImports: rawFormattingRules.ConsolidateImports,
+	}, []InvalidPath{}
+}
+
 func ProcessAndValidateConfig(rawConfig RawConfig) (Config, *ConfigValidationError) {
 	var configInvalidPaths []InvalidPath
 
@@ -125,9 +136,13 @@ func ProcessAndValidateConfig(rawConfig RawConfig) (Config, *ConfigValidationErr
 		}
 	}
 
+	processedFormattingRules, formattingRulesInvalidPaths := processAndValidateFormattingRules(rawConfig.FormattingRules)
+	configInvalidPaths = append(configInvalidPaths, formattingRulesInvalidPaths...)
+
 	return Config{
-		Language:      rawConfig.Language,
-		IgnoredPaths:  rawConfig.IgnoredPaths,
-		GroupingRules: processedGroupingRules,
+		Language:        rawConfig.Language,
+		IgnoredPaths:    rawConfig.IgnoredPaths,
+		GroupingRules:   processedGroupingRules,
+		FormattingRules: processedFormattingRules,
 	}, validationError
 }
