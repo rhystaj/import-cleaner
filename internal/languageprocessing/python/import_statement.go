@@ -30,16 +30,43 @@ func (p PythonImportStatement) dependecyAsString(dependecy PythonDependecy) stri
 	return result
 }
 
+func (p PythonImportStatement) formatDependecyList(
+	dependencyNames []string,
+	options lp.TextOutputOptions,
+	totalCharsInStatement int,
+) string {
+	if options.BreakLinesAtNumChars == 0 || totalCharsInStatement < options.BreakLinesAtNumChars {
+		return strings.Join(dependencyNames, ", ")
+	}
+
+	var stringBuilder strings.Builder
+	stringBuilder.WriteString("(")
+	for i, dependencyName := range dependencyNames {
+		stringBuilder.WriteString("\n\t")
+		stringBuilder.WriteString(dependencyName)
+		if i < len(dependencyNames)-1 {
+			stringBuilder.WriteString(",")
+		}
+	}
+	stringBuilder.WriteString("\n)")
+	return stringBuilder.String()
+}
+
 func (p PythonImportStatement) AsText(options lp.TextOutputOptions) (string, error) {
 	modulePath := strings.Repeat(".", p.AncestoryLevels) + strings.Join(p.ModulePathParts, ".")
 
 	if len(p.Dependecies) > 0 {
-		dependencyNames := make([]string, 0)
-		for _, dep := range p.Dependecies {
-			dependencyNames = append(dependencyNames, p.dependecyAsString(dep))
+		dependencyNames := make([]string, len(p.Dependecies))
+		dependecyChars := (len(p.Dependecies) - 1) * 2 // 2 chars per intermdiary comma and space
+		for i, dep := range p.Dependecies {
+			dependencyNames[i] = p.dependecyAsString(dep)
+			dependecyChars += len(dependencyNames[i])
 		}
 
-		result := fmt.Sprintf("from %s import %s", modulePath, strings.Join(dependencyNames, ", "))
+		totalCharsInStatement := len(modulePath) + dependecyChars + 12 // 12 chars for "from " and "import "
+		formattedDependecyList := p.formatDependecyList(dependencyNames, options, totalCharsInStatement)
+
+		result := fmt.Sprintf("from %s import %s", modulePath, formattedDependecyList)
 		return result, nil
 	} else {
 		result := fmt.Sprintf("import %s", modulePath)
