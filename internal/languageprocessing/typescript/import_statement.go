@@ -40,7 +40,7 @@ func (p TypescriptImportStatement) dependencyAsStatementString(dependency *Types
 	return statementStringBuilder.String()
 }
 
-func (p TypescriptImportStatement) AsText() (string, error) {
+func (p TypescriptImportStatement) AsText(options lp.TextOutputOptions) (string, error) {
 	if len(p.Dependecies) == 0 {
 		return "", &lp.ImportStatementWriteError{
 			Statement: p,

@@ -14,7 +14,7 @@ type testImportStatement struct {
 	details lp.ImportStatementGenericDetails
 }
 
-func (s testImportStatement) AsText() (string, error) {
+func (s testImportStatement) AsText(options lp.TextOutputOptions) (string, error) {
 	panic("not implemented")
 }
 

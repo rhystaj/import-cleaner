@@ -11,7 +11,7 @@ import (
 
 func AssertStatementCorrectlyConvertedToText(t *testing.T, statement python.PythonImportStatement, expectedString string) {
 	t.Run(expectedString, func(t *testing.T) {
-		result, _ := statement.AsText()
+		result, _ := statement.AsText(lp.TextOutputOptions{BreakLinesAtNumChars: 50})
 
 		if result != expectedString {
 			t.Errorf("Failure to convert statement %+v to string: Expected '%s', but retrieved '%s'", statement, expectedString, result)
@@ -214,7 +214,7 @@ func Test_PythonImportStatement_ConsolidateWith_Success(t *testing.T) {
 
 type dummyImportStatement struct{}
 
-func (d dummyImportStatement) AsText() (string, error) {
+func (d dummyImportStatement) AsText(options lp.TextOutputOptions) (string, error) {
 	return "dummy", nil
 }
 

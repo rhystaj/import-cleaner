@@ -72,7 +72,7 @@ func Test_TypescriptImportStatement_AsText_ValidNonTypeImport(t *testing.T) {
 				Dependecies:     dependencyCase.Dependencies,
 			}
 
-			result, error := testStatement.AsText()
+			result, error := testStatement.AsText(lp.TextOutputOptions{BreakLinesAtNumChars: 50})
 
 			t.Run(expectedStatement, func(t_ *testing.T) {
 				assert.Nil(t_, error)
@@ -97,7 +97,7 @@ func Test_TypescriptImportStatement_AsText_ValidTypeImport(t *testing.T) {
 				IsTypeImport:    true,
 			}
 
-			result, error := testStatement.AsText()
+			result, error := testStatement.AsText(lp.TextOutputOptions{BreakLinesAtNumChars: 50})
 
 			t.Run(expectedStatement, func(t_ *testing.T) {
 				assert.Nil(t_, error)
@@ -115,7 +115,7 @@ func AssertCorrectErrorHandlingForInvalidTypescriotImportStatementWrite(
 		Detail:    expectedErrorDetail,
 	}
 
-	resultingImportStatement, resultingError := statement.AsText()
+	resultingImportStatement, resultingError := statement.AsText(lp.TextOutputOptions{BreakLinesAtNumChars: 50})
 
 	t.Run(description, func(t_ *testing.T) {
 		assert.NotNil(t_, resultingError)
@@ -330,7 +330,7 @@ func Test_TypescriptImportStatement_ConsolidateWith_Success(t *testing.T) {
 
 type dummyImportStatement struct{}
 
-func (d dummyImportStatement) AsText() (string, error) {
+func (d dummyImportStatement) AsText(options lp.TextOutputOptions) (string, error) {
 	return "dummy", nil
 }
 

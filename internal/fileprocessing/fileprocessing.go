@@ -68,7 +68,7 @@ func (fp FileProcessorImpl[S]) ProcessFile(filePath string) error {
 		}
 
 		for _, statement := range group {
-			statementAsText, _ := statement.AsText() //TODO: Properly handle error
+			statementAsText, _ := statement.AsText(lp.TextOutputOptions{BreakLinesAtNumChars: 50}) //TODO: Properly handle error
 			outputContentsBuffer.WriteString(statementAsText)
 			outputContentsBuffer.WriteString("\n")
 		}

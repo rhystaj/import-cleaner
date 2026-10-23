@@ -16,8 +16,12 @@ type ImportStatementGenericDetails struct {
 	External        bool
 }
 
+type TextOutputOptions struct {
+	BreakLinesAtNumChars int
+}
+
 type ImportStatement interface {
-	AsText() (string, error)
+	AsText(options TextOutputOptions) (string, error)
 	GetGenericDetails() ImportStatementGenericDetails
 	// Statements are considered to be able to be consolidated if they have the same consolidation key
 	ConsolidationKey() string
