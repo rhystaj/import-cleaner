@@ -13,9 +13,10 @@ type FileProcessor interface {
 }
 
 type FileProcessorImpl[S lp.ImportStatement] struct {
-	Parser      lp.ImportStatementParser
-	FileManager iowrappers.FileManager
-	Organiser   organisation.ImportStatementOrganiser[S]
+	TextOutputOptions lp.TextOutputOptions
+	Parser            lp.ImportStatementParser
+	FileManager       iowrappers.FileManager
+	Organiser         organisation.ImportStatementOrganiser[S]
 }
 
 func (fp FileProcessorImpl[S]) extractStatements(text string) ([]S, []string, error) {
@@ -68,7 +69,7 @@ func (fp FileProcessorImpl[S]) ProcessFile(filePath string) error {
 		}
 
 		for _, statement := range group {
-			statementAsText, _ := statement.AsText(lp.TextOutputOptions{BreakLinesAtNumChars: 50}) //TODO: Properly handle error
+			statementAsText, _ := statement.AsText(fp.TextOutputOptions) //TODO: Properly handle error
 			outputContentsBuffer.WriteString(statementAsText)
 			outputContentsBuffer.WriteString("\n")
 		}

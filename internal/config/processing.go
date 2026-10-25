@@ -21,7 +21,8 @@ type ImportStatementGroupRuleDefinition struct {
 }
 
 type FormattingRules struct {
-	ConsolidateImports bool
+	ConsolidateImports  bool
+	LineBreakAtNumChars int
 }
 
 type Config struct {
@@ -114,8 +115,18 @@ func processAndValidateGroupingRule(rawGroupingRule RawGroupingRuleDefinition) (
 }
 
 func processAndValidateFormattingRules(rawFormattingRules RawFormattingRules) (FormattingRules, []InvalidPath) {
+	if rawFormattingRules.LineBreakAtNumChars < 0 {
+		return FormattingRules{}, []InvalidPath{
+			{
+				Path:             "formattingRules.lineBreakAtNumChars",
+				ErrorDescription: "Must be greater than 0",
+			},
+		}
+	}
+
 	return FormattingRules{
-		ConsolidateImports: rawFormattingRules.ConsolidateImports,
+		ConsolidateImports:  rawFormattingRules.ConsolidateImports,
+		LineBreakAtNumChars: rawFormattingRules.LineBreakAtNumChars,
 	}, []InvalidPath{}
 }
 

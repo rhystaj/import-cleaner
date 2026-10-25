@@ -23,6 +23,12 @@ type FileProcessorFactoryImpl struct {
 	FileManager iowrappers.FileManager
 }
 
+func textOutputOptionsFromConfig(config config.Config) lp.TextOutputOptions {
+	return lp.TextOutputOptions{
+		BreakLinesAtNumChars: config.FormattingRules.LineBreakAtNumChars,
+	}
+}
+
 func (f FileProcessorFactoryImpl) CreatePythonFileProcessor(config config.Config) (FileProcessor, error) {
 	groupingRules := make([]organisation.ImportStatementGroupRule[lp.ImportStatement], len(f.Config.GroupingRules))
 	for i, rule := range f.Config.GroupingRules {
@@ -34,7 +40,8 @@ func (f FileProcessorFactoryImpl) CreatePythonFileProcessor(config config.Config
 			WorkingDir:  f.WorkingDir,
 			FileManager: f.FileManager,
 		},
-		FileManager: f.FileManager,
+		FileManager:       f.FileManager,
+		TextOutputOptions: textOutputOptionsFromConfig(config),
 		Organiser: organisation.ImportStatementOrganiserImpl[lp.ImportStatement]{
 			GroupRules:                  groupingRules,
 			ConsolidateImportStatements: config.FormattingRules.ConsolidateImports,

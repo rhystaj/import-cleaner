@@ -14,7 +14,8 @@ type RawGroupingRuleDefinition struct {
 }
 
 type RawFormattingRules struct {
-	ConsolidateImports bool `yaml:"consolidateImports"`
+	ConsolidateImports  bool `yaml:"consolidateImports"`
+	LineBreakAtNumChars int  `yaml:"lineBreakAtNumChars"`
 }
 
 type RawConfig struct {
