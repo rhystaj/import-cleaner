@@ -13,9 +13,15 @@ type RawGroupingRuleDefinition struct {
 	IsTypeImport         string   `yaml:"isTypeImport"`
 }
 
+type RawIndentSettings struct {
+	Type string `yaml:"type"`
+	Size int    `yaml:"size"`
+}
+
 type RawFormattingRules struct {
-	ConsolidateImports  bool `yaml:"consolidateImports"`
-	LineBreakAtNumChars int  `yaml:"lineBreakAtNumChars"`
+	ConsolidateImports  bool              `yaml:"consolidateImports"`
+	LineBreakAtNumChars int               `yaml:"lineBreakAtNumChars"`
+	Indent              RawIndentSettings `yaml:"indent"`
 }
 
 type RawConfig struct {

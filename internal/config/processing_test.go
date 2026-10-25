@@ -12,67 +12,112 @@ func TestProcessAndValidationConfig_ValidConfig(t *testing.T) {
 
 	testIgnoredPaths := []string{}
 
-	testConfig := config.RawConfig{
-		IgnoredPaths: testIgnoredPaths,
-		GroupingRules: []config.RawGroupingRuleDefinition{
-			{},
-			{
-				DependencySourceType: "internal",
-				ModulePaths: []string{
-					"somecoolmodule",
-					"helpers.database",
+	testFormattingCases := []struct {
+		description             string
+		rawFormattingRules      config.RawFormattingRules
+		expectedFormattingRules config.FormattingRules
+	}{
+		{
+			description: "Space indent",
+			rawFormattingRules: config.RawFormattingRules{
+				ConsolidateImports:  true,
+				LineBreakAtNumChars: 66,
+				Indent: config.RawIndentSettings{
+					Type: "space",
+					Size: 4,
 				},
 			},
-			{
-				DependencySourceType: "external",
-				IsTypeImport:         "true",
+			expectedFormattingRules: config.FormattingRules{
+				ConsolidateImports:  true,
+				LineBreakAtNumChars: 66,
+				Indent:              "    ",
 			},
-			{
-				ModulePaths: []string{
-					"pydantic.types",
-					"argparse",
+		},
+		{
+			description: "Tab indent",
+			rawFormattingRules: config.RawFormattingRules{
+				ConsolidateImports:  true,
+				LineBreakAtNumChars: 66,
+				Indent: config.RawIndentSettings{
+					Type: "tab",
+					Size: 1,
 				},
-				IsTypeImport: "false",
+			},
+			expectedFormattingRules: config.FormattingRules{
+				ConsolidateImports:  true,
+				LineBreakAtNumChars: 66,
+				Indent:              "\t",
 			},
 		},
 	}
 
-	expectedOutput := config.Config{
-		IgnoredPaths: testIgnoredPaths,
-		GroupingRules: []config.ImportStatementGroupRuleDefinition{
-			{
-				DependencySourceType: config.DependencySourceTypeNone,
-				ModulePaths:          [][]string{},
-				IsTypeImport:         types.OBNil,
-			},
-			{
-				DependencySourceType: config.DependencySourceTypeInternal,
-				ModulePaths: [][]string{
-					{"somecoolmodule"},
-					{"helpers", "database"},
+	for _, testFormattingCase := range testFormattingCases {
+		t.Run("", func(t *testing.T) {
+			testConfig := config.RawConfig{
+				IgnoredPaths: testIgnoredPaths,
+				GroupingRules: []config.RawGroupingRuleDefinition{
+					{},
+					{
+						DependencySourceType: "internal",
+						ModulePaths: []string{
+							"somecoolmodule",
+							"helpers.database",
+						},
+					},
+					{
+						DependencySourceType: "external",
+						IsTypeImport:         "true",
+					},
+					{
+						ModulePaths: []string{
+							"pydantic.types",
+							"argparse",
+						},
+						IsTypeImport: "false",
+					},
 				},
-				IsTypeImport: types.OBNil,
-			},
-			{
-				DependencySourceType: config.DependencySourceTypeExternal,
-				ModulePaths:          [][]string{},
-				IsTypeImport:         types.OBTrue,
-			},
-			{
-				DependencySourceType: config.DependencySourceTypeNone,
-				ModulePaths: [][]string{
-					{"pydantic", "types"},
-					{"argparse"},
+				FormattingRules: testFormattingCase.rawFormattingRules,
+			}
+
+			expectedOutput := config.Config{
+				IgnoredPaths: testIgnoredPaths,
+				GroupingRules: []config.ImportStatementGroupRuleDefinition{
+					{
+						DependencySourceType: config.DependencySourceTypeNone,
+						ModulePaths:          [][]string{},
+						IsTypeImport:         types.OBNil,
+					},
+					{
+						DependencySourceType: config.DependencySourceTypeInternal,
+						ModulePaths: [][]string{
+							{"somecoolmodule"},
+							{"helpers", "database"},
+						},
+						IsTypeImport: types.OBNil,
+					},
+					{
+						DependencySourceType: config.DependencySourceTypeExternal,
+						ModulePaths:          [][]string{},
+						IsTypeImport:         types.OBTrue,
+					},
+					{
+						DependencySourceType: config.DependencySourceTypeNone,
+						ModulePaths: [][]string{
+							{"pydantic", "types"},
+							{"argparse"},
+						},
+						IsTypeImport: types.OBFalse,
+					},
 				},
-				IsTypeImport: types.OBFalse,
-			},
-		},
+				FormattingRules: testFormattingCase.expectedFormattingRules,
+			}
+
+			result, err := config.ProcessAndValidateConfig(testConfig)
+
+			assert.Nil(t, err)
+			assert.Equal(t, expectedOutput, result)
+		})
 	}
-
-	result, err := config.ProcessAndValidateConfig(testConfig)
-
-	assert.Nil(t, err)
-	assert.Equal(t, expectedOutput, result)
 }
 
 func TestProcessAndValidationConfig_InvalidConfig(t *testing.T) {

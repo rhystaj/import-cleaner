@@ -23,6 +23,7 @@ type ImportStatementGroupRuleDefinition struct {
 type FormattingRules struct {
 	ConsolidateImports  bool
 	LineBreakAtNumChars int
+	Indent              string
 }
 
 type Config struct {
