@@ -7,3 +7,7 @@ groupingRules:
   - dependencySourceType: internal
 formattingRules:
   consolidateImports: true
+  lineBreakAtNumChars: 40
+  indent:
+    type: space
+    size: 2
