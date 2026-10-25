@@ -116,33 +116,35 @@ func processAndValidateGroupingRule(rawGroupingRule RawGroupingRuleDefinition) (
 }
 
 func processAndValidateIndentFromSettings(rawIndentSettings RawIndentSettings) (string, []InvalidPath) {
+	indentInvalidPaths := make([]InvalidPath, 0)
+
 	if rawIndentSettings.Size == 0 && rawIndentSettings.Type == "" {
 		// Default case if no indention is specified
 		return strings.Repeat(" ", 4), []InvalidPath{}
 	}
 
-	if rawIndentSettings.Size < 0 {
-		return "", []InvalidPath{
-			{
-				Path:             "formattingRules.indent.size",
-				ErrorDescription: "Must be greater than 0",
-			},
-		}
-	}
-
+	indentString := ""
 	switch rawIndentSettings.Type {
 	case "space":
-		return strings.Repeat(" ", rawIndentSettings.Size), []InvalidPath{}
+		indentString = strings.Repeat(" ", rawIndentSettings.Size)
 	case "tab":
-		return strings.Repeat("\t", rawIndentSettings.Size), []InvalidPath{}
+		indentString = strings.Repeat("\t", rawIndentSettings.Size)
 	default:
-		return "", []InvalidPath{
-			{
-				Path:             "formattingRules.indent.type",
-				ErrorDescription: fmt.Sprintf("Must be 'space', or 'tab', but was '%s'", rawIndentSettings.Type),
-			},
-		}
+		indentInvalidPaths = append(indentInvalidPaths, InvalidPath{
+			Path:             "formattingRules.indent.type",
+			ErrorDescription: fmt.Sprintf("Must be 'space', or 'tab', but was '%s'", rawIndentSettings.Type),
+		})
 	}
+
+	if rawIndentSettings.Size < 0 {
+		indentInvalidPaths = append(indentInvalidPaths, InvalidPath{
+			Path:             "formattingRules.indent.size",
+			ErrorDescription: "Must be greater than 0",
+		})
+		return "", indentInvalidPaths
+	}
+
+	return strings.Repeat(indentString, rawIndentSettings.Size), indentInvalidPaths
 }
 
 func processAndValidateFormattingRules(rawFormattingRules RawFormattingRules) (FormattingRules, []InvalidPath) {
@@ -175,15 +177,15 @@ func ProcessAndValidateConfig(rawConfig RawConfig) (Config, *ConfigValidationErr
 		configInvalidPaths = append(configInvalidPaths, groupRuleInvalidPaths...)
 	}
 
+	processedFormattingRules, formattingRulesInvalidPaths := processAndValidateFormattingRules(rawConfig.FormattingRules)
+	configInvalidPaths = append(configInvalidPaths, formattingRulesInvalidPaths...)
+
 	var validationError *ConfigValidationError
 	if len(configInvalidPaths) > 0 {
 		validationError = &ConfigValidationError{
 			InvalidPaths: configInvalidPaths,
 		}
 	}
-
-	processedFormattingRules, formattingRulesInvalidPaths := processAndValidateFormattingRules(rawConfig.FormattingRules)
-	configInvalidPaths = append(configInvalidPaths, formattingRulesInvalidPaths...)
 
 	return Config{
 		Language:        rawConfig.Language,

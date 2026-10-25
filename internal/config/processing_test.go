@@ -151,6 +151,14 @@ func TestProcessAndValidationConfig_InvalidConfig(t *testing.T) {
 				DependencySourceType: "notvalideither",
 			},
 		},
+		FormattingRules: config.RawFormattingRules{
+			ConsolidateImports:  true,
+			LineBreakAtNumChars: 66,
+			Indent: config.RawIndentSettings{
+				Type: "notvalid",
+				Size: -3,
+			},
+		},
 	}
 
 	expectedError := config.ConfigValidationError{
@@ -166,6 +174,14 @@ func TestProcessAndValidationConfig_InvalidConfig(t *testing.T) {
 			{
 				Path:             "groupingRules.dependencySourceType",
 				ErrorDescription: "Must be 'internal', or 'external', but was 'notvalideither'",
+			},
+			{
+				Path:             "formattingRules.indent.type",
+				ErrorDescription: "Must be 'space', or 'tab', but was 'notvalid'",
+			},
+			{
+				Path:             "formattingRules.indent.size",
+				ErrorDescription: "Must be greater than 0",
 			},
 		},
 	}
