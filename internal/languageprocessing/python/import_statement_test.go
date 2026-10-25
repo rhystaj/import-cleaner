@@ -15,7 +15,10 @@ type expectedOutput struct {
 }
 
 func Test_PythonImportStatement_AsText(t *testing.T) {
-	lineBreakAtNumChars := 66
+	testOptions := lp.TextOutputOptions{
+		BreakLinesAtNumChars: 66,
+		Indent:               "\t",
+	}
 
 	testCases := []struct {
 		statement      python.PythonImportStatement
@@ -120,9 +123,7 @@ func Test_PythonImportStatement_AsText(t *testing.T) {
 			assert.Equal(t, testCase.expectedOutput.noFormatting, result)
 		})
 		t.Run(testCase.expectedOutput.noFormatting+" - Line breaks after num chars", func(t *testing.T) {
-			result, _ := testCase.statement.AsText(lp.TextOutputOptions{
-				BreakLinesAtNumChars: lineBreakAtNumChars,
-			})
+			result, _ := testCase.statement.AsText(testOptions)
 			assert.Equal(t, testCase.expectedOutput.withLineBreaks, result)
 		})
 	}

@@ -42,7 +42,8 @@ func (p PythonImportStatement) formatDependecyList(
 	var stringBuilder strings.Builder
 	stringBuilder.WriteString("(")
 	for i, dependencyName := range dependencyNames {
-		stringBuilder.WriteString("\n\t")
+		stringBuilder.WriteString("\n")
+		stringBuilder.WriteString(options.Indent)
 		stringBuilder.WriteString(dependencyName)
 		if i < len(dependencyNames)-1 {
 			stringBuilder.WriteString(",")

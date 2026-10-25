@@ -18,6 +18,7 @@ type ImportStatementGenericDetails struct {
 
 type TextOutputOptions struct {
 	BreakLinesAtNumChars int
+	Indent               string
 }
 
 type ImportStatement interface {
