@@ -115,20 +115,54 @@ func processAndValidateGroupingRule(rawGroupingRule RawGroupingRuleDefinition) (
 	}, invalidPaths
 }
 
-func processAndValidateFormattingRules(rawFormattingRules RawFormattingRules) (FormattingRules, []InvalidPath) {
-	if rawFormattingRules.LineBreakAtNumChars < 0 {
-		return FormattingRules{}, []InvalidPath{
+func processAndValidateIndentFromSettings(rawIndentSettings RawIndentSettings) (string, []InvalidPath) {
+	if rawIndentSettings.Size == 0 && rawIndentSettings.Type == "" {
+		// Default case if no indention is specified
+		return strings.Repeat(" ", 4), []InvalidPath{}
+	}
+
+	if rawIndentSettings.Size < 0 {
+		return "", []InvalidPath{
 			{
-				Path:             "formattingRules.lineBreakAtNumChars",
+				Path:             "formattingRules.indent.size",
 				ErrorDescription: "Must be greater than 0",
 			},
 		}
 	}
 
+	switch rawIndentSettings.Type {
+	case "space":
+		return strings.Repeat(" ", rawIndentSettings.Size), []InvalidPath{}
+	case "tab":
+		return strings.Repeat("\t", rawIndentSettings.Size), []InvalidPath{}
+	default:
+		return "", []InvalidPath{
+			{
+				Path:             "formattingRules.indent.type",
+				ErrorDescription: fmt.Sprintf("Must be 'space', or 'tab', but was '%s'", rawIndentSettings.Type),
+			},
+		}
+	}
+}
+
+func processAndValidateFormattingRules(rawFormattingRules RawFormattingRules) (FormattingRules, []InvalidPath) {
+	var formattingRulesInvalidPaths []InvalidPath
+
+	if rawFormattingRules.LineBreakAtNumChars < 0 {
+		formattingRulesInvalidPaths = append(formattingRulesInvalidPaths, InvalidPath{
+			Path:             "formattingRules.lineBreakAtNumChars",
+			ErrorDescription: "Must be greater than 0",
+		})
+	}
+
+	indent, indentInvalidPaths := processAndValidateIndentFromSettings(rawFormattingRules.Indent)
+	formattingRulesInvalidPaths = append(formattingRulesInvalidPaths, indentInvalidPaths...)
+
 	return FormattingRules{
 		ConsolidateImports:  rawFormattingRules.ConsolidateImports,
 		LineBreakAtNumChars: rawFormattingRules.LineBreakAtNumChars,
-	}, []InvalidPath{}
+		Indent:              indent,
+	}, formattingRulesInvalidPaths
 }
 
 func ProcessAndValidateConfig(rawConfig RawConfig) (Config, *ConfigValidationError) {

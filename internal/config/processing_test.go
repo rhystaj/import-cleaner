@@ -18,19 +18,31 @@ func TestProcessAndValidationConfig_ValidConfig(t *testing.T) {
 		expectedFormattingRules config.FormattingRules
 	}{
 		{
+			description: "Default space indent",
+			rawFormattingRules: config.RawFormattingRules{
+				ConsolidateImports:  true,
+				LineBreakAtNumChars: 66,
+			},
+			expectedFormattingRules: config.FormattingRules{
+				ConsolidateImports:  true,
+				LineBreakAtNumChars: 66,
+				Indent:              "    ",
+			},
+		},
+		{
 			description: "Space indent",
 			rawFormattingRules: config.RawFormattingRules{
 				ConsolidateImports:  true,
 				LineBreakAtNumChars: 66,
 				Indent: config.RawIndentSettings{
 					Type: "space",
-					Size: 4,
+					Size: 3,
 				},
 			},
 			expectedFormattingRules: config.FormattingRules{
 				ConsolidateImports:  true,
 				LineBreakAtNumChars: 66,
-				Indent:              "    ",
+				Indent:              "   ",
 			},
 		},
 		{
@@ -52,7 +64,7 @@ func TestProcessAndValidationConfig_ValidConfig(t *testing.T) {
 	}
 
 	for _, testFormattingCase := range testFormattingCases {
-		t.Run("", func(t *testing.T) {
+		t.Run("Formatting: "+testFormattingCase.description, func(t *testing.T) {
 			testConfig := config.RawConfig{
 				IgnoredPaths: testIgnoredPaths,
 				GroupingRules: []config.RawGroupingRuleDefinition{
