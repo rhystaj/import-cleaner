@@ -126,9 +126,9 @@ func processAndValidateIndentFromSettings(rawIndentSettings RawIndentSettings) (
 	indentString := ""
 	switch rawIndentSettings.Type {
 	case "space":
-		indentString = strings.Repeat(" ", rawIndentSettings.Size)
+		indentString = " "
 	case "tab":
-		indentString = strings.Repeat("\t", rawIndentSettings.Size)
+		indentString = "\t"
 	default:
 		indentInvalidPaths = append(indentInvalidPaths, InvalidPath{
 			Path:             "formattingRules.indent.type",

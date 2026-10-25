@@ -26,6 +26,7 @@ type FileProcessorFactoryImpl struct {
 func textOutputOptionsFromConfig(config config.Config) lp.TextOutputOptions {
 	return lp.TextOutputOptions{
 		BreakLinesAtNumChars: config.FormattingRules.LineBreakAtNumChars,
+		Indent:               config.FormattingRules.Indent,
 	}
 }
 
