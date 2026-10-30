@@ -9,6 +9,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type dependencySetAsTextVariants struct {
+	base           string
+	withLineBreaks string
+}
+
+type dependencySetAsTextCase struct {
+	TextVariants        dependencySetAsTextVariants
+	Dependencies        []typescript.TypescriptDependecy
+	ExpectedErrorDetail string
+}
+
 type moduleAsStatementStringCase struct {
 	Description       string
 	ModulePathParts   []string
@@ -55,17 +66,93 @@ func moduleAsStatementStringCases() []moduleAsStatementStringCase {
 	}
 }
 
+func generateDependencySetAsTextCases(args struct {
+	IncludeDefaultCases    bool
+	IncludeTypeImportCases bool
+	Indent                 string
+}) []dependencySetAsTextCase {
+	defaultCases := make([]dependencySetAsTextCase, 0)
+	if args.IncludeDefaultCases {
+		for _, inidividualCase := range generateIndividualDependencyCases(generateIndividualDependencyCasesArgs{
+			Name:                   "something",
+			Alias:                  "someCoolAlias",
+			IncludeTypeKeywordCase: args.IncludeTypeImportCases,
+		}) {
+			defaultCases = append(defaultCases, dependencySetAsTextCase{
+				TextVariants: dependencySetAsTextVariants{
+					base:           inidividualCase.Text,
+					withLineBreaks: inidividualCase.Text, // Line breaks are not supported for default cases
+				},
+				Dependencies: []typescript.TypescriptDependecy{
+					{
+						Name:         inidividualCase.Dependency.Name,
+						IsDefault:    true,
+						IsTypeImport: inidividualCase.Dependency.IsTypeImport,
+						Alias:        inidividualCase.Dependency.Alias,
+					},
+				},
+			})
+		}
+	}
+
+	nonDefaultCases := make([]dependencySetAsTextCase, 0)
+	for _, inidividualCaseA := range generateIndividualDependencyCases(generateIndividualDependencyCasesArgs{
+		Name:                   "this",
+		Alias:                  "t",
+		IncludeTypeKeywordCase: args.IncludeTypeImportCases,
+	}) {
+		for _, inidividualCaseB := range generateIndividualDependencyCases(generateIndividualDependencyCasesArgs{
+			Name:                   "andThis",
+			Alias:                  "at",
+			IncludeTypeKeywordCase: args.IncludeTypeImportCases,
+		}) {
+			nonDefaultCases = append(nonDefaultCases, dependencySetAsTextCase{
+				TextVariants: dependencySetAsTextVariants{
+					base:           "{ " + inidividualCaseA.Text + ", " + inidividualCaseB.Text + " }",
+					withLineBreaks: "{\n" + args.Indent + inidividualCaseA.Text + ",\n" + args.Indent + inidividualCaseB.Text + "\n}",
+				},
+				Dependencies: []typescript.TypescriptDependecy{
+					inidividualCaseA.Dependency,
+					inidividualCaseB.Dependency,
+				},
+			})
+		}
+	}
+
+	mixedCases := make([]dependencySetAsTextCase, len(defaultCases)*len(nonDefaultCases))
+	for defaultCaseIndex, defaultCase := range defaultCases {
+		for nonDefaultCaseIndex, nonDefaultCase := range nonDefaultCases {
+			index := defaultCaseIndex*len(nonDefaultCases) + nonDefaultCaseIndex
+			mixedCase := dependencySetAsTextCase{
+				TextVariants: dependencySetAsTextVariants{
+					base:           defaultCase.TextVariants.base + ", " + nonDefaultCase.TextVariants.base,
+					withLineBreaks: defaultCase.TextVariants.withLineBreaks + ", " + nonDefaultCase.TextVariants.withLineBreaks,
+				},
+				Dependencies: append(defaultCase.Dependencies, nonDefaultCase.Dependencies...),
+			}
+			mixedCases[index] = mixedCase
+		}
+	}
+
+	return append(defaultCases, append(nonDefaultCases, mixedCases...)...)
+}
+
 func Test_TypescriptImportStatement_AsText_ValidNonTypeImport(t *testing.T) {
-	dependencyCases := generateValidDependencySetPartCases(generateValidDependencySetPartCasesArgs{
+	dependencyCases := generateDependencySetAsTextCases(struct {
+		IncludeDefaultCases    bool
+		IncludeTypeImportCases bool
+		Indent                 string
+	}{
 		IncludeDefaultCases:    true,
 		IncludeTypeImportCases: true,
+		Indent:                 "    ",
 	})
 
 	moduleCases := moduleAsStatementStringCases()
 
 	for _, dependencyCase := range dependencyCases {
 		for _, moduleCase := range moduleCases {
-			expectedStatement := "import " + dependencyCase.Text + " from " + moduleCase.ExpectedStatement + ";"
+			expectedStatement := "import " + dependencyCase.TextVariants.base + " from " + moduleCase.ExpectedStatement + ";"
 			testStatement := typescript.TypescriptImportStatement{
 				ModulePathParts: moduleCase.ModulePathParts,
 				External:        false,
@@ -83,13 +170,19 @@ func Test_TypescriptImportStatement_AsText_ValidNonTypeImport(t *testing.T) {
 }
 
 func Test_TypescriptImportStatement_AsText_ValidTypeImport(t *testing.T) {
-	dependencyCases := generateValidDependencySetPartCases(generateValidDependencySetPartCasesArgs{})
+	dependencyCases := generateDependencySetAsTextCases(struct {
+		IncludeDefaultCases    bool
+		IncludeTypeImportCases bool
+		Indent                 string
+	}{
+		Indent: "    ",
+	})
 
 	moduleCases := moduleAsStatementStringCases()
 
 	for _, dependencyCase := range dependencyCases {
 		for _, moduleCase := range moduleCases {
-			expectedStatement := "import type " + dependencyCase.Text + " from " + moduleCase.ExpectedStatement + ";"
+			expectedStatement := "import type " + dependencyCase.TextVariants.base + " from " + moduleCase.ExpectedStatement + ";"
 			testStatement := typescript.TypescriptImportStatement{
 				ModulePathParts: moduleCase.ModulePathParts,
 				External:        false,

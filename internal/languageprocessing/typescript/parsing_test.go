@@ -69,15 +69,15 @@ type generateValidDependencySetPartCasesArgs struct {
 	IncludeNewLineCases    bool
 }
 
-func generateValidDependencySetPartCases(args generateValidDependencySetPartCasesArgs) []dependencySetCase {
-	defaultCases := make([]dependencySetCase, 0)
+func generateValidDependencySetPartCases(args generateValidDependencySetPartCasesArgs) []dependencySetParsingCase {
+	defaultCases := make([]dependencySetParsingCase, 0)
 	if args.IncludeDefaultCases {
 		for _, inidividualCase := range generateIndividualDependencyCases(generateIndividualDependencyCasesArgs{
 			Name:                   "something",
 			Alias:                  "someCoolAlias",
 			IncludeTypeKeywordCase: args.IncludeTypeImportCases,
 		}) {
-			defaultCases = append(defaultCases, dependencySetCase{
+			defaultCases = append(defaultCases, dependencySetParsingCase{
 				Text: inidividualCase.Text,
 				Dependencies: []typescript.TypescriptDependecy{
 					{
@@ -91,7 +91,7 @@ func generateValidDependencySetPartCases(args generateValidDependencySetPartCase
 		}
 	}
 
-	nonDefaultCases := make([]dependencySetCase, 0)
+	nonDefaultCases := make([]dependencySetParsingCase, 0)
 	for _, inidividualCaseA := range generateIndividualDependencyCases(generateIndividualDependencyCasesArgs{
 		Name:                   "this",
 		Alias:                  "t",
@@ -102,7 +102,7 @@ func generateValidDependencySetPartCases(args generateValidDependencySetPartCase
 			Alias:                  "at",
 			IncludeTypeKeywordCase: args.IncludeTypeImportCases,
 		}) {
-			nonDefaultCases = append(nonDefaultCases, dependencySetCase{
+			nonDefaultCases = append(nonDefaultCases, dependencySetParsingCase{
 				Text: "{ " + inidividualCaseA.Text + ", " + inidividualCaseB.Text + " }",
 				Dependencies: []typescript.TypescriptDependecy{
 					inidividualCaseA.Dependency,
@@ -110,7 +110,7 @@ func generateValidDependencySetPartCases(args generateValidDependencySetPartCase
 				},
 			})
 			if args.IncludeNewLineCases {
-				nonDefaultCases = append(nonDefaultCases, dependencySetCase{
+				nonDefaultCases = append(nonDefaultCases, dependencySetParsingCase{
 					Text: "{\n\t" + inidividualCaseA.Text + ",\n\t" + inidividualCaseB.Text + "\n}",
 					Dependencies: []typescript.TypescriptDependecy{
 						inidividualCaseA.Dependency,
@@ -121,11 +121,11 @@ func generateValidDependencySetPartCases(args generateValidDependencySetPartCase
 		}
 	}
 
-	mixedCases := make([]dependencySetCase, len(defaultCases)*len(nonDefaultCases))
+	mixedCases := make([]dependencySetParsingCase, len(defaultCases)*len(nonDefaultCases))
 	for defaultCaseIndex, defaultCase := range defaultCases {
 		for nonDefaultCaseIndex, nonDefaultCase := range nonDefaultCases {
 			index := defaultCaseIndex*len(nonDefaultCases) + nonDefaultCaseIndex
-			mixedCase := dependencySetCase{
+			mixedCase := dependencySetParsingCase{
 				Text:         defaultCase.Text + ", " + nonDefaultCase.Text,
 				Dependencies: append(defaultCase.Dependencies, nonDefaultCase.Dependencies...),
 			}
@@ -227,7 +227,7 @@ func TestIsIntendedImportStatement_False_Typescript(t *testing.T) {
 
 }
 
-type dependencySetCase struct {
+type dependencySetParsingCase struct {
 	Text                string
 	Dependencies        []typescript.TypescriptDependecy
 	ExpectedErrorDetail string
@@ -401,7 +401,7 @@ func TestParseImportStatement_InvalidStatement_NoFromKeyword_Typescript(t *testi
 }
 
 func TestParseImportStatement_InvalidStatement_InvalidDependencyDeclaration(t *testing.T) {
-	testCases := []dependencySetCase{
+	testCases := []dependencySetParsingCase{
 		{
 			Text:                "",
 			ExpectedErrorDetail: "No dependencies were provided",
